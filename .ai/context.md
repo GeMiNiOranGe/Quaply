@@ -10,7 +10,7 @@ Core Idea:
 Fast CV assembly via checkbox selection; exports to PDF
 
 Tech Stack:
-WPF, SQLite, Entity Framework
+WPF (.NET 10), SQLite, Entity Framework
 
 Platform:
 Windows only
