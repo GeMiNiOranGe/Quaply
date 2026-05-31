@@ -22,7 +22,8 @@ Flow:
 user reads job description -> open Quaply -> select experience, project, skills, education, certification -> export to PDF
 
 Key Decisions:
-SQLite: bundled with the app for local-only deployment (no separate DB server needed)
+- SQLite: bundled with the app for local-only deployment (no separate DB server needed)
+- Database-first: schema designed upfront; EF Core models scaffolded from SQLite schema
 
 Status:
 Learning-focused, not production-ready
