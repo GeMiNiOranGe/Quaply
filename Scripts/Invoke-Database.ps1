@@ -8,7 +8,13 @@ Interactive menu for managing the Quaply SQLite database:
 initialize, remove, reset, or restore seed data.
 #>
 param(
-    [ValidateSet("Initialize", "Remove", "Reset", "RestoreData")]
+    [ValidateSet(
+        "Initialize",
+        "Remove",
+        "Reset",
+        "RestoreData",
+        "ExportInsertTemplates"
+    )]
     [string]$Action
 )
 
@@ -22,11 +28,18 @@ $ErrorActionPreference = "Stop"
 $script:DatabaseDirectory = Join-Path $PSScriptRoot ".." "Database"
 $script:DatabasePath = Join-Path $script:DatabaseDirectory "Quaply.db"
 
+$script:ToolsDirectory = Join-Path $PSScriptRoot "Tools"
+$script:GeneratedDirectory = Join-Path $PSScriptRoot "Generated"
+
 $script:SqlFiles = @{
-    InitSchema = Join-Path $script:DatabaseDirectory "InitSchema.sql"
-    MasterData = Join-Path $script:DatabaseDirectory "PopulateMasterData.sql"
-    SeedData   = Join-Path $script:DatabaseDirectory "PopulateSeedData.sql"
-    ClearData  = Join-Path $script:DatabaseDirectory "ClearData.sql"
+    InitSchema        = Join-Path $script:DatabaseDirectory "InitSchema.sql"
+    MasterData        = `
+        Join-Path $script:DatabaseDirectory "PopulateMasterData.sql"
+    SeedData          = `
+        Join-Path $script:DatabaseDirectory "PopulateSeedData.sql"
+    ClearData         = Join-Path $script:DatabaseDirectory "ClearData.sql"
+    GenerateInsertTemplates = `
+        Join-Path $script:ToolsDirectory "GenerateInsertTemplates.sql"
 }
 
 # ------------------------------------------------------------------------------
@@ -163,6 +176,23 @@ function Restore-Data {
     Write-Host "  Data restored to defaults." -ForegroundColor Green
 }
 
+function Export-InsertTemplates {
+    if (-not (Test-Path $script:DatabasePath)) {
+        Write-Host "  No database found. Run Initialize first." `
+            -ForegroundColor Yellow
+        return
+    }
+
+    $outputPath = Join-Path $script:GeneratedDirectory "InsertTemplates.sql"
+
+    [void](New-Item -Path $outputPath -ItemType File -Force)
+    Get-Content $script:SqlFiles.GenerateInsertTemplates | `
+        sqlite3 $script:DatabasePath | `
+        Set-Content $outputPath
+
+    Write-Host "  Templates written to: $outputPath" -ForegroundColor Green
+}
+
 # ------------------------------------------------------------------------------
 # UI helpers
 # ------------------------------------------------------------------------------
@@ -184,6 +214,7 @@ function Write-MenuHeader {
     Write-Host "  [2]  Remove database" -ForegroundColor White
     Write-Host "  [3]  Reset database" -ForegroundColor White
     Write-Host "  [4]  Restore default data" -ForegroundColor White
+    Write-Host "  [5]  Export INSERT query templates" -ForegroundColor White
     Write-Host "  [Q]  Quit" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "  Select: " -NoNewline -ForegroundColor Cyan
@@ -210,6 +241,9 @@ function Invoke-MenuAction {
             "4" { 
                 Restore-Data    
             }
+            "5" {
+                Export-InsertTemplates
+            }
             "q" {
                 Write-Host "  Goodbye." -ForegroundColor DarkGray
                 Write-Host ""
@@ -218,7 +252,8 @@ function Invoke-MenuAction {
             default {
                 Write-Host "  '$Option' is not a valid option." `
                     -ForegroundColor Red
-                return $false   # no pause needed
+                # no pause needed
+                return $false
             }
         }
     }
@@ -249,6 +284,9 @@ if ($Action) {
         }
         "RestoreData" { 
             Restore-Data 
+        }
+        "ExportInsertTemplates" {
+            Export-InsertTemplates
         }
     }
     exit 0
