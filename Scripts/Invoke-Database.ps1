@@ -32,12 +32,14 @@ $script:ToolsDirectory = Join-Path $PSScriptRoot "Tools"
 $script:GeneratedDirectory = Join-Path $PSScriptRoot "Generated"
 
 $script:SqlFiles = @{
-    InitSchema        = Join-Path $script:DatabaseDirectory "InitSchema.sql"
-    MasterData        = `
+    InitSchema              = `
+        Join-Path $script:DatabaseDirectory "InitSchema.sql"
+    PopulateMasterData      = `
         Join-Path $script:DatabaseDirectory "PopulateMasterData.sql"
-    SeedData          = `
+    PopulateSeedData        = `
         Join-Path $script:DatabaseDirectory "PopulateSeedData.sql"
-    ClearData         = Join-Path $script:DatabaseDirectory "ClearData.sql"
+    ClearData               = `
+        Join-Path $script:DatabaseDirectory "ClearData.sql"
     GenerateInsertTemplates = `
         Join-Path $script:ToolsDirectory "GenerateInsertTemplates.sql"
 }
@@ -96,9 +98,9 @@ function Invoke-SchemaInit {
 }
 
 function Invoke-DataPopulate {
-    Invoke-SqlFile -SqlFile $script:SqlFiles.MasterData `
+    Invoke-SqlFile -SqlFile $script:SqlFiles.PopulateMasterData `
         -DatabasePath $script:DatabasePath
-    Invoke-SqlFile -SqlFile $script:SqlFiles.SeedData `
+    Invoke-SqlFile -SqlFile $script:SqlFiles.PopulateSeedData `
         -DatabasePath $script:DatabasePath
 }
 
