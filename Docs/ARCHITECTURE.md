@@ -3,11 +3,11 @@
 architecture-beta
     group application(server)[Quaply]
 
-    service presentation(internet)[Presentation] in application
+    service ui(internet)[UI] in application
     service services(server)[Services] in application
     service data(disk)[Data] in application
 
-    presentation:R --> L:services
+    ui:R --> L:services
     services:R --> L:data
 
 ```
@@ -15,14 +15,14 @@ architecture-beta
 # Details
 ```mermaid
 architecture-beta
-    group presentation(internet)[Presentation]
+    group ui(internet)[UI]
     group services(server)[Services]
     group data(disk)[Data]
 
-    group mvvm(internet)[MVVM] in presentation
+    group mvvm(internet)[MVVM] in ui
     group data_services(server)[Data Services] in services
 
-    service pdf_preview(server)[PDF Preview] in presentation
+    service pdf_preview(server)[PDF Preview] in ui
     service models(server)[Models] in mvvm
     service views(internet)[Views] in mvvm
     service viewmodels(server)[ViewModels] in mvvm
