@@ -1,3 +1,7 @@
 <Project>
   <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
+  <ItemDefinitionGroup>
+    <ProjectReference PrivateAssets="compile" />
+    <PackageReference PrivateAssets="compile" />
+  </ItemDefinitionGroup>
 </Project>
