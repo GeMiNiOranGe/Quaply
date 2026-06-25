@@ -1,20 +1,15 @@
-## Set Git attributes for paths including line ending
-## normalization, diff behavior, etc.
-##
+## Concatenate content from: https://github.com/gitattributes/gitattributes (recommended)
+## Or
 ## Get latest from `dotnet new gitattributes`
 
 # Auto detect text files and perform LF normalization
-* text=auto
+*          text=auto eol=lf
 
 #
 # The above will handle all files NOT found below
 #
 
-*.cs     text diff=csharp
-*.cshtml text diff=html
-*.csx    text diff=csharp
-*.sln    text eol=crlf
-
+# Common settings that generally should always be used with your language specific settings
 # Content below from: https://github.com/gitattributes/gitattributes/blob/master/Common.gitattributes
 
 # Documents
@@ -35,7 +30,6 @@
 *.adoc     text
 *.textile  text
 *.mustache text
-# Per RFC 4180, .csv should be CRLF
 *.csv      text eol=crlf
 *.tab      text
 *.tsv      text
@@ -59,16 +53,15 @@
 *.eps      binary
 
 # Scripts
-# Force Unix scripts to always use lf line endings so that if a repo is accessed
-# in Unix via a file share from Windows, the scripts will work
 *.bash     text eol=lf
 *.fish     text eol=lf
 *.ksh      text eol=lf
 *.sh       text eol=lf
 *.zsh      text eol=lf
-# Likewise, force cmd and batch scripts to always use crlf
+# These are explicitly windows files and should use crlf
 *.bat      text eol=crlf
 *.cmd      text eol=crlf
+*.ps1      text eol=crlf
 
 # Serialization
 *.json     text
@@ -101,7 +94,20 @@
 # Text files where line endings should be preserved
 *.patch    -text
 
+# CSharp settings
+# Content below from: https://github.com/gitattributes/gitattributes/blob/master/CSharp.gitattributes
+
+*.cs       text diff=csharp
+*.cshtml   text diff=html
+*.csx      text diff=csharp
+*.sln      text eol=crlf
+*.slnx     text eol=crlf
+*.csproj   text eol=crlf
+
+#
 # Exclude files from exporting
+#
+
 .gitattributes export-ignore
 .gitignore     export-ignore
 .gitkeep       export-ignore
