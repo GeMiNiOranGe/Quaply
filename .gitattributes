@@ -101,8 +101,8 @@
 *.cshtml   text diff=html
 *.csx      text diff=csharp
 *.sln      text eol=crlf
-*.slnx     text eol=crlf
-*.csproj   text eol=crlf
+*.slnx     text eol=lf
+*.csproj   text eol=lf
 
 #
 # Exclude files from exporting
