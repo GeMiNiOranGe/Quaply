@@ -2,5 +2,11 @@
     "printWidth": 80,
     "useTabs": false,
     "tabWidth": 4,
-    "endOfLine": "lf"
+    "endOfLine": "lf",
+    "overrides": [
+        {
+            "files": "*.{sln}",
+            "endOfLine": "crlf"
+        }
+    ]
 }

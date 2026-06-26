@@ -12,5 +12,5 @@ trim_trailing_whitespace = true
 [*.{csproj,props,targets,xaml,xml,config}]
 indent_size = 2
 
-[*.{bat,cmd,csv}]
+[*.{csv,bat,cmd,ps1,sln}]
 end_of_line = crlf
