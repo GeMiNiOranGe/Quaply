@@ -4,4 +4,8 @@
     <ProjectReference PrivateAssets="compile" />
     <PackageReference PrivateAssets="compile" />
   </ItemDefinitionGroup>
+  <PropertyGroup>
+    <SolutionDir Condition="'$(SolutionDir)' == ''"
+      >$(MSBuildThisFileDirectory)</SolutionDir>
+  </PropertyGroup>
 </Project>
