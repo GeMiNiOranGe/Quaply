@@ -10,13 +10,13 @@ Core Idea:
 Fast CV assembly via checkbox selection; exports to PDF
 
 Tech Stack:
-WPF (.NET 10), SQLite, Entity Framework
+WPF (.NET 10), SQLite, Entity Framework, Dependency Injection
 
 Platform:
 Windows only
 
 Architecture:
-MVVM
+MVVM for Ui layer, traditional 3-layer model
 
 Flow:
 user reads job description -> open Quaply -> select experience, project, skills, education, certification -> export to PDF
