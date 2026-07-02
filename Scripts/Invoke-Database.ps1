@@ -15,7 +15,15 @@ param(
         "RestoreData",
         "ExportInsertTemplates"
     )]
-    [string]$Action
+    [string]$Action,
+
+    [ValidateSet(
+        "Development",
+        "Testing",
+        "Staging",
+        "Production"
+    )]
+    [string]$Environment = "Development"
 )
 
 Set-StrictMode -Version Latest
@@ -122,8 +130,25 @@ function Initialize-Database {
 
     Write-Host "  Initializing database..." -ForegroundColor DarkGray
 
-    Invoke-SchemaInit
-    Invoke-DataPopulate
+    switch ($Environment) {
+        "Development" {
+            Invoke-SchemaInit
+            Invoke-DataPopulate
+            Write-Host "  Environment: Development" -ForegroundColor DarkGray
+        }
+        "Testing" {
+            Write-Host "  Environment: Testing" -ForegroundColor DarkGray
+        }
+        "Staging" {
+            Write-Host "  Environment: Staging" -ForegroundColor DarkGray
+        }
+        "Production" {
+            Invoke-SchemaInit
+            Invoke-SqlFile -SqlFile $script:SqlFiles.PopulateMasterData `
+                -DatabasePath $script:DatabasePath
+            Write-Host "  Environment: Production" -ForegroundColor DarkGray
+        }
+    }
 
     Write-Host "  Database initialized: $script:DatabasePath" `
         -ForegroundColor Green
@@ -231,17 +256,17 @@ function Invoke-MenuAction {
 
     try {
         switch ($Option) {
-            "1" { 
+            "1" {
                 Initialize-Database
             }
-            "2" { 
+            "2" {
                 Remove-Database
             }
-            "3" { 
+            "3" {
                 Reset-Database
             }
-            "4" { 
-                Restore-Data    
+            "4" {
+                Restore-Data
             }
             "5" {
                 Export-InsertTemplates
@@ -275,17 +300,17 @@ Assert-SqliteInstalled
 
 if ($Action) {
     switch ($Action) {
-        "Initialize" { 
+        "Initialize" {
             Initialize-Database
         }
-        "Remove" { 
+        "Remove" {
             Remove-Database
         }
-        "Reset" { 
+        "Reset" {
             Reset-Database
         }
-        "RestoreData" { 
-            Restore-Data 
+        "RestoreData" {
+            Restore-Data
         }
         "ExportInsertTemplates" {
             Export-InsertTemplates
