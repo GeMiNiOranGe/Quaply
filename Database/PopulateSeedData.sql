@@ -88,7 +88,7 @@ VALUES
         'Stripe',
         'Backend Engineer',
         'Built and maintained high-throughput backend services for Stripe''s payment processing platform. Led migration of legacy monolith to microservices using Go and Kafka.',
-        '2021-06',
+        '2021-06-01',
         NULL
     ),
     (
@@ -96,15 +96,15 @@ VALUES
         'Shopify',
         'Junior Backend Developer',
         'Developed e-commerce order management APIs using Java Spring Boot and MySQL. Implemented caching layers with Redis to reduce DB load by 40%.',
-        '2019-08',
-        '2021-05'
+        '2019-08-01',
+        '2021-05-01'
     ),
     (
         3,
         'Stripe',
         'DevOps Engineer',
         'Owned the internal Kubernetes clusters on AWS EKS for 20+ microservices. Implemented GitOps workflow with ArgoCD and reduced deployment time from 45 min to under 8 min.',
-        '2022-01',
+        '2022-01-01',
         NULL
     ),
     (
@@ -112,8 +112,8 @@ VALUES
         'Amazon Web Services',
         'Infrastructure Engineer Intern',
         'Assisted in provisioning AWS EC2/RDS resources and writing Ansible playbooks for configuration management.',
-        '2019-06',
-        '2019-08'
+        '2019-06-01',
+        '2019-08-01'
     );
 
 INSERT INTO "ProfileWorkExperience"
@@ -145,8 +145,8 @@ VALUES
         'University of California, Berkeley',
         'Bachelor of Science',
         'Computer Science',
-        '2015-09',
-        '2019-05'
+        '2015-09-01',
+        '2019-05-01'
     );
 
 -- Both profiles share the same education
@@ -194,22 +194,22 @@ VALUES
         1,
         'Oracle Certified Professional: Java SE 11 Developer',
         'Oracle',
-        '2021-03',
+        '2021-03-01',
         NULL
     ),
     (
         2,
         'AWS Certified Solutions Architect - Associate',
         'Amazon Web Services',
-        '2022-09',
-        '2025-09'
+        '2022-09-01',
+        '2025-09-01'
     ),
     (
         3,
         'Certified Kubernetes Administrator (CKA)',
         'Cloud Native Computing Foundation',
-        '2023-04',
-        '2026-04'
+        '2023-04-01',
+        '2026-04-01'
     );
 
 INSERT INTO "ProfileCertification"
@@ -306,7 +306,7 @@ VALUES
         'Designed the service in Go with a Kafka consumer pipeline. Implemented retry logic, dead-letter queue, and per-device rate limiting. Wrote internal benchmarks achieving <5ms p99 latency.',
         NULL,
         NULL,
-        '2022-03',
+        '2022-03-01',
         NULL,
         0,
         1,  -- Stripe Backend
@@ -320,8 +320,8 @@ VALUES
         'Built REST APIs with Spring Boot. Integrated Redis for session/cache. Wrote JUnit tests achieving 85% code coverage. Coordinated with frontend team on API contracts.',
         NULL,
         NULL,
-        '2020-01',
-        '2021-05',
+        '2020-01-01',
+        '2021-05-01',
         0,
         2,  -- Shopify
         3   -- Professional
@@ -334,7 +334,7 @@ VALUES
         'Designed the public API, implemented workers, retry strategies, and backoff. Published on GitHub with documentation and example apps. 200+ GitHub stars.',
         'https://github.com/ethan-carter-dev/go-taskq',
         NULL,
-        '2023-01',
+        '2023-01-01',
         NULL,
         0,
         NULL,  -- personal project
@@ -350,7 +350,7 @@ VALUES
         'Set up AWS EKS clusters with Terraform. Deployed ArgoCD for GitOps. Wrote Helm chart templates for standardized service deployments. Reduced onboarding time for new services from 3 days to 2 hours.',
         NULL,
         NULL,
-        '2022-04',
+        '2022-04-01',
         NULL,
         0,
         3,  -- Stripe DevOps
@@ -364,8 +364,8 @@ VALUES
         'Designed recording rules and alerting policies. Integrated Datadog for APM traces. Created runbook documentation and on-call playbooks.',
         NULL,
         NULL,
-        '2023-06',
-        '2024-01',
+        '2023-06-01',
+        '2024-01-01',
         0,
         3,  -- Stripe DevOps
         3   -- Professional
@@ -378,7 +378,7 @@ VALUES
         'Built in Python with the official Prometheus client. Packaged as a Docker image with Helm chart. Featured in CNCF newsletter.',
         'https://github.com/ethan-carter-dev/k8s-cost-exporter',
         NULL,
-        '2023-09',
+        '2023-09-01',
         NULL,
         0,
         NULL,  -- personal
