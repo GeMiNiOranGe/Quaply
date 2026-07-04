@@ -15,5 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Quaply.Data\Quaply.Data.csproj" />
+    <ProjectReference Include="..\Quaply.Service\Quaply.Service.csproj" />
   </ItemGroup>
 </Project>

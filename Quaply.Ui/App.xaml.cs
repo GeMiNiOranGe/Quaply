@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quaply.Data;
+using Quaply.Service;
 
 namespace Quaply.Ui;
 
@@ -17,6 +18,7 @@ public partial class App : Application
         HostApplicationBuilder builder = Host.CreateApplicationBuilder();
 
         builder.Services.AddData();
+        builder.Services.AddService();
         builder.Services.AddUi();
 
         _host = builder.Build();

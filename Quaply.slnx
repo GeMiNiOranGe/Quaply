@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="Quaply.Data/Quaply.Data.csproj" />
+  <Project Path="Quaply.Service/Quaply.Service.csproj" />
   <Project Path="Quaply.Ui/Quaply.Ui.csproj" />
 </Solution>
