@@ -19,92 +19,119 @@ param(
     [switch]$Force
 )
 
-$databaseDirectory = Join-Path $PSScriptRoot ".." "Database"
-$databasePath = Join-Path $databaseDirectory "Quaply.db"
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
-# Prerequisites ----------------------------------------------------------------
+. (Join-Path $PSScriptRoot "Common" "ConsoleOutput.ps1")
 
-if (-not (Get-Command -Name "dotnet" -ErrorAction SilentlyContinue)) {
-    Write-Host "dotnet CLI is not installed or not in the PATH." `
-        -ForegroundColor Red
+$script:DatabaseDirectory = Join-Path $PSScriptRoot ".." "Database"
+$script:DatabasePath = Join-Path $script:DatabaseDirectory "Quaply.db"
+
+$script:DataProjectName = "Quaply.Data"
+$script:GeneratedDirectory = "Generated"
+$script:NewDatabasePath = `
+    Join-Path $PSScriptRoot ".." $script:DataProjectName "Database" "Quaply.db"
+
+# ------------------------------------------------------------------------------
+# Prerequisites
+# ------------------------------------------------------------------------------
+
+function Assert-DotnetInstalled {
+    if (Get-Command -Name "dotnet" -ErrorAction SilentlyContinue) {
+        return
+    }
+
+    Write-Failure "dotnet CLI is not installed or not in the PATH."
     exit 1
 }
 
-# Database ---------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# Steps
+# ------------------------------------------------------------------------------
 
-$invokeDatabase = Join-Path $PSScriptRoot "Invoke-Database.ps1"
+function Initialize-ScaffoldDatabase {
+    $invokeDatabase = Join-Path $PSScriptRoot "Invoke-Database.ps1"
 
-if ($Force) {
-    & $invokeDatabase -Action Reset
-}
-elseif (-not (Test-Path $databasePath)) {
-    & $invokeDatabase -Action Initialize
-}
-
-# Tool restore -----------------------------------------------------------------
-
-# Husky.NET runs `dotnet tool restore` only after a successful build, so tools
-# must be restored manually here to break the circular dependency.
-dotnet tool restore
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "dotnet tool restore failed." -ForegroundColor Red
-    exit 1
+    if ($Force) {
+        Write-Step "Resetting database..."
+        & $invokeDatabase -Action Reset
+    }
+    elseif (-not (Test-Path $script:DatabasePath)) {
+        Write-Step "Database not found. Initializing..."
+        & $invokeDatabase -Action Initialize
+    }
 }
 
-# Scaffold ---------------------------------------------------------------------
+function Restore-DotnetTools {
+    Write-Step "Restoring dotnet tools..."
+    Write-Divider
 
-$generatedDirectory = "Generated"
-$dataProjectName = "Quaply.Data"
-$newDatabasePath = Join-Path $PSScriptRoot ".." `
-    $dataProjectName "Database" "Quaply.db"
+    # Husky.NET runs `dotnet tool restore` only after a successful build, so
+    # tools must be restored manually here to break the circular dependency.
+    dotnet tool restore
 
-# Ensure destination directory exists
-$newDatabaseDir = Split-Path -Path $newDatabasePath -Parent
-if (-not (Test-Path $newDatabaseDir)) {
-    New-Item -ItemType Directory -Path $newDatabaseDir -Force | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Failure "dotnet tool restore failed."
+        exit 1
+    }
 }
 
-# Only move if source exists; use -Force to overwrite existing file
-if (Test-Path $databasePath) {
+function Move-DatabaseToDataProject {
+    $destinationDirectory = Split-Path -Path $script:NewDatabasePath -Parent
+    if (-not (Test-Path $destinationDirectory)) {
+        [void](New-Item -ItemType Directory -Path $destinationDirectory -Force)
+    }
+
+    if (-not (Test-Path $script:DatabasePath)) {
+        Write-Caution "Source database not found at $script:DatabasePath"
+        return
+    }
+
     try {
         Move-Item `
-            -Path $databasePath `
-            -Destination $newDatabasePath `
+            -Path $script:DatabasePath `
+            -Destination $script:NewDatabasePath `
             -Force `
             -ErrorAction Stop
     }
     catch {
-        Write-Host "Failed to move database: $($_.Exception.Message)" `
-            -ForegroundColor Red
+        Write-Failure "Failed to move database: $($_.Exception.Message)"
         exit 1
     }
 }
-else {
-    Write-Host "Source database not found at $databasePath" `
-        -ForegroundColor Yellow
+
+function Invoke-EfScaffold {
+    $scaffoldArgs = @(
+        "ef", "dbcontext", "scaffold",
+        "Data Source=$script:NewDatabasePath",
+        "Microsoft.EntityFrameworkCore.Sqlite",
+        "--startup-project", "Quaply.Ui",
+        "--project", $script:DataProjectName,
+        "--namespace", "$script:DataProjectName.Models",
+        "--context-namespace", "$script:DataProjectName.Contexts",
+        "--context", "QuaplyDbContext",
+        "--context-dir", (Join-Path $script:GeneratedDirectory "Contexts"),
+        "--output-dir", (Join-Path $script:GeneratedDirectory "Models"),
+        "--no-onconfiguring",
+        "--no-build" # skip build; models may not exist yet
+    )
+
+    if ($Force) {
+        $scaffoldArgs += "--force"
+    }
+
+    Write-Step "Scaffolding EF Core models..."
+    dotnet @scaffoldArgs
 }
 
-$dataDatabasePath = $newDatabasePath
+# ------------------------------------------------------------------------------
+# Entry point
+# ------------------------------------------------------------------------------
 
-$scaffoldArgs = @(
-    "ef", "dbcontext", "scaffold",
-    "Data Source=$dataDatabasePath",
-    "Microsoft.EntityFrameworkCore.Sqlite",
-    "--startup-project", "Quaply.Ui",
-    "--project", $dataProjectName,
-    "--namespace", "$dataProjectName.Models",
-    "--context-namespace", "$dataProjectName.Contexts",
-    "--context", "QuaplyDbContext",
-    "--context-dir", (Join-Path $generatedDirectory "Contexts"),
-    "--output-dir", (Join-Path $generatedDirectory "Models"),
-    "--no-onconfiguring",
-    # skip build; models may not exist yet
-    "--no-build"
-)
+Assert-DotnetInstalled
+Initialize-ScaffoldDatabase
+Restore-DotnetTools
+Move-DatabaseToDataProject
+Invoke-EfScaffold
 
-if ($Force) {
-    $scaffoldArgs += "--force"
-}
-
-dotnet @scaffoldArgs
+Write-Success "Scaffold complete."

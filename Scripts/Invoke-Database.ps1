@@ -29,6 +29,9 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+. (Join-Path $PSScriptRoot "Common" "ConsoleOutput.ps1")
+Set-OutputIndent -Spaces 2
+
 # ------------------------------------------------------------------------------
 # Constants
 # ------------------------------------------------------------------------------
@@ -57,15 +60,14 @@ $script:SqlFiles = @{
 # ------------------------------------------------------------------------------
 
 function Assert-SqliteInstalled {
-    if (-not (Get-Command -Name "sqlite3" -ErrorAction SilentlyContinue)) {
-        Write-Host ""
-        Write-Host "  [ERROR] sqlite3 is not installed or not on PATH." `
-            -ForegroundColor Red
-        Write-Host "  Please install SQLite3 and add it to your system PATH." `
-            -ForegroundColor Red
-        Write-Host ""
-        exit 1
+    if (Get-Command -Name "sqlite3" -ErrorAction SilentlyContinue) {
+        return
     }
+
+    Write-Failure "sqlite3 is not installed or not on PATH."
+    Write-Failure "Please install SQLite3 and add it to your system PATH."
+    Write-Host ""
+    exit 1
 }
 
 # ------------------------------------------------------------------------------
@@ -89,10 +91,7 @@ function Invoke-SqlFile {
     $output = Get-Content $SqlFile | sqlite3 $DatabasePath 2>&1
 
     if ($LASTEXITCODE -ne 0) {
-        throw @(
-            "sqlite3 returned exit code $LASTEXITCODE while executing "
-            "'$SqlFile'.`n$output"
-        ) -join ""
+        throw "sqlite3 exited with code $LASTEXITCODE while executing '$SqlFile'.`n$output"
     }
 }
 
@@ -123,52 +122,48 @@ function Invoke-DataClear {
 
 function Initialize-Database {
     if (Test-Path $script:DatabasePath) {
-        Write-Host "  Database already exists. Choose [3] Reset to overwrite." `
-            -ForegroundColor Yellow
+        Write-Caution "Database already exists. Choose [3] Reset to overwrite."
         return
     }
 
-    Write-Host "  Initializing database..." -ForegroundColor DarkGray
+    Write-Step "Initializing database..."
 
     switch ($Environment) {
         "Development" {
             Invoke-SchemaInit
             Invoke-DataPopulate
-            Write-Host "  Environment: Development" -ForegroundColor DarkGray
         }
         "Testing" {
-            Write-Host "  Environment: Testing" -ForegroundColor DarkGray
+            # No seed data for automated test runs; schema only, if any.
         }
         "Staging" {
-            Write-Host "  Environment: Staging" -ForegroundColor DarkGray
+            # Intentionally left for future staging-specific setup.
         }
         "Production" {
             Invoke-SchemaInit
             Invoke-SqlFile -SqlFile $script:SqlFiles.PopulateMasterData `
                 -DatabasePath $script:DatabasePath
-            Write-Host "  Environment: Production" -ForegroundColor DarkGray
         }
     }
 
-    Write-Host "  Database initialized: $script:DatabasePath" `
-        -ForegroundColor Green
+    Write-Step "Environment: $Environment"
+    Write-Success "Database initialized: $script:DatabasePath"
 }
 
 function Remove-Database {
     param([switch]$Force)
 
     if (-not (Test-Path $script:DatabasePath)) {
-        Write-Host "  No database file found." -ForegroundColor Yellow
+        Write-Caution "No database file found."
         return
     }
 
     if (-not $Force) {
-        Write-Host "  WARNING: This will permanently delete the database." `
-            -ForegroundColor Red
+        Write-Failure "WARNING: This will permanently delete the database."
         $confirm = Read-Host "  Type '[y]es' to confirm"
 
         if ($confirm -notin "yes", "y") {
-            Write-Host "  Cancelled." -ForegroundColor DarkGray
+            Write-Step "Cancelled."
             return
         }
     }
@@ -176,37 +171,35 @@ function Remove-Database {
     # Remove only the exact database file (no wildcard)
     Remove-Item $script:DatabasePath -Force
 
-    Write-Host "  Database removed." -ForegroundColor Green
+    Write-Success "Database removed."
 }
 
 function Reset-Database {
-    Write-Host "  Removing old database..." -ForegroundColor DarkGray
+    Write-Step "Removing old database..."
     Remove-Database -Force
 
-    Write-Host "  Re-initializing..." -ForegroundColor DarkGray
+    Write-Step "Re-initializing..."
     Initialize-Database
 }
 
 function Restore-Data {
     if (-not (Test-Path $script:DatabasePath)) {
-        Write-Host "  No database found. Run Initialize first." `
-            -ForegroundColor Yellow
+        Write-Caution "No database found. Run Initialize first."
         return
     }
 
-    Write-Host "  Clearing existing data..." -ForegroundColor DarkGray
+    Write-Step "Clearing existing data..."
     Invoke-DataClear
 
-    Write-Host "  Repopulating from seed files..." -ForegroundColor DarkGray
+    Write-Step "Repopulating from seed files..."
     Invoke-DataPopulate
 
-    Write-Host "  Data restored to defaults." -ForegroundColor Green
+    Write-Success "Data restored to defaults."
 }
 
 function Export-InsertTemplates {
     if (-not (Test-Path $script:DatabasePath)) {
-        Write-Host "  No database found. Run Initialize first." `
-            -ForegroundColor Yellow
+        Write-Caution "No database found. Run Initialize first."
         return
     }
 
@@ -217,7 +210,7 @@ function Export-InsertTemplates {
         sqlite3 $script:DatabasePath | `
         Set-Content $outputPath
 
-    Write-Host "  Templates written to: $outputPath" -ForegroundColor Green
+    Write-Success "Templates written to: $outputPath"
 }
 
 # ------------------------------------------------------------------------------
@@ -225,68 +218,54 @@ function Export-InsertTemplates {
 # ------------------------------------------------------------------------------
 
 function Write-MenuHeader {
-    $DatabaseExists = Test-Path $script:DatabasePath
-    $dbStatus = $DatabaseExists ? "EXISTS  $script:DatabasePath" : "NOT FOUND"
-    $statusColor = $DatabaseExists ? "Green" : "DarkGray"
+    Write-Header -Title "Quaply Database Management"
 
+    $databaseExists = Test-Path $script:DatabasePath
+    $status = $databaseExists ? "EXISTS  $script:DatabasePath" : "NOT FOUND"
+    $statusColor = $databaseExists ? "Green" : "DarkGray"
+    Write-Label -Label "DB: " -Value $status -ValueColor $statusColor
     Write-Host ""
-    Write-Host "  ╔══════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "  ║   Quaply  Database  Management   ║" -ForegroundColor Cyan
-    Write-Host "  ╚══════════════════════════════════╝" -ForegroundColor Cyan
+
+    @(
+        "[1]  Initialize database"
+        "[2]  Remove database"
+        "[3]  Reset database"
+        "[4]  Restore default data"
+        "[5]  Export INSERT query templates"
+    ) | ForEach-Object { Write-Host "$script:Indent$_" -ForegroundColor White }
+
+    Write-Host "$script:Indent[Q]  Quit" -ForegroundColor DarkGray
     Write-Host ""
-    Write-Host "  DB: " -NoNewline -ForegroundColor DarkGray
-    Write-Host $dbStatus -ForegroundColor $statusColor
-    Write-Host ""
-    Write-Host "  [1]  Initialize database" -ForegroundColor White
-    Write-Host "  [2]  Remove database" -ForegroundColor White
-    Write-Host "  [3]  Reset database" -ForegroundColor White
-    Write-Host "  [4]  Restore default data" -ForegroundColor White
-    Write-Host "  [5]  Export INSERT query templates" -ForegroundColor White
-    Write-Host "  [Q]  Quit" -ForegroundColor DarkGray
-    Write-Host ""
-    Write-Host "  Select: " -NoNewline -ForegroundColor Cyan
+    Write-Prompt "Select: "
 }
 
 function Invoke-MenuAction {
     param([string]$Option)
 
     Write-Host ""
-    Write-Host "  ─────────────────────────────────────" `
-        -ForegroundColor DarkGray
+    Write-Divider
 
     try {
-        switch ($Option) {
-            "1" {
-                Initialize-Database
-            }
-            "2" {
-                Remove-Database
-            }
-            "3" {
-                Reset-Database
-            }
-            "4" {
-                Restore-Data
-            }
-            "5" {
-                Export-InsertTemplates
-            }
+        switch ($Option.ToLowerInvariant()) {
+            "1" { Initialize-Database }
+            "2" { Remove-Database }
+            "3" { Reset-Database }
+            "4" { Restore-Data }
+            "5" { Export-InsertTemplates }
             "q" {
-                Write-Host "  Goodbye." -ForegroundColor DarkGray
+                Write-Step "Goodbye."
                 Write-Host ""
                 exit 0
             }
             default {
-                Write-Host "  '$Option' is not a valid option." `
-                    -ForegroundColor Red
-                # no pause needed
+                Write-Failure "'$Option' is not a valid option."
                 return $false
             }
         }
     }
     catch {
         Write-Host ""
-        Write-Host "  [ERROR] $_" -ForegroundColor Red
+        Write-Failure $_
     }
 
     return $true
@@ -300,21 +279,11 @@ Assert-SqliteInstalled
 
 if ($Action) {
     switch ($Action) {
-        "Initialize" {
-            Initialize-Database
-        }
-        "Remove" {
-            Remove-Database
-        }
-        "Reset" {
-            Reset-Database
-        }
-        "RestoreData" {
-            Restore-Data
-        }
-        "ExportInsertTemplates" {
-            Export-InsertTemplates
-        }
+        "Initialize" { Initialize-Database }
+        "Remove" { Remove-Database }
+        "Reset" { Reset-Database }
+        "RestoreData" { Restore-Data }
+        "ExportInsertTemplates" { Export-InsertTemplates }
     }
     exit 0
 }
@@ -331,8 +300,7 @@ while ($true) {
 
     if ($needsPause) {
         Write-Host ""
-        Write-Host "  Press any key to return to menu..." `
-            -ForegroundColor DarkGray
+        Write-Step "Press any key to return to menu..."
         $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown") | Out-Null
     }
     else {
