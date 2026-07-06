@@ -4,9 +4,10 @@
 Scaffolds EF Core models from the Quaply SQLite database.
 
 .DESCRIPTION
-Ensures the database exists, restores dotnet tools, then scaffolds EF Core
-models into Quaply.Data. Use -Force to reset the database and overwrite
-existing models.
+Ensures the database exists, restores dotnet tools, scaffolds EF Core models
+into a throwaway EfScaffoldSandbox project (to avoid the circular dependency
+with Quaply.Data), then copies the generated files into Quaply.Data. Use -Force
+to reset the database and overwrite existing models.
 
 .PARAMETER Force
 Resets the database and overwrites existing scaffolded models.
@@ -32,9 +33,20 @@ $script:GeneratedDirectory = "Generated"
 $script:NewDatabasePath = `
     Join-Path $PSScriptRoot ".." $script:DataProjectName "Database" "Quaply.db"
 
-# ------------------------------------------------------------------------------
-# Prerequisites
-# ------------------------------------------------------------------------------
+$script:SandboxProjectName = "EfScaffold"
+$script:SandboxDirectory = `
+    Join-Path $PSScriptRoot ".." "Sandbox" $script:SandboxProjectName
+$script:SandboxProjectPath = `
+    Join-Path $script:SandboxDirectory "$script:SandboxProjectName.csproj"
+$script:SandboxGeneratedDirectory = `
+    Join-Path $script:SandboxDirectory $script:GeneratedDirectory
+
+$script:DataProjectDirectory = `
+    Join-Path $PSScriptRoot ".." $script:DataProjectName
+$script:DataGeneratedDirectory = `
+    Join-Path $script:DataProjectDirectory $script:GeneratedDirectory
+
+# Prerequisites ----------------------------------------------------------------
 
 function Assert-DotnetInstalled {
     if (Get-Command -Name "dotnet" -ErrorAction SilentlyContinue) {
@@ -45,9 +57,7 @@ function Assert-DotnetInstalled {
     exit 1
 }
 
-# ------------------------------------------------------------------------------
-# Steps
-# ------------------------------------------------------------------------------
+# Steps ------------------------------------------------------------------------
 
 function Initialize-ScaffoldDatabase {
     $invokeDatabase = Join-Path $PSScriptRoot "Invoke-Database.ps1"
@@ -100,38 +110,108 @@ function Move-DatabaseToDataProject {
     }
 }
 
+function Initialize-SandboxProject {
+    if (Test-Path $script:SandboxProjectPath) {
+        return
+    }
+
+    Write-Step "Creating $script:SandboxProjectName sandbox project..."
+
+    [void](New-Item -ItemType Directory -Path $script:SandboxDirectory -Force)
+
+    dotnet new classlib `
+        --name $script:SandboxProjectName `
+        --output $script:SandboxDirectory `
+        --force
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Failure "Failed to create $script:SandboxProjectName project."
+        exit 1
+    }
+
+    Push-Location $script:SandboxDirectory
+    try {
+        dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+        if ($LASTEXITCODE -ne 0) {
+            Write-Failure "Failed to add Microsoft.EntityFrameworkCore.Sqlite."
+            exit 1
+        }
+
+        dotnet add package Microsoft.EntityFrameworkCore.Design
+        if ($LASTEXITCODE -ne 0) {
+            Write-Failure "Failed to add Microsoft.EntityFrameworkCore.Design."
+            exit 1
+        }
+    }
+    finally {
+        Pop-Location
+    }
+}
+
 function Invoke-EfScaffold {
     $scaffoldArgs = @(
         "ef", "dbcontext", "scaffold",
         "Data Source=$script:NewDatabasePath",
         "Microsoft.EntityFrameworkCore.Sqlite",
-        "--startup-project", "Quaply.Ui",
-        "--project", $script:DataProjectName,
+        "--project", $script:SandboxProjectPath,
+        "--startup-project", $script:SandboxProjectPath,
         "--namespace", "$script:DataProjectName.Models",
+        "--output-dir", (Join-Path $script:SandboxGeneratedDirectory "Models"),
         "--context-namespace", "$script:DataProjectName.Contexts",
+        "--context-dir", (
+            Join-Path $script:SandboxGeneratedDirectory "Contexts"
+        ),
         "--context", "QuaplyDbContext",
-        "--context-dir", (Join-Path $script:GeneratedDirectory "Contexts"),
-        "--output-dir", (Join-Path $script:GeneratedDirectory "Models"),
-        "--no-onconfiguring",
-        "--no-build" # skip build; models may not exist yet
+        "--no-onconfiguring"
     )
 
     if ($Force) {
         $scaffoldArgs += "--force"
     }
 
-    Write-Step "Scaffolding EF Core models..."
+    Write-Step "Scaffolding EF Core models into sandbox project..."
     dotnet @scaffoldArgs
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Failure "EF scaffold failed."
+        exit 1
+    }
 }
 
-# ------------------------------------------------------------------------------
-# Entry point
-# ------------------------------------------------------------------------------
+function Move-GeneratedFilesToDataProject {
+    Write-Step "Moving scaffolded files into $script:DataProjectName..."
+
+    if (-not (Test-Path $script:SandboxGeneratedDirectory)) {
+        Write-Caution `
+            "No generated files found at $script:SandboxGeneratedDirectory"
+        return
+    }
+
+    # Move-Item cannot overwrite an existing directory, so the destination
+    # must be cleared first.
+    if (Test-Path $script:DataGeneratedDirectory) {
+        Remove-Item -Path $script:DataGeneratedDirectory -Recurse -Force
+    }
+
+    $destinationParent = Split-Path -Path $script:DataGeneratedDirectory -Parent
+    if (-not (Test-Path $destinationParent)) {
+        [void](New-Item -ItemType Directory -Path $destinationParent -Force)
+    }
+
+    Move-Item `
+        -Path $script:SandboxGeneratedDirectory `
+        -Destination $script:DataGeneratedDirectory `
+        -Force
+}
+
+# Entry point ------------------------------------------------------------------
 
 Assert-DotnetInstalled
 Initialize-ScaffoldDatabase
 Restore-DotnetTools
 Move-DatabaseToDataProject
+Initialize-SandboxProject
 Invoke-EfScaffold
+Move-GeneratedFilesToDataProject
 
 Write-Success "Scaffold complete."

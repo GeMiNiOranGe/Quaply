@@ -1,6 +1,7 @@
 # Quaply ignore file
 Quaply.Data/Database
 Quaply.Data/Generated
+Sandbox
 Quaply.db
 
 ## Ignore Visual Studio temporary files, build results, and
