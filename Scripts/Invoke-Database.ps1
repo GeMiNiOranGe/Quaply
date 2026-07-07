@@ -32,9 +32,7 @@ $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "Common" "ConsoleOutput.ps1")
 Set-OutputIndent -Spaces 2
 
-# ------------------------------------------------------------------------------
-# Constants
-# ------------------------------------------------------------------------------
+# Constants --------------------------------------------------------------------
 
 $script:DatabaseDirectory = Join-Path $PSScriptRoot ".." "Database"
 $script:DatabasePath = Join-Path $script:DatabaseDirectory "Quaply.db"
@@ -55,9 +53,7 @@ $script:SqlFiles = @{
         Join-Path $script:ToolsDirectory "GenerateInsertTemplates.sql"
 }
 
-# ------------------------------------------------------------------------------
-# Prerequisites
-# ------------------------------------------------------------------------------
+# Prerequisites ----------------------------------------------------------------
 
 function Assert-SqliteInstalled {
     if (Get-Command -Name "sqlite3" -ErrorAction SilentlyContinue) {
@@ -70,9 +66,7 @@ function Assert-SqliteInstalled {
     exit 1
 }
 
-# ------------------------------------------------------------------------------
-# Low-level helpers
-# ------------------------------------------------------------------------------
+# Low-level helpers ------------------------------------------------------------
 
 <#
 .SYNOPSIS
@@ -91,13 +85,14 @@ function Invoke-SqlFile {
     $output = Get-Content $SqlFile | sqlite3 $DatabasePath 2>&1
 
     if ($LASTEXITCODE -ne 0) {
-        throw "sqlite3 exited with code $LASTEXITCODE while executing '$SqlFile'.`n$output"
+        throw @(
+            "sqlite3 exited with code $LASTEXITCODE while executing '$SqlFile'."
+            "$output"
+        ) -join "`n"
     }
 }
 
-# ------------------------------------------------------------------------------
-# Database operations
-# ------------------------------------------------------------------------------
+# Database operations ----------------------------------------------------------
 
 function Invoke-SchemaInit {
     Invoke-SqlFile -SqlFile $script:SqlFiles.InitSchema `
@@ -107,8 +102,10 @@ function Invoke-SchemaInit {
 function Invoke-DataPopulate {
     Invoke-SqlFile -SqlFile $script:SqlFiles.PopulateMasterData `
         -DatabasePath $script:DatabasePath
-    Invoke-SqlFile -SqlFile $script:SqlFiles.PopulateSeedData `
-        -DatabasePath $script:DatabasePath
+    if ($Environment -ne "Production") {
+        Invoke-SqlFile -SqlFile $script:SqlFiles.PopulateSeedData `
+            -DatabasePath $script:DatabasePath
+    }
 }
 
 function Invoke-DataClear {
@@ -116,9 +113,7 @@ function Invoke-DataClear {
         -DatabasePath $script:DatabasePath
 }
 
-# ------------------------------------------------------------------------------
-# Menu actions
-# ------------------------------------------------------------------------------
+# Menu actions -----------------------------------------------------------------
 
 function Initialize-Database {
     if (Test-Path $script:DatabasePath) {
@@ -126,8 +121,7 @@ function Initialize-Database {
         return
     }
 
-    Write-Step "Initializing database..."
-
+    Write-Step "Initializing database... (Environment: $Environment)"
     switch ($Environment) {
         "Development" {
             Invoke-SchemaInit
@@ -141,12 +135,10 @@ function Initialize-Database {
         }
         "Production" {
             Invoke-SchemaInit
-            Invoke-SqlFile -SqlFile $script:SqlFiles.PopulateMasterData `
-                -DatabasePath $script:DatabasePath
+            Invoke-DataPopulate
         }
     }
 
-    Write-Step "Environment: $Environment"
     Write-Success "Database initialized: $script:DatabasePath"
 }
 
@@ -154,7 +146,7 @@ function Remove-Database {
     param([switch]$Force)
 
     if (-not (Test-Path $script:DatabasePath)) {
-        Write-Caution "No database file found."
+        Write-Caution "No existing database found. Run Initialize first."
         return
     }
 
@@ -175,6 +167,11 @@ function Remove-Database {
 }
 
 function Reset-Database {
+    if (-not (Test-Path $script:DatabasePath)) {
+        Write-Caution "No existing database found. Run Initialize first."
+        return
+    }
+
     Write-Step "Removing old database..."
     Remove-Database -Force
 
@@ -184,7 +181,7 @@ function Reset-Database {
 
 function Restore-Data {
     if (-not (Test-Path $script:DatabasePath)) {
-        Write-Caution "No database found. Run Initialize first."
+        Write-Caution "No existing database found. Run Initialize first."
         return
     }
 
@@ -199,7 +196,7 @@ function Restore-Data {
 
 function Export-InsertTemplates {
     if (-not (Test-Path $script:DatabasePath)) {
-        Write-Caution "No database found. Run Initialize first."
+        Write-Caution "No existing database found. Run Initialize first."
         return
     }
 
@@ -213,9 +210,7 @@ function Export-InsertTemplates {
     Write-Success "Templates written to: $outputPath"
 }
 
-# ------------------------------------------------------------------------------
-# UI helpers
-# ------------------------------------------------------------------------------
+# UI helpers -------------------------------------------------------------------
 
 function Write-MenuHeader {
     Write-Header -Title "Quaply Database Management"
@@ -271,9 +266,7 @@ function Invoke-MenuAction {
     return $true
 }
 
-# ------------------------------------------------------------------------------
-# Entry point
-# ------------------------------------------------------------------------------
+# Entry point ------------------------------------------------------------------
 
 Assert-SqliteInstalled
 
