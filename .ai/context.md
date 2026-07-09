@@ -13,7 +13,8 @@ Tech Stack:
 WPF (.NET 10), SQLite, Entity Framework, Dependency Injection
 
 Platform:
-Windows only
+Windows only.
+Optimize for native Windows development. Do not design around future cross-platform support. Cross-platform compatibility will only be considered after release if it becomes genuinely necessary.
 
 Architecture:
 MVVM for Ui layer, traditional 3-layer model
@@ -26,10 +27,10 @@ Key Decisions:
 - Database-first: schema designed upfront; EF Core models scaffolded from SQLite schema
 
 Status:
-Learning-focused, not production-ready
+Learning-focused, not production-ready - a public release is planned soon.
 
 Meta:
 - Team: individual
 - Scale: small
 - Timeline: unknown (ongoing, See CHANGELOG for details)
-- Role: Solo developer; used AI assistance for WPF syntax learning.
+- Role: Solo developer; using AI assistants for development (WPF syntax learning, Software Architecture).
