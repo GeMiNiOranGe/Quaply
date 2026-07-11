@@ -2,6 +2,18 @@
   x:Class="Quaply.Ui.App"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:local="clr-namespace:Quaply.Ui">
-  <Application.Resources />
+  xmlns:local="clr-namespace:Quaply.Ui"
+  xmlns:pages="clr-namespace:Quaply.Ui.Views.Pages"
+  xmlns:viewModels="clr-namespace:Quaply.Ui.ViewModels">
+  <Application.Resources>
+    <ResourceDictionary>
+      <DataTemplate DataType="{x:Type viewModels:ProfileViewModel}">
+        <pages:ProfilePage />
+      </DataTemplate>
+
+      <DataTemplate DataType="{x:Type viewModels:WorkExperienceViewModel}">
+        <pages:WorkExperiencePage />
+      </DataTemplate>
+    </ResourceDictionary>
+  </Application.Resources>
 </Application>

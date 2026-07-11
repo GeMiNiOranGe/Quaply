@@ -9,5 +9,25 @@
   Width="800"
   Height="450"
   mc:Ignorable="d">
-  <Grid />
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="120" />
+      <ColumnDefinition />
+    </Grid.ColumnDefinitions>
+
+    <StackPanel Grid.Column="0" Background="LightGray">
+      <Button
+        Padding="8,12"
+        BorderThickness="0"
+        Command="{Binding NavigateToProfileCommand}"
+        Content="Profile" />
+      <Button
+        Padding="8,12"
+        BorderThickness="0"
+        Command="{Binding NavigateToWorkExperienceCommand}"
+        Content="Work Experience" />
+    </StackPanel>
+
+    <ContentControl Grid.Column="1" Content="{Binding CurrentViewModel}" />
+  </Grid>
 </Window>
