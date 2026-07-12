@@ -8,14 +8,14 @@ public class HostNavigator(IViewModelFactory viewModelFactory)
         IHostNavigator
 {
     private readonly IViewModelFactory _viewModelFactory = viewModelFactory;
-    private ViewModel? _currentViewModel;
+    private ViewModel? _current;
 
-    public ViewModel? CurrentViewModel
+    public ViewModel? Current
     {
-        get => _currentViewModel;
+        get => _current;
         private set
         {
-            _currentViewModel = value;
+            _current = value;
             OnPropertyChanged();
         }
     }
@@ -24,6 +24,6 @@ public class HostNavigator(IViewModelFactory viewModelFactory)
         where TViewModel : ViewModel
     {
         ViewModel viewModel = _viewModelFactory.Create(typeof(TViewModel));
-        CurrentViewModel = viewModel;
+        Current = viewModel;
     }
 }

@@ -32,7 +32,7 @@ public class MainViewModel : NavigableViewModel, IDisposable
         );
     }
 
-    public ViewModel? CurrentViewModel => _hostNavigator.CurrentViewModel;
+    public ViewModel? CurrentViewModel => _hostNavigator.Current;
 
     public ICommand NavigateToProfileCommand => _navigateToProfileCommand;
 
@@ -56,7 +56,7 @@ public class MainViewModel : NavigableViewModel, IDisposable
 
     private bool CanNavigateToProfile()
     {
-        return _hostNavigator.CurrentViewModel is not ProfileViewModel;
+        return _hostNavigator.Current is not ProfileViewModel;
     }
 
     private void NavigateToWorkExperience()
@@ -66,7 +66,7 @@ public class MainViewModel : NavigableViewModel, IDisposable
 
     private bool CanNavigateToWorkExperience()
     {
-        return _hostNavigator.CurrentViewModel is not WorkExperienceViewModel;
+        return _hostNavigator.Current is not WorkExperienceViewModel;
     }
 
     private void OnNavigatorPropertyChanged(
@@ -74,7 +74,7 @@ public class MainViewModel : NavigableViewModel, IDisposable
         PropertyChangedEventArgs e
     )
     {
-        if (e.PropertyName == nameof(IHostNavigator.CurrentViewModel))
+        if (e.PropertyName == nameof(IHostNavigator.Current))
         {
             OnPropertyChanged(nameof(CurrentViewModel));
         }
