@@ -9,18 +9,75 @@
   d:DesignWidth="800"
   Style="{StaticResource FadeInSlideUpPage}"
   mc:Ignorable="d">
-  <Grid>
-    <TextBlock
-      HorizontalAlignment="Center"
-      VerticalAlignment="Center"
-      FontSize="24"
-      FontWeight="Bold"
-      Text="Profile page" />
-    <Button
-      Padding="8"
-      HorizontalAlignment="Left"
-      VerticalAlignment="Top"
-      Command="{Binding NavigateToWorkExperienceCommand}"
-      Content="Go to Work Experience page" />
+  <Grid Margin="24,16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!--  Top actions  -->
+    <StackPanel
+      Grid.Row="0"
+      Margin="0,0,0,8"
+      Orientation="Horizontal">
+      <Button
+        Padding="8"
+        Command="{Binding AddProfileCommand}"
+        Content="+ Add Profile" />
+      <Button
+        Margin="8,0,0,0"
+        Padding="8"
+        Command="{Binding NavigateToWorkExperienceCommand}"
+        Content="Go to Work Experience page" />
+    </StackPanel>
+
+    <!--  List  -->
+    <ListView
+      Grid.Row="1"
+      AlternationCount="2"
+      ItemsSource="{Binding Profiles}"
+      SelectedItem="{Binding SelectedProfile, Mode=TwoWay}">
+      <ListView.ItemContainerStyle>
+        <Style TargetType="ListViewItem">
+          <Style.Triggers>
+            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+              <Setter Property="Background" Value="#F5F5F5" />
+            </Trigger>
+          </Style.Triggers>
+        </Style>
+      </ListView.ItemContainerStyle>
+      <ListView.ItemTemplate>
+        <DataTemplate>
+          <StackPanel Margin="4" Orientation="Vertical">
+            <TextBlock
+              FontSize="14"
+              FontWeight="Bold"
+              Text="{Binding FullName}" />
+            <TextBlock
+              FontSize="12"
+              Opacity="0.7"
+              Text="{Binding Title}" />
+          </StackPanel>
+        </DataTemplate>
+      </ListView.ItemTemplate>
+    </ListView>
+
+    <!--  Bottom actions: Edit / Delete  -->
+    <StackPanel
+      Grid.Row="2"
+      Margin="0,8,0,0"
+      HorizontalAlignment="Right"
+      Orientation="Horizontal">
+      <Button
+        Padding="8"
+        Command="{Binding EditProfileCommand}"
+        Content="Edit" />
+      <Button
+        Margin="8,0,0,0"
+        Padding="8"
+        Command="{Binding DeleteProfileCommand}"
+        Content="Delete" />
+    </StackPanel>
   </Grid>
 </UserControl>

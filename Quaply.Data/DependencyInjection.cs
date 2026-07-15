@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Quaply.Data.Contexts;
+using Quaply.Data.Interfaces;
 
 namespace Quaply.Data;
 
@@ -19,6 +20,8 @@ public static class DependencyInjection
             services.AddDbContext<QuaplyDbContext>(options =>
                 options.UseSqlite($"Data Source={databasePath}")
             );
+
+            services.AddScoped<IProfileRepository, ProfileRepository>();
 
             return services;
         }
