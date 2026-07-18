@@ -8,9 +8,9 @@ public partial class WorkExperienceViewModel(INavigator navigator)
     : NavigableViewModel(navigator)
 {
     [RelayCommand(CanExecute = nameof(CanNavigateToProfile))]
-    private void NavigateToProfile()
+    private async Task NavigateToProfileAsync()
     {
-        Navigator.NavigateTo<ProfileViewModel>();
+        await Navigator.NavigateToAsync<ProfileViewModel>();
     }
 
     private static bool CanNavigateToProfile()

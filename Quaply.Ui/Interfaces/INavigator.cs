@@ -4,6 +4,6 @@ namespace Quaply.Ui.Interfaces;
 
 public interface INavigator
 {
-    void NavigateTo<TViewModel>()
+    Task NavigateToAsync<TViewModel>(object? parameter = null)
         where TViewModel : ViewModel;
 }

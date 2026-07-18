@@ -9,8 +9,8 @@ namespace Quaply.Ui.ViewModels;
 public class MainViewModel : NavigableViewModel, IDisposable
 {
     private readonly IHostNavigator _hostNavigator;
-    private readonly ICommand _navigateToProfileCommand;
-    private readonly ICommand _navigateToWorkExperienceCommand;
+    private readonly AsyncRelayCommand _navigateToProfileCommand;
+    private readonly AsyncRelayCommand _navigateToWorkExperienceCommand;
 
     public MainViewModel(IHostNavigator hostNavigator)
         : base(hostNavigator)
@@ -22,12 +22,12 @@ public class MainViewModel : NavigableViewModel, IDisposable
             notifier.PropertyChanged += OnNavigatorPropertyChanged;
         }
 
-        _navigateToProfileCommand = new RelayCommand(
-            NavigateToProfile,
+        _navigateToProfileCommand = new AsyncRelayCommand(
+            NavigateToProfileAsync,
             CanNavigateToProfile
         );
-        _navigateToWorkExperienceCommand = new RelayCommand(
-            NavigateToWorkExperience,
+        _navigateToWorkExperienceCommand = new AsyncRelayCommand(
+            NavigateToWorkExperienceAsync,
             CanNavigateToWorkExperience
         );
     }
@@ -49,9 +49,9 @@ public class MainViewModel : NavigableViewModel, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private void NavigateToProfile()
+    private async Task NavigateToProfileAsync()
     {
-        _hostNavigator.NavigateTo<ProfileViewModel>();
+        await _hostNavigator.NavigateToAsync<ProfileViewModel>();
     }
 
     private bool CanNavigateToProfile()
@@ -59,9 +59,9 @@ public class MainViewModel : NavigableViewModel, IDisposable
         return _hostNavigator.Current is not ProfileViewModel;
     }
 
-    private void NavigateToWorkExperience()
+    private async Task NavigateToWorkExperienceAsync()
     {
-        _hostNavigator.NavigateTo<WorkExperienceViewModel>();
+        await _hostNavigator.NavigateToAsync<WorkExperienceViewModel>();
     }
 
     private bool CanNavigateToWorkExperience()
@@ -77,6 +77,10 @@ public class MainViewModel : NavigableViewModel, IDisposable
         if (e.PropertyName == nameof(IHostNavigator.Current))
         {
             OnPropertyChanged(nameof(CurrentViewModel));
+
+            // Notify WPF that CanExecute() needs to be re-evaluated immediately.
+            _navigateToProfileCommand.NotifyCanExecuteChanged();
+            _navigateToWorkExperienceCommand.NotifyCanExecuteChanged();
         }
     }
 }

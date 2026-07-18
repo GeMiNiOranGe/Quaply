@@ -20,7 +20,7 @@ public class HostNavigator(IViewModelFactory viewModelFactory)
         }
     }
 
-    public void NavigateTo<TViewModel>()
+    public async Task NavigateToAsync<TViewModel>(object? parameter = null)
         where TViewModel : ViewModel
     {
         ViewModel viewModel = _viewModelFactory.Create(typeof(TViewModel));

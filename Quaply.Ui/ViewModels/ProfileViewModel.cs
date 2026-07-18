@@ -21,9 +21,9 @@ public partial class ProfileViewModel(
     public ObservableCollection<Profile> Profiles { get; } = [];
 
     [RelayCommand(CanExecute = nameof(CanNavigateToWorkExperience))]
-    private void NavigateToWorkExperience()
+    private async Task NavigateToWorkExperienceAsync()
     {
-        Navigator.NavigateTo<WorkExperienceViewModel>();
+        await Navigator.NavigateToAsync<WorkExperienceViewModel>();
     }
 
     private static bool CanNavigateToWorkExperience()
