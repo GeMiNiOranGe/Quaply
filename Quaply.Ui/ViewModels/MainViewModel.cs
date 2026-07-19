@@ -34,6 +34,11 @@ public class MainViewModel : NavigableViewModel, IDisposable
 
     public ViewModel? CurrentViewModel => _hostNavigator.Current;
 
+    public bool IsProfileSelected => CurrentViewModel is ProfileViewModel;
+
+    public bool IsWorkExperienceSelected =>
+        CurrentViewModel is WorkExperienceViewModel;
+
     public ICommand NavigateToProfileCommand => _navigateToProfileCommand;
 
     public ICommand NavigateToWorkExperienceCommand =>
@@ -77,6 +82,8 @@ public class MainViewModel : NavigableViewModel, IDisposable
         if (e.PropertyName == nameof(IHostNavigator.Current))
         {
             OnPropertyChanged(nameof(CurrentViewModel));
+            OnPropertyChanged(nameof(IsProfileSelected));
+            OnPropertyChanged(nameof(IsWorkExperienceSelected));
 
             // Notify WPF that CanExecute() needs to be re-evaluated immediately.
             _navigateToProfileCommand.NotifyCanExecuteChanged();
