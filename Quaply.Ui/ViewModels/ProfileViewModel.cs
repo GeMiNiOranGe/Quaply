@@ -18,7 +18,15 @@ public partial class ProfileViewModel(
     [ObservableProperty]
     public partial Profile? SelectedProfile { get; set; }
 
-    public ObservableCollection<Profile> Profiles { get; } = [];
+    public ObservableCollection<Profile> Profiles
+    {
+        get;
+        private set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
+    } = [];
 
     [RelayCommand(CanExecute = nameof(CanNavigateToWorkExperience))]
     private async Task NavigateToWorkExperienceAsync()
@@ -35,12 +43,7 @@ public partial class ProfileViewModel(
     private async Task LoadProfilesAsync()
     {
         IEnumerable<Profile> profiles = await _service.GetProfilesAsync();
-
-        Profiles.Clear();
-        foreach (Profile profile in profiles)
-        {
-            Profiles.Add(profile);
-        }
+        Profiles = new(profiles);
     }
 
     [RelayCommand]
