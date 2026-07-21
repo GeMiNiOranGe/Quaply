@@ -11,7 +11,7 @@ namespace Quaply.Ui.ViewModels;
 public partial class ProfileViewModel(
     INavigator navigator,
     IProfileService service
-) : NavigableViewModel(navigator)
+) : NavigableViewModel(navigator), INavigationAware
 {
     private readonly IProfileService _service = service;
 
@@ -27,6 +27,11 @@ public partial class ProfileViewModel(
             OnPropertyChanged();
         }
     } = [];
+
+    public async Task OnNavigatedToAsync(object? parameter)
+    {
+        await LoadProfilesAsync();
+    }
 
     [RelayCommand(CanExecute = nameof(CanNavigateToWorkExperience))]
     private async Task NavigateToWorkExperienceAsync()

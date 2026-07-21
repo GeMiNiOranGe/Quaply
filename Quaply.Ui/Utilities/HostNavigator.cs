@@ -23,7 +23,17 @@ public class HostNavigator(IViewModelFactory viewModelFactory)
     public async Task NavigateToAsync<TViewModel>(object? parameter = null)
         where TViewModel : ViewModel
     {
+        if (Current is INavigationAware currentAware)
+        {
+            await currentAware.OnNavigatedFromAsync();
+        }
+
         ViewModel viewModel = _viewModelFactory.Create(typeof(TViewModel));
         Current = viewModel;
+
+        if (viewModel is INavigationAware newAware)
+        {
+            await newAware.OnNavigatedToAsync(parameter);
+        }
     }
 }
