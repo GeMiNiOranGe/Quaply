@@ -21,7 +21,7 @@ public static class DependencyInjection
                 options.UseSqlite($"Data Source={databasePath}")
             );
 
-            services.AddScoped<IProfileRepository, ProfileRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }

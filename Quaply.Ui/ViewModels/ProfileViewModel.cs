@@ -71,7 +71,7 @@ public partial class ProfileViewModel(
             return;
         }
 
-        await _service.RemoveProfileAsync(SelectedProfile.Id);
+        await _service.DeleteProfileAsync(SelectedProfile.Id);
         Profiles.Remove(SelectedProfile);
         SelectedProfile = null;
     }

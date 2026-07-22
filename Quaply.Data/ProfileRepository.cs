@@ -5,7 +5,7 @@ using Quaply.Data.Models;
 
 namespace Quaply.Data;
 
-public class ProfileRepository(QuaplyDbContext context) : IProfileRepository
+internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
 {
     private readonly QuaplyDbContext _context = context;
 
@@ -19,21 +19,13 @@ public class ProfileRepository(QuaplyDbContext context) : IProfileRepository
         return await _context.Profiles.AsNoTracking().ToListAsync();
     }
 
-    public async Task AddAsync(Profile profile)
+    public void Add(Profile profile)
     {
         _context.Profiles.Add(profile);
-        await _context.SaveChangesAsync();
     }
 
-    public async Task RemoveAsync(int id)
+    public void Remove(Profile profile)
     {
-        Profile? profile = await _context.Profiles.FindAsync(id);
-        if (profile is null)
-        {
-            return;
-        }
-
         _context.Profiles.Remove(profile);
-        await _context.SaveChangesAsync();
     }
 }

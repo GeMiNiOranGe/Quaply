@@ -4,17 +4,24 @@ using Quaply.Service.Interfaces;
 
 namespace Quaply.Service;
 
-public class ProfileService(IProfileRepository repository) : IProfileService
+public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
 {
-    private readonly IProfileRepository _repository = repository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public Task<IEnumerable<Profile>> GetProfilesAsync()
     {
-        return _repository.GetManyAsync();
+        return _unitOfWork.Profiles.GetManyAsync();
     }
 
-    public Task RemoveProfileAsync(int id)
+    public async Task DeleteProfileAsync(int id)
     {
-        return _repository.RemoveAsync(id);
+        Profile? profile = await _unitOfWork.Profiles.GetByIdAsync(id);
+        if (profile is null)
+        {
+            return;
+        }
+
+        _unitOfWork.Profiles.Remove(profile);
+        await _unitOfWork.SaveChangesAsync();
     }
 }

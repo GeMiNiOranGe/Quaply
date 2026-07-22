@@ -6,6 +6,6 @@ public interface IProfileRepository
 {
     Task<Profile?> GetByIdAsync(int id);
     Task<IEnumerable<Profile>> GetManyAsync();
-    Task AddAsync(Profile profile);
-    Task RemoveAsync(int id);
+    void Add(Profile profile);
+    void Remove(Profile profile);
 }
