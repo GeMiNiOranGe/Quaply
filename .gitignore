@@ -1,4 +1,5 @@
 # Quaply ignore file
+.vscode
 Quaply.Data/Database
 Quaply.Data/Generated
 Sandbox
