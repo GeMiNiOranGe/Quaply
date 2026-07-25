@@ -19,9 +19,11 @@ public static class DependencyInjection
             );
 
             services.AddTransient<MainViewModel>();
+            services.AddTransient<ProfileEditorViewModel>();
             services.AddTransient<ProfileViewModel>();
             services.AddTransient<WorkExperienceViewModel>();
 
+            services.AddSingleton<ProfileEditorPage>();
             services.AddSingleton<ProfilePage>();
             services.AddSingleton<WorkExperiencePage>();
             services.AddSingleton(provider => new MainWindow()

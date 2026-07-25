@@ -6,6 +6,7 @@
   xmlns:local="clr-namespace:Quaply.Ui.Views.Pages"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+  x:Name="profilePage"
   d:DesignHeight="450"
   d:DesignWidth="800"
   Style="{StaticResource FadeInSlideUpPage}"
@@ -14,7 +15,6 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
-      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
     <!--  Top actions  -->
@@ -94,8 +94,10 @@
           CanUserAddRows="False"
           CanUserDeleteRows="False"
           HeadersVisibility="Column"
+          IsReadOnly="True"
           ItemsSource="{Binding Profiles}"
           RowHeight="48"
+          SelectedItem="{Binding SelectedProfile}"
           SelectionMode="Extended">
           <DataGrid.Columns>
             <!--  TODO: Fixing CheckBox's padding is not equal to the left padding with header and footer  -->
@@ -153,7 +155,8 @@
                       Margin="0,0,8,0"
                       Padding="8"
                       Appearance="Transparent"
-                      Command="{Binding EditCommand}"
+                      Command="{Binding DataContext.EditProfileCommand, ElementName=profilePage}"
+                      CommandParameter="{Binding}"
                       ToolTip="Edit">
                       <ui:SymbolIcon Symbol="Edit24" />
                     </ui:Button>
@@ -161,7 +164,8 @@
                     <ui:Button
                       Padding="8"
                       Appearance="Transparent"
-                      Command="{Binding DeleteCommand}"
+                      Command="{Binding DataContext.DeleteProfileCommand, ElementName=profilePage}"
+                      CommandParameter="{Binding}"
                       ToolTip="Delete">
                       <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />
                     </ui:Button>
@@ -215,22 +219,5 @@
         </Border>
       </Grid>
     </ui:Card>
-
-    <!--  Bottom actions: Edit / Delete  -->
-    <StackPanel
-      Grid.Row="2"
-      Margin="0,8,0,0"
-      HorizontalAlignment="Right"
-      Orientation="Horizontal">
-      <Button
-        Padding="8"
-        Command="{Binding EditProfileCommand}"
-        Content="Edit" />
-      <Button
-        Margin="8,0,0,0"
-        Padding="8"
-        Command="{Binding DeleteProfileCommand}"
-        Content="Delete" />
-    </StackPanel>
   </Grid>
 </UserControl>

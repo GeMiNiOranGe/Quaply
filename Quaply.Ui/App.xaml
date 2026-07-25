@@ -15,6 +15,10 @@
         <ResourceDictionary Source="Styles/PageAnimations.xaml" />
       </ResourceDictionary.MergedDictionaries>
 
+      <DataTemplate DataType="{x:Type viewModels:ProfileEditorViewModel}">
+        <pages:ProfileEditorPage />
+      </DataTemplate>
+
       <DataTemplate DataType="{x:Type viewModels:ProfileViewModel}">
         <pages:ProfilePage />
       </DataTemplate>

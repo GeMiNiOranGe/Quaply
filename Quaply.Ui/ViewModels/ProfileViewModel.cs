@@ -52,38 +52,36 @@ public partial class ProfileViewModel(
     }
 
     [RelayCommand]
-    private void AddProfile()
+    private async Task AddProfileAsync()
     {
-        // TODO: Navigator.NavigateTo<AddProfileViewModel>();
+        await Navigator.NavigateToAsync<ProfileEditorViewModel>();
     }
 
-    [RelayCommand(CanExecute = nameof(HasSelectedProfile))]
-    private void EditProfile()
+    [RelayCommand]
+    private async Task EditProfileAsync(Profile? profile)
     {
-        // TODO: Navigator.NavigateTo<EditProfileViewModel>(SelectedProfile!.Id);
-    }
-
-    [RelayCommand(CanExecute = nameof(HasSelectedProfile))]
-    private async Task DeleteProfileAsync()
-    {
-        if (SelectedProfile is null)
+        if (profile is null)
         {
             return;
         }
 
-        await _service.DeleteProfileAsync(SelectedProfile.Id);
-        Profiles.Remove(SelectedProfile);
-        SelectedProfile = null;
+        await Navigator.NavigateToAsync<ProfileEditorViewModel>(profile.Id);
     }
 
-    private bool HasSelectedProfile()
+    [RelayCommand]
+    private async Task DeleteProfileAsync(Profile? profile)
     {
-        return SelectedProfile is not null;
-    }
+        if (profile is null)
+        {
+            return;
+        }
 
-    partial void OnSelectedProfileChanged(Profile? value)
-    {
-        EditProfileCommand.NotifyCanExecuteChanged();
-        DeleteProfileCommand.NotifyCanExecuteChanged();
+        await _service.DeleteProfileAsync(profile.Id);
+        Profiles.Remove(profile);
+
+        if (SelectedProfile == profile)
+        {
+            SelectedProfile = null;
+        }
     }
 }
