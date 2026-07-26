@@ -24,6 +24,11 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
         _context.Profiles.Add(profile);
     }
 
+    public void Update(Profile profile)
+    {
+        _context.Profiles.Update(profile);
+    }
+
     public void Remove(Profile profile)
     {
         _context.Profiles.Remove(profile);
