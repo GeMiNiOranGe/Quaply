@@ -12,8 +12,8 @@ INSERT INTO "Profile"
         "Title",
         "Email",
         "PhoneNumber",
-        "LinkedInUrl",
-        "GitHubUrl",
+        "LinkedInUsername",
+        "GitHubUsername",
         "PortfolioUrl",
         "DateOfBirth"
     )
@@ -24,8 +24,8 @@ VALUES
         'Backend Software Engineer',
         'ethan.carter.dev@gmail.com',
         '+1 415 234 5678',
-        'https://linkedin.com/in/ethan-carter-dev',
-        'https://github.com/ethan-carter-dev',
+        'ethan-carter-dev',
+        'ethan-carter-dev',
         NULL,
         '1997-08-15'
     ),
@@ -35,8 +35,8 @@ VALUES
         'DevOps / Cloud Engineer',
         'ethan.carter.dev@gmail.com',
         '+1 415 234 5678',
-        'https://linkedin.com/in/ethan-carter-dev',
-        'https://github.com/ethan-carter-dev',
+        'ethan-carter-dev',
+        'ethan-carter-dev',
         'https://ethancarter.dev',
         '1997-08-15'
     );

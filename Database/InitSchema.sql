@@ -17,15 +17,15 @@ STRICT;
 
 CREATE TABLE "Profile"
 (
-    "Id"           INTEGER PRIMARY KEY AUTOINCREMENT,
-    "FullName"     TEXT    NOT NULL,
-    "Title"        TEXT,
-    "Email"        TEXT,
-    "PhoneNumber"  TEXT,
-    "LinkedInUrl"  TEXT,
-    "GitHubUrl"    TEXT,
-    "PortfolioUrl" TEXT,
-    "DateOfBirth"  TEXT,
+    "Id"               INTEGER PRIMARY KEY AUTOINCREMENT,
+    "FullName"         TEXT    NOT NULL,
+    "Title"            TEXT,
+    "Email"            TEXT,
+    "PhoneNumber"      TEXT,
+    "LinkedInUsername" TEXT,
+    "GitHubUsername"   TEXT,
+    "PortfolioUrl"     TEXT,
+    "DateOfBirth"      TEXT,
 
     CHECK ("DateOfBirth" IS NULL OR date("DateOfBirth") = "DateOfBirth")
 )
