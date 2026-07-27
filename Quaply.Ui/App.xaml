@@ -2,6 +2,7 @@
   x:Class="Quaply.Ui.App"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:converters="clr-namespace:Quaply.Ui.Converters"
   xmlns:local="clr-namespace:Quaply.Ui"
   xmlns:pages="clr-namespace:Quaply.Ui.Views.Pages"
   xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -14,6 +15,8 @@
 
         <ResourceDictionary Source="Styles/PageAnimations.xaml" />
       </ResourceDictionary.MergedDictionaries>
+
+      <converters:DateOnlyToDateTimeConverter x:Key="DateOnlyToDateTimeConverter" />
 
       <DataTemplate DataType="{x:Type viewModels:ProfileEditorViewModel}">
         <pages:ProfileEditorPage />
