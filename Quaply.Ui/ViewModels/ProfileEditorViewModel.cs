@@ -1,8 +1,10 @@
+using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quaply.Data.Models;
 using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
+using Quaply.Ui.Validations;
 using Quaply.Ui.ViewModels.Base;
 
 namespace Quaply.Ui.ViewModels;
@@ -24,17 +26,26 @@ public partial class ProfileEditorViewModel(
     [ObservableProperty]
     public partial bool IsSaving { get; private set; }
 
+    [NotifyDataErrorInfo]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
+    [MaxLength(255, ErrorMessage = "Full name must be at most 255 characters.")]
     [ObservableProperty]
+    [Required(ErrorMessage = "Full name is required.")]
     public partial string FullName { get; set; } = string.Empty;
 
+    [NotifyDataErrorInfo]
+    [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     [ObservableProperty]
+    [OptionalEmailAddress(ErrorMessage = "Email is not valid.")]
     public partial string Email { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial string Title { get; set; } = string.Empty;
 
+    [NotifyDataErrorInfo]
+    [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     [ObservableProperty]
+    [OptionalPhone(ErrorMessage = "Phone number is not valid.")]
     public partial string PhoneNumber { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -43,7 +54,10 @@ public partial class ProfileEditorViewModel(
     [ObservableProperty]
     public partial string GitHubUsername { get; set; } = string.Empty;
 
+    [NotifyDataErrorInfo]
+    [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     [ObservableProperty]
+    [OptionalUrl(ErrorMessage = "Portfolio URL is not valid.")]
     public partial string PortfolioUrl { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -63,6 +77,13 @@ public partial class ProfileEditorViewModel(
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task SaveAsync()
     {
+        ValidateAllProperties();
+
+        if (HasErrors)
+        {
+            return;
+        }
+
         IsSaving = true;
 
         try
@@ -97,7 +118,7 @@ public partial class ProfileEditorViewModel(
 
     private bool CanSave()
     {
-        return !string.IsNullOrWhiteSpace(FullName) && !IsSaving;
+        return !string.IsNullOrWhiteSpace(FullName) && !HasErrors && !IsSaving;
     }
 
     [RelayCommand]
@@ -127,6 +148,8 @@ public partial class ProfileEditorViewModel(
         GitHubUsername = profile.GitHubUsername ?? string.Empty;
         PortfolioUrl = profile.PortfolioUrl ?? string.Empty;
         DateOfBirth = profile.DateOfBirth;
+
+        ClearErrors();
     }
 
     private void ResetToAddMode()
@@ -143,6 +166,8 @@ public partial class ProfileEditorViewModel(
         GitHubUsername = string.Empty;
         PortfolioUrl = string.Empty;
         DateOfBirth = null;
+
+        ClearErrors();
     }
 
     private void ApplyFormTo(Profile profile)
