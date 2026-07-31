@@ -17,7 +17,9 @@ Windows only.
 Optimize for native Windows development. Do not design around future cross-platform support. Cross-platform compatibility will only be considered after release if it becomes genuinely necessary.
 
 Architecture:
-MVVM for Ui layer, traditional 3-layer model
+- Ui Layer: MVVM architecture with UI components organized following Atomic Design (Atoms, Molecules, Organisms, Templates, Pages).
+- Service Layer: Business logic and use cases.
+- Data Layer: Unit Of Work + Repository pattern with local data sources.
 
 Flow:
 user reads job description -> open Quaply -> select experience, project, skills, education, certification -> export to PDF
