@@ -1,0 +1,31 @@
+﻿<UserControl
+  x:Class="Quaply.Ui.Views.Molecules.ValidatedTextBoxField"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:local="clr-namespace:Quaply.Ui.Views.Molecules"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:primitives="clr-namespace:Quaply.Ui.Views.Molecules.Primitives"
+  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+  x:Name="validatedTextBoxField"
+  d:DesignWidth="300"
+  Validation.Error="ValidatedTextBoxField_OnValidationError"
+  Validation.ErrorTemplate="{x:Null}"
+  mc:Ignorable="d">
+  <primitives:ValidatedField ErrorText="{Binding ErrorText, ElementName=validatedTextBoxField}" Label="{Binding Label, ElementName=validatedTextBoxField}">
+    <ui:TextBox
+      Icon="{Binding Icon, ElementName=validatedTextBoxField}"
+      PlaceholderText="{Binding PlaceholderText, ElementName=validatedTextBoxField}"
+      Text="{Binding Text, ElementName=validatedTextBoxField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+      <ui:TextBox.Style>
+        <Style BasedOn="{StaticResource {x:Type ui:TextBox}}" TargetType="ui:TextBox">
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding (Validation.HasError), ElementName=validatedTextBoxField}" Value="True">
+              <Setter Property="BorderBrush" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </ui:TextBox.Style>
+    </ui:TextBox>
+  </primitives:ValidatedField>
+</UserControl>
