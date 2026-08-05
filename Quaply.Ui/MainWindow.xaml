@@ -7,11 +7,14 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:pages="clr-namespace:Quaply.Ui.Views.Pages"
   xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+  xmlns:viewModels="clr-namespace:Quaply.Ui.ViewModels"
   Title="MainWindow"
   Width="1280"
   Height="720"
   MinWidth="960"
   MinHeight="540"
+  d:DataContext="{d:DesignInstance Type=viewModels:MainViewModel,
+                                   IsDesignTimeCreatable=False}"
   mc:Ignorable="d">
   <DockPanel>
     <ui:TitleBar Title="Quaply" DockPanel.Dock="Top">
