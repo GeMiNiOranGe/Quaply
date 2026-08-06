@@ -108,76 +108,30 @@
               <DatePicker SelectedDate="{Binding DateOfBirth, Converter={converters:DateOnlyToDateTimeConverter}}" />
             </StackPanel>
 
-            <StackPanel Margin="0,8,0,0" Grid.IsSharedSizeScope="True">
-              <TextBlock
-                Margin="0,0,0,8"
-                FontSize="20"
-                FontWeight="SemiBold"
-                Text="Social media links" />
+            <TextBlock
+              Margin="0,0,0,8"
+              FontSize="20"
+              FontWeight="SemiBold"
+              Text="Social media links" />
 
-              <Separator Margin="0,0,0,8" />
+            <Separator Margin="0,0,0,8" />
 
+            <StackPanel Grid.IsSharedSizeScope="True">
               <!--  LinkedIn  -->
-              <StackPanel Margin="0,0,0,16">
-                <TextBlock Margin="0,0,0,6" Text="LinkedIn" />
-
-                <Grid Height="38">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" SharedSizeGroup="PrefixColumn" />
-                    <ColumnDefinition Width="*" />
-                  </Grid.ColumnDefinitions>
-
-                  <Border
-                    Grid.Column="0"
-                    Background="{DynamicResource ControlFillColorSecondaryBrush}"
-                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1,1,0,1"
-                    CornerRadius="4,0,0,4">
-                    <TextBlock
-                      Margin="12,0"
-                      HorizontalAlignment="Right"
-                      VerticalAlignment="Center"
-                      Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                      Text="https://linkedin.com/in/" />
-                  </Border>
-
-                  <ui:TextBox
-                    Grid.Column="1"
-                    PlaceholderText="john-doe"
-                    Text="{Binding LinkedInUsername, UpdateSourceTrigger=PropertyChanged}" />
-                </Grid>
-              </StackPanel>
+              <molecules:PrefixedTextBoxField
+                Margin="0,0,0,16"
+                Label="LinkedIn"
+                PlaceholderText="john-doe"
+                Prefix="https://linkedin.com/in/"
+                Text="{Binding LinkedInUsername, UpdateSourceTrigger=PropertyChanged}" />
 
               <!--  GitHub  -->
-              <StackPanel Margin="0,0,0,16">
-                <TextBlock Margin="0,0,0,6" Text="GitHub" />
-
-                <Grid Height="38">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" SharedSizeGroup="PrefixColumn" />
-                    <ColumnDefinition Width="*" />
-                  </Grid.ColumnDefinitions>
-
-                  <Border
-                    Grid.Column="0"
-                    Background="{DynamicResource ControlFillColorSecondaryBrush}"
-                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1,1,0,1"
-                    CornerRadius="4,0,0,4">
-                    <TextBlock
-                      Margin="12,0"
-                      HorizontalAlignment="Right"
-                      VerticalAlignment="Center"
-                      Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                      Text="https://github.com/" />
-                  </Border>
-
-                  <ui:TextBox
-                    Grid.Column="1"
-                    PlaceholderText="JohnDoe"
-                    Text="{Binding GitHubUsername, UpdateSourceTrigger=PropertyChanged}" />
-                </Grid>
-              </StackPanel>
+              <molecules:PrefixedTextBoxField
+                Margin="0,0,0,16"
+                Label="GitHub"
+                PlaceholderText="JohnDoe"
+                Prefix="https://github.com/"
+                Text="{Binding GitHubUsername, UpdateSourceTrigger=PropertyChanged}" />
 
               <!--  Portfolio  -->
               <molecules:ValidatedTextBoxField
