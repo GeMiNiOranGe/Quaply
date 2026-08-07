@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Quaply.Data.Models;
 using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
+using Quaply.Ui.Parameters;
 using Quaply.Ui.Validations;
 using Quaply.Ui.ViewModels.Base;
 
@@ -15,7 +16,10 @@ public partial class ProfileEditorViewModel(
 ) : NavigableViewModel(navigator), INavigationAware
 {
     private readonly IProfileService _service = service;
-    private int _profileId;
+
+    // Only Edit needs to remember which row gets updated on Save.
+    // Add and (future) Duplicate always create a new row.
+    private int? _editingProfileId;
 
     [ObservableProperty]
     public partial bool IsEditMode { get; private set; }
@@ -65,13 +69,19 @@ public partial class ProfileEditorViewModel(
 
     public async Task OnNavigatedToAsync(object? parameter)
     {
-        if (parameter is int id && id > 0)
+        switch (parameter)
         {
-            await LoadProfileAsync(id);
-            return;
+            case ProfileEditorParameter.Edit edit:
+                await EnterEditModeAsync(edit.ProfileId);
+                break;
+            // case ProfileEditorParameter.Duplicate duplicate:
+            //     await EnterDuplicateModeAsync(duplicate.SourceProfileId);
+            //     break;
+            case ProfileEditorParameter.Add:
+            default:
+                ResetToAddMode();
+                break;
         }
-
-        ResetToAddMode();
     }
 
     [RelayCommand(CanExecute = nameof(CanSave))]
@@ -88,11 +98,9 @@ public partial class ProfileEditorViewModel(
 
         try
         {
-            if (IsEditMode)
+            if (IsEditMode && _editingProfileId is int id)
             {
-                Profile? existing = await _service.GetProfileByIdAsync(
-                    _profileId
-                );
+                Profile? existing = await _service.GetProfileByIdAsync(id);
                 if (existing is null)
                 {
                     return;
@@ -103,6 +111,7 @@ public partial class ProfileEditorViewModel(
             }
             else
             {
+                // Covers both Add and (future) Duplicate: always a new row.
                 Profile profile = new();
                 ApplyFormTo(profile);
                 await _service.CreateProfileAsync(profile);
@@ -127,34 +136,44 @@ public partial class ProfileEditorViewModel(
         await Navigator.NavigateToAsync<ProfileViewModel>();
     }
 
-    private async Task LoadProfileAsync(int id)
+    private async Task EnterEditModeAsync(int profileId)
     {
-        Profile? profile = await _service.GetProfileByIdAsync(id);
+        Profile? profile = await _service.GetProfileByIdAsync(profileId);
         if (profile is null)
         {
             ResetToAddMode();
             return;
         }
 
-        _profileId = profile.Id;
+        _editingProfileId = profile.Id;
         IsEditMode = true;
         PageTitle = "Edit Profile";
 
-        FullName = profile.FullName;
-        Title = profile.Title ?? string.Empty;
-        Email = profile.Email ?? string.Empty;
-        PhoneNumber = profile.PhoneNumber ?? string.Empty;
-        LinkedInUsername = profile.LinkedInUsername ?? string.Empty;
-        GitHubUsername = profile.GitHubUsername ?? string.Empty;
-        PortfolioUrl = profile.PortfolioUrl ?? string.Empty;
-        DateOfBirth = profile.DateOfBirth;
-
+        FillFormFrom(profile);
         ClearErrors();
     }
 
+    // Reserved for future use - uncomment alongside ProfileEditorParameter.Duplicate.
+    // private async Task EnterDuplicateModeAsync(int sourceProfileId)
+    // {
+    //     Profile? source = await _service.GetProfileByIdAsync(sourceProfileId);
+    //     if (source is null)
+    //     {
+    //         ResetToAddMode();
+    //         return;
+    //     }
+    //
+    //     _editingProfileId = null; // Save must create a new row, not update the source.
+    //     IsEditMode = false;
+    //     PageTitle = "Duplicate Profile";
+    //
+    //     FillFormFrom(source);
+    //     ClearErrors();
+    // }
+
     private void ResetToAddMode()
     {
-        _profileId = 0;
+        _editingProfileId = null;
         IsEditMode = false;
         PageTitle = "Add Profile";
 
@@ -168,6 +187,19 @@ public partial class ProfileEditorViewModel(
         DateOfBirth = null;
 
         ClearErrors();
+    }
+
+    // Shared by Edit and (future) Duplicate - both pre-fill the form the same way.
+    private void FillFormFrom(Profile profile)
+    {
+        FullName = profile.FullName;
+        Title = profile.Title ?? string.Empty;
+        Email = profile.Email ?? string.Empty;
+        PhoneNumber = profile.PhoneNumber ?? string.Empty;
+        LinkedInUsername = profile.LinkedInUsername ?? string.Empty;
+        GitHubUsername = profile.GitHubUsername ?? string.Empty;
+        PortfolioUrl = profile.PortfolioUrl ?? string.Empty;
+        DateOfBirth = profile.DateOfBirth;
     }
 
     private void ApplyFormTo(Profile profile)
