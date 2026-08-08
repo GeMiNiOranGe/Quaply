@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Input;
 using Quaply.Data.Models;
 using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
-using Quaply.Ui.Parameters;
 using Quaply.Ui.ViewModels.Base;
 
 namespace Quaply.Ui.ViewModels;
@@ -56,7 +55,7 @@ public partial class ProfileViewModel(
     private async Task AddProfileAsync()
     {
         await Navigator.NavigateToAsync<ProfileEditorViewModel>(
-            new ProfileEditorParameter.Add()
+            ProfileEditorParameter.ForAdd()
         );
     }
 
@@ -69,7 +68,7 @@ public partial class ProfileViewModel(
         }
 
         await Navigator.NavigateToAsync<ProfileEditorViewModel>(
-            new ProfileEditorParameter.Edit(profile.Id)
+            ProfileEditorParameter.ForEdit(profile.Id)
         );
     }
 

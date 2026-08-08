@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Input;
 using Quaply.Data.Models;
 using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
-using Quaply.Ui.Parameters;
 using Quaply.Ui.Validations;
 using Quaply.Ui.ViewModels.Base;
 
@@ -72,10 +71,10 @@ public partial class ProfileEditorViewModel(
         switch (parameter)
         {
             case ProfileEditorParameter.Edit edit:
-                await EnterEditModeAsync(edit.ProfileId);
+                await EnterEditModeAsync(edit.Id);
                 break;
-            // case ProfileEditorParameter.Duplicate duplicate:
-            //     await EnterDuplicateModeAsync(duplicate.SourceProfileId);
+            // case ProfileEditorParameter.DuplicateCase duplicate:
+            //     await EnterDuplicateModeAsync(duplicate.SourceId);
             //     break;
             case ProfileEditorParameter.Add:
             default:
