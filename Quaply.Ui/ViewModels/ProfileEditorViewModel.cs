@@ -21,9 +21,6 @@ public partial class ProfileEditorViewModel(
     private int? _editingProfileId;
 
     [ObservableProperty]
-    public partial bool IsEditMode { get; private set; }
-
-    [ObservableProperty]
     public partial string PageTitle { get; private set; } = "Add Profile";
 
     [ObservableProperty]
@@ -97,7 +94,7 @@ public partial class ProfileEditorViewModel(
 
         try
         {
-            if (IsEditMode && _editingProfileId is int id)
+            if (_editingProfileId is int id)
             {
                 Profile? existing = await _service.GetProfileByIdAsync(id);
                 if (existing is null)
@@ -145,7 +142,6 @@ public partial class ProfileEditorViewModel(
         }
 
         _editingProfileId = profile.Id;
-        IsEditMode = true;
         PageTitle = "Edit Profile";
 
         FillFormFrom(profile);
@@ -163,7 +159,6 @@ public partial class ProfileEditorViewModel(
     //     }
     //
     //     _editingProfileId = null; // Save must create a new row, not update the source.
-    //     IsEditMode = false;
     //     PageTitle = "Duplicate Profile";
     //
     //     FillFormFrom(source);
@@ -173,7 +168,6 @@ public partial class ProfileEditorViewModel(
     private void ResetToAddMode()
     {
         _editingProfileId = null;
-        IsEditMode = false;
         PageTitle = "Add Profile";
 
         FullName = string.Empty;
