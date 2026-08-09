@@ -21,7 +21,7 @@ public partial class ProfileEditorViewModel(
     private int? _editingProfileId;
 
     [ObservableProperty]
-    public partial string PageTitle { get; private set; } = "Add Profile";
+    public partial string PageTitle { get; private set; }
 
     [ObservableProperty]
     public partial bool IsSaving { get; private set; }
@@ -68,16 +68,28 @@ public partial class ProfileEditorViewModel(
         switch (parameter)
         {
             case ProfileEditorParameter.Edit edit:
-                await EnterEditModeAsync(edit.Id);
+                await EnterEditModeAsync(edit);
                 break;
-            // case ProfileEditorParameter.DuplicateCase duplicate:
-            //     await EnterDuplicateModeAsync(duplicate.SourceId);
-            //     break;
-            case ProfileEditorParameter.Add:
+            case ProfileEditorParameter.Duplicate duplicate:
+                await EnterDuplicateModeAsync(duplicate);
+                break;
+            case ProfileEditorParameter.Add add:
+                EnterAddMode(add);
+                break;
             default:
-                ResetToAddMode();
+                EnterAddMode(new());
                 break;
         }
+    }
+
+    private void SetParameter(ProfileEditorParameter parameter)
+    {
+        PageTitle = parameter switch
+        {
+            ProfileEditorParameter.Edit => "Edit Profile",
+            ProfileEditorParameter.Duplicate => "Duplicate Profile",
+            ProfileEditorParameter.Add or _ => "Add Profile",
+        };
     }
 
     [RelayCommand(CanExecute = nameof(CanSave))]
@@ -107,7 +119,7 @@ public partial class ProfileEditorViewModel(
             }
             else
             {
-                // Covers both Add and (future) Duplicate: always a new row.
+                // Covers both Add and Duplicate: always a new row.
                 Profile profile = new();
                 ApplyFormTo(profile);
                 await _service.CreateProfileAsync(profile);
@@ -132,43 +144,12 @@ public partial class ProfileEditorViewModel(
         await Navigator.NavigateToAsync<ProfileViewModel>();
     }
 
-    private async Task EnterEditModeAsync(int profileId)
+    private void EnterAddMode(ProfileEditorParameter.Add add)
     {
-        Profile? profile = await _service.GetProfileByIdAsync(profileId);
-        if (profile is null)
-        {
-            ResetToAddMode();
-            return;
-        }
-
-        _editingProfileId = profile.Id;
-        PageTitle = "Edit Profile";
-
-        FillFormFrom(profile);
-        ClearErrors();
-    }
-
-    // Reserved for future use - uncomment alongside ProfileEditorParameter.Duplicate.
-    // private async Task EnterDuplicateModeAsync(int sourceProfileId)
-    // {
-    //     Profile? source = await _service.GetProfileByIdAsync(sourceProfileId);
-    //     if (source is null)
-    //     {
-    //         ResetToAddMode();
-    //         return;
-    //     }
-    //
-    //     _editingProfileId = null; // Save must create a new row, not update the source.
-    //     PageTitle = "Duplicate Profile";
-    //
-    //     FillFormFrom(source);
-    //     ClearErrors();
-    // }
-
-    private void ResetToAddMode()
-    {
+        // Save must create a new row.
         _editingProfileId = null;
-        PageTitle = "Add Profile";
+
+        SetParameter(add);
 
         FullName = string.Empty;
         Title = string.Empty;
@@ -182,7 +163,45 @@ public partial class ProfileEditorViewModel(
         ClearErrors();
     }
 
-    // Shared by Edit and (future) Duplicate - both pre-fill the form the same way.
+    private async Task EnterEditModeAsync(ProfileEditorParameter.Edit edit)
+    {
+        Profile? profile = await _service.GetProfileByIdAsync(edit.Id);
+        if (profile is null)
+        {
+            EnterAddMode(new ProfileEditorParameter.Add());
+            return;
+        }
+
+        // Update the source.
+        _editingProfileId = edit.Id;
+
+        SetParameter(edit);
+        FillFormFrom(profile);
+        ClearErrors();
+    }
+
+    private async Task EnterDuplicateModeAsync(
+        ProfileEditorParameter.Duplicate duplicate
+    )
+    {
+        Profile? source = await _service.GetProfileByIdAsync(
+            duplicate.SourceId
+        );
+        if (source is null)
+        {
+            EnterAddMode(new ProfileEditorParameter.Add());
+            return;
+        }
+
+        // Save must create a new row, not update the source.
+        _editingProfileId = null;
+
+        SetParameter(duplicate);
+        FillFormFrom(source);
+        ClearErrors();
+    }
+
+    // Shared by Edit and Duplicate - both pre-fill the form the same way.
     private void FillFormFrom(Profile profile)
     {
         FullName = profile.FullName;

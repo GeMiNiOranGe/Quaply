@@ -25,6 +25,7 @@ public abstract record EditorParameter<TEntity>
         return new Duplicate(sourceId);
     }
 
+    /*
     public TResult Match<TResult>(
         Func<TResult> onAdd,
         Func<int, TResult> onEdit,
@@ -41,4 +42,5 @@ public abstract record EditorParameter<TEntity>
             ),
         };
     }
+    */
 }
