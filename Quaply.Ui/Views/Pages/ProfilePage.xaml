@@ -150,7 +150,7 @@
 
             <!--  TODO: Finding the way to center the Actions header  -->
             <!--  Actions  -->
-            <DataGridTemplateColumn Width="96" Header="Actions">
+            <DataGridTemplateColumn Width="128" Header="Actions">
               <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
                   <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
@@ -162,6 +162,16 @@
                       CommandParameter="{Binding}"
                       ToolTip="Edit">
                       <ui:SymbolIcon Symbol="Edit24" />
+                    </ui:Button>
+
+                    <ui:Button
+                      Margin="0,0,8,0"
+                      Padding="8"
+                      Appearance="Transparent"
+                      Command="{Binding DataContext.DuplicateProfileCommand, ElementName=profilePage}"
+                      CommandParameter="{Binding}"
+                      ToolTip="Duplicate">
+                      <ui:SymbolIcon Symbol="Copy24" />
                     </ui:Button>
 
                     <ui:Button

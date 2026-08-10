@@ -73,6 +73,19 @@ public partial class ProfileViewModel(
     }
 
     [RelayCommand]
+    private async Task DuplicateProfileAsync(Profile? profile)
+    {
+        if (profile is null)
+        {
+            return;
+        }
+
+        await Navigator.NavigateToAsync<ProfileEditorViewModel>(
+            ProfileEditorParameter.ForDuplicate(profile.Id)
+        );
+    }
+
+    [RelayCommand]
     private async Task DeleteProfileAsync(Profile? profile)
     {
         if (profile is null)
