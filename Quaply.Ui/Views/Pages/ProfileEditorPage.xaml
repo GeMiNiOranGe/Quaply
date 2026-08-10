@@ -158,7 +158,7 @@
                 Padding="16,8"
                 Appearance="Primary"
                 Command="{Binding SaveCommand}"
-                Content="Save"
+                Content="{Binding SaveButtonText}"
                 Icon="{ui:SymbolIcon Save24}" />
             </StackPanel>
           </Border>

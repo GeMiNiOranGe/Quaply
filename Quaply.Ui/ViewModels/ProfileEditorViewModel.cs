@@ -24,6 +24,9 @@ public partial class ProfileEditorViewModel(
     public partial string PageTitle { get; private set; }
 
     [ObservableProperty]
+    public partial string SaveButtonText { get; private set; }
+
+    [ObservableProperty]
     public partial bool IsSaving { get; private set; }
 
     [NotifyDataErrorInfo]
@@ -84,11 +87,17 @@ public partial class ProfileEditorViewModel(
 
     private void SetParameter(ProfileEditorParameter parameter)
     {
-        PageTitle = parameter switch
+        (PageTitle, SaveButtonText) = parameter switch
         {
-            ProfileEditorParameter.Edit => "Edit Profile",
-            ProfileEditorParameter.Duplicate => "Duplicate Profile",
-            ProfileEditorParameter.Add or _ => "Add Profile",
+            ProfileEditorParameter.Edit => ("Edit Profile", "Save Changes"),
+            ProfileEditorParameter.Duplicate => (
+                "Duplicate Profile",
+                "Create Duplicate"
+            ),
+            ProfileEditorParameter.Add or _ => (
+                "Create Profile",
+                "Create Profile"
+            ),
         };
     }
 
