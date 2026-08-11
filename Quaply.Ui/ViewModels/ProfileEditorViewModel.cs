@@ -85,21 +85,31 @@ public partial class ProfileEditorViewModel(
         }
     }
 
-    private void SetParameter(ProfileEditorParameter parameter)
+    /// <summary>
+    /// Current navigation parameter driving this editor's mode.
+    /// Assigning this also derives <see cref="PageTitle"/> and
+    /// <see cref="SaveButtonText"/> — do not set those two directly.
+    /// </summary>
+    private ProfileEditorParameter EditorParameter
     {
-        (PageTitle, SaveButtonText) = parameter switch
+        get;
+        set
         {
-            ProfileEditorParameter.Edit => ("Edit Profile", "Save Changes"),
-            ProfileEditorParameter.Duplicate => (
-                "Duplicate Profile",
-                "Create Duplicate"
-            ),
-            ProfileEditorParameter.Add or _ => (
-                "Create Profile",
-                "Create Profile"
-            ),
-        };
-    }
+            field = value;
+            (PageTitle, SaveButtonText) = value switch
+            {
+                ProfileEditorParameter.Edit => ("Edit Profile", "Save Changes"),
+                ProfileEditorParameter.Duplicate => (
+                    "Duplicate Profile",
+                    "Create Duplicate"
+                ),
+                ProfileEditorParameter.Add or _ => (
+                    "Create Profile",
+                    "Create Profile"
+                ),
+            };
+        }
+    } = new ProfileEditorParameter.Add();
 
     [RelayCommand(CanExecute = nameof(CanSave))]
     private async Task SaveAsync()
@@ -153,22 +163,44 @@ public partial class ProfileEditorViewModel(
         await Navigator.NavigateToAsync<ProfileViewModel>();
     }
 
+    [RelayCommand(CanExecute = nameof(CanReset))]
+    private async Task ResetAsync()
+    {
+        switch (EditorParameter)
+        {
+            case ProfileEditorParameter.Edit edit:
+                await ReloadFormFromAsync(edit.Id);
+                break;
+            case ProfileEditorParameter.Duplicate duplicate:
+                await ReloadFormFromAsync(duplicate.SourceId);
+                break;
+            case ProfileEditorParameter.Add:
+            default:
+                ClearForm();
+                ClearErrors();
+                break;
+        }
+    }
+
+    private bool CanReset() => !IsSaving;
+
+    // Shared by Edit and Duplicate: both "reload from an existing profile ID."
+    private async Task ReloadFormFromAsync(int profileId)
+    {
+        Profile? profile = await _service.GetProfileByIdAsync(profileId);
+        if (profile is not null)
+        {
+            FillFormFrom(profile);
+        }
+
+        ClearErrors();
+    }
+
     private void EnterAddMode(ProfileEditorParameter.Add add)
     {
-        // Save must create a new row.
         _editingProfileId = null;
-
-        SetParameter(add);
-
-        FullName = string.Empty;
-        Title = string.Empty;
-        Email = string.Empty;
-        PhoneNumber = string.Empty;
-        LinkedInUsername = string.Empty;
-        GitHubUsername = string.Empty;
-        PortfolioUrl = string.Empty;
-        DateOfBirth = null;
-
+        EditorParameter = add;
+        ClearForm();
         ClearErrors();
     }
 
@@ -184,7 +216,7 @@ public partial class ProfileEditorViewModel(
         // Update the source.
         _editingProfileId = edit.Id;
 
-        SetParameter(edit);
+        EditorParameter = edit;
         FillFormFrom(profile);
         ClearErrors();
     }
@@ -205,9 +237,21 @@ public partial class ProfileEditorViewModel(
         // Save must create a new row, not update the source.
         _editingProfileId = null;
 
-        SetParameter(duplicate);
+        EditorParameter = duplicate;
         FillFormFrom(source);
         ClearErrors();
+    }
+
+    private void ClearForm()
+    {
+        FullName = string.Empty;
+        Title = string.Empty;
+        Email = string.Empty;
+        PhoneNumber = string.Empty;
+        LinkedInUsername = string.Empty;
+        GitHubUsername = string.Empty;
+        PortfolioUrl = string.Empty;
+        DateOfBirth = null;
     }
 
     // Shared by Edit and Duplicate - both pre-fill the form the same way.
