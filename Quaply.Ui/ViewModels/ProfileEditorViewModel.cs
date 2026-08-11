@@ -14,11 +14,26 @@ public partial class ProfileEditorViewModel(
     IProfileService service
 ) : NavigableViewModel(navigator), INavigationAware
 {
+    private sealed record ProfileFormSnapshot(
+        string FullName,
+        string Title,
+        string Email,
+        string PhoneNumber,
+        string LinkedInUsername,
+        string GitHubUsername,
+        string PortfolioUrl,
+        DateOnly? DateOfBirth
+    );
+
     private readonly IProfileService _service = service;
 
     // Only Edit needs to remember which row gets updated on Save.
     // Add and (future) Duplicate always create a new row.
     private int? _editingProfileId;
+
+    // A baseline for comparing the dirty state. It is updated whenever the mode
+    // changes or after a reset is completed.
+    private ProfileFormSnapshot _baseline = EmptySnapshot();
 
     [ObservableProperty]
     public partial string PageTitle { get; private set; }
@@ -30,6 +45,7 @@ public partial class ProfileEditorViewModel(
     public partial bool IsSaving { get; private set; }
 
     [NotifyDataErrorInfo]
+    [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     [MaxLength(255, ErrorMessage = "Full name must be at most 255 characters.")]
     [ObservableProperty]
@@ -37,32 +53,39 @@ public partial class ProfileEditorViewModel(
     public partial string FullName { get; set; } = string.Empty;
 
     [NotifyDataErrorInfo]
+    [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     [ObservableProperty]
     [OptionalEmailAddress(ErrorMessage = "Email is not valid.")]
     public partial string Email { get; set; } = string.Empty;
 
+    [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
     [ObservableProperty]
     public partial string Title { get; set; } = string.Empty;
 
     [NotifyDataErrorInfo]
+    [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     [ObservableProperty]
     [OptionalPhone(ErrorMessage = "Phone number is not valid.")]
     public partial string PhoneNumber { get; set; } = string.Empty;
 
+    [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
     [ObservableProperty]
     public partial string LinkedInUsername { get; set; } = string.Empty;
 
+    [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
     [ObservableProperty]
     public partial string GitHubUsername { get; set; } = string.Empty;
 
     [NotifyDataErrorInfo]
+    [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
     [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
     [ObservableProperty]
     [OptionalUrl(ErrorMessage = "Portfolio URL is not valid.")]
     public partial string PortfolioUrl { get; set; } = string.Empty;
 
+    [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
     [ObservableProperty]
     public partial DateOnly? DateOfBirth { get; set; }
 
@@ -178,11 +201,17 @@ public partial class ProfileEditorViewModel(
             default:
                 ClearForm();
                 ClearErrors();
+                CaptureBaseline();
                 break;
         }
     }
 
-    private bool CanReset() => !IsSaving;
+    // Dirty check: Only allow a reset if the form differs from
+    // the current baseline.
+    private bool CanReset()
+    {
+        return !IsSaving && CurrentSnapshot() != _baseline;
+    }
 
     // Shared by Edit and Duplicate: both "reload from an existing profile ID."
     private async Task ReloadFormFromAsync(int profileId)
@@ -194,14 +223,17 @@ public partial class ProfileEditorViewModel(
         }
 
         ClearErrors();
+        CaptureBaseline();
     }
 
     private void EnterAddMode(ProfileEditorParameter.Add add)
     {
         _editingProfileId = null;
+
         EditorParameter = add;
         ClearForm();
         ClearErrors();
+        CaptureBaseline();
     }
 
     private async Task EnterEditModeAsync(ProfileEditorParameter.Edit edit)
@@ -219,6 +251,7 @@ public partial class ProfileEditorViewModel(
         EditorParameter = edit;
         FillFormFrom(profile);
         ClearErrors();
+        CaptureBaseline();
     }
 
     private async Task EnterDuplicateModeAsync(
@@ -240,6 +273,7 @@ public partial class ProfileEditorViewModel(
         EditorParameter = duplicate;
         FillFormFrom(source);
         ClearErrors();
+        CaptureBaseline();
     }
 
     private void ClearForm()
@@ -285,5 +319,40 @@ public partial class ProfileEditorViewModel(
             ? null
             : PortfolioUrl.Trim();
         profile.DateOfBirth = DateOfBirth;
+    }
+
+    // Capture the current form state to serve as a baseline for dirty checking.
+    private void CaptureBaseline()
+    {
+        _baseline = CurrentSnapshot();
+        ResetCommand.NotifyCanExecuteChanged();
+    }
+
+    private ProfileFormSnapshot CurrentSnapshot()
+    {
+        return new(
+            FullName,
+            Title,
+            Email,
+            PhoneNumber,
+            LinkedInUsername,
+            GitHubUsername,
+            PortfolioUrl,
+            DateOfBirth
+        );
+    }
+
+    private static ProfileFormSnapshot EmptySnapshot()
+    {
+        return new(
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            string.Empty,
+            null
+        );
     }
 }
