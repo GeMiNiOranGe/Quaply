@@ -1,4 +1,4 @@
-<UserControl
+﻿<UserControl
   x:Class="Quaply.Ui.Views.Pages.ProfileEditorPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -159,8 +159,11 @@
                 HorizontalAlignment="Left"
                 Appearance="Transparent"
                 Command="{Binding ResetCommand}"
-                Content="Reset"
-                Icon="{ui:SymbolIcon ArrowReset24}" />
+                Content="{Binding ResetButtonText}">
+                <ui:Button.Icon>
+                  <ui:SymbolIcon Symbol="{Binding ResetButtonIcon}" />
+                </ui:Button.Icon>
+              </ui:Button>
 
               <StackPanel
                 Grid.Column="1"

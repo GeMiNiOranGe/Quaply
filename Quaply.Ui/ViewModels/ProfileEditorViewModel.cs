@@ -6,6 +6,7 @@ using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
 using Quaply.Ui.Validations;
 using Quaply.Ui.ViewModels.Base;
+using Wpf.Ui.Controls;
 
 namespace Quaply.Ui.ViewModels;
 
@@ -37,6 +38,12 @@ public partial class ProfileEditorViewModel(
 
     [ObservableProperty]
     public partial string PageTitle { get; private set; }
+
+    [ObservableProperty]
+    public partial string ResetButtonText { get; private set; }
+
+    [ObservableProperty]
+    public partial SymbolRegular ResetButtonIcon { get; private set; }
 
     [ObservableProperty]
     public partial string SaveButtonText { get; private set; }
@@ -119,18 +126,28 @@ public partial class ProfileEditorViewModel(
         set
         {
             field = value;
-            (PageTitle, SaveButtonText) = value switch
-            {
-                ProfileEditorParameter.Edit => ("Edit Profile", "Save Changes"),
-                ProfileEditorParameter.Duplicate => (
-                    "Duplicate Profile",
-                    "Create Duplicate"
-                ),
-                ProfileEditorParameter.Add or _ => (
-                    "Create Profile",
-                    "Create Profile"
-                ),
-            };
+            (PageTitle, ResetButtonText, ResetButtonIcon, SaveButtonText) =
+                value switch
+                {
+                    ProfileEditorParameter.Edit => (
+                        "Edit Profile",
+                        "Reset Changes",
+                        SymbolRegular.ArrowReset24,
+                        "Save Changes"
+                    ),
+                    ProfileEditorParameter.Duplicate => (
+                        "Duplicate Profile",
+                        "Reset Changes",
+                        SymbolRegular.ArrowReset24,
+                        "Create Duplicate"
+                    ),
+                    ProfileEditorParameter.Add or _ => (
+                        "Create Profile",
+                        "Clear",
+                        SymbolRegular.Eraser24,
+                        "Create Profile"
+                    ),
+                };
         }
     } = new ProfileEditorParameter.Add();
 
