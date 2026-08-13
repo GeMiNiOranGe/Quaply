@@ -3,6 +3,7 @@ using Quaply.Ui.Interfaces;
 using Quaply.Ui.Utilities;
 using Quaply.Ui.ViewModels;
 using Quaply.Ui.Views.Pages;
+using Wpf.Ui;
 
 namespace Quaply.Ui;
 
@@ -12,11 +13,17 @@ public static class DependencyInjection
     {
         public IServiceCollection AddUi()
         {
-            services.AddSingleton<IViewModelFactory, ViewModelFactory>();
+            services.AddSingleton<
+                IContentDialogService,
+                ContentDialogService
+            >();
+
+            services.AddSingleton<IDialogPresenter, DialogPresenter>();
             services.AddSingleton<IHostNavigator, HostNavigator>();
             services.AddSingleton<INavigator>(provider =>
                 provider.GetRequiredService<IHostNavigator>()
             );
+            services.AddSingleton<IViewModelFactory, ViewModelFactory>();
 
             services.AddTransient<MainViewModel>();
             services.AddTransient<ProfileEditorViewModel>();
@@ -26,7 +33,9 @@ public static class DependencyInjection
             services.AddSingleton<ProfileEditorPage>();
             services.AddSingleton<ProfilePage>();
             services.AddSingleton<WorkExperiencePage>();
-            services.AddSingleton(provider => new MainWindow()
+            services.AddSingleton(provider => new MainWindow(
+                provider.GetRequiredService<IContentDialogService>()
+            )
             {
                 DataContext = provider.GetRequiredService<MainViewModel>(),
             });

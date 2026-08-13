@@ -16,40 +16,45 @@
   d:DataContext="{d:DesignInstance Type=viewModels:MainViewModel,
                                    IsDesignTimeCreatable=False}"
   mc:Ignorable="d">
-  <DockPanel>
-    <ui:TitleBar Title="Quaply" DockPanel.Dock="Top">
-      <ui:TitleBar.Icon>
-        <ui:SymbolIcon Symbol="Document16" />
-      </ui:TitleBar.Icon>
-    </ui:TitleBar>
+  <Grid>
+    <DockPanel>
+      <ui:TitleBar Title="Quaply" DockPanel.Dock="Top">
+        <ui:TitleBar.Icon>
+          <ui:SymbolIcon Symbol="Document16" />
+        </ui:TitleBar.Icon>
+      </ui:TitleBar>
 
-    <ui:NavigationView
-      IsBackButtonVisible="Collapsed"
-      OpenPaneLength="256"
-      PaneDisplayMode="Left">
-      <ui:NavigationView.MenuItems>
-        <ui:NavigationViewItem
-          Command="{Binding NavigateToProfileCommand}"
-          Content="Profile"
-          IsActive="{Binding IsProfileSelected}">
-          <ui:NavigationViewItem.Icon>
-            <ui:SymbolIcon Symbol="ContactCard24" />
-          </ui:NavigationViewItem.Icon>
-        </ui:NavigationViewItem>
+      <ui:NavigationView
+        IsBackButtonVisible="Collapsed"
+        OpenPaneLength="256"
+        PaneDisplayMode="Left">
+        <ui:NavigationView.MenuItems>
+          <ui:NavigationViewItem
+            Command="{Binding NavigateToProfileCommand}"
+            Content="Profile"
+            IsActive="{Binding IsProfileSelected}">
+            <ui:NavigationViewItem.Icon>
+              <ui:SymbolIcon Symbol="ContactCard24" />
+            </ui:NavigationViewItem.Icon>
+          </ui:NavigationViewItem>
 
-        <ui:NavigationViewItem
-          Command="{Binding NavigateToWorkExperienceCommand}"
-          Content="Work Experience"
-          IsActive="{Binding IsWorkExperienceSelected}">
-          <ui:NavigationViewItem.Icon>
-            <ui:SymbolIcon Symbol="Briefcase24" />
-          </ui:NavigationViewItem.Icon>
-        </ui:NavigationViewItem>
-      </ui:NavigationView.MenuItems>
+          <ui:NavigationViewItem
+            Command="{Binding NavigateToWorkExperienceCommand}"
+            Content="Work Experience"
+            IsActive="{Binding IsWorkExperienceSelected}">
+            <ui:NavigationViewItem.Icon>
+              <ui:SymbolIcon Symbol="Briefcase24" />
+            </ui:NavigationViewItem.Icon>
+          </ui:NavigationViewItem>
+        </ui:NavigationView.MenuItems>
 
-      <ui:NavigationView.ContentOverlay>
-        <ContentControl Content="{Binding CurrentViewModel}" />
-      </ui:NavigationView.ContentOverlay>
-    </ui:NavigationView>
-  </DockPanel>
+        <ui:NavigationView.ContentOverlay>
+          <ContentControl Content="{Binding CurrentViewModel}" />
+        </ui:NavigationView.ContentOverlay>
+      </ui:NavigationView>
+    </DockPanel>
+
+    <!--  Overlay layer for the dialog - always stays on top and does not take up layout space.  -->
+    <ui:ContentDialogHost x:Name="rootContentDialogPresenter" />
+  </Grid>
 </ui:FluentWindow>

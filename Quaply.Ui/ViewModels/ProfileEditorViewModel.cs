@@ -12,7 +12,8 @@ namespace Quaply.Ui.ViewModels;
 
 public partial class ProfileEditorViewModel(
     INavigator navigator,
-    IProfileService service
+    IProfileService service,
+    IDialogPresenter dialogPresenter
 ) : NavigableViewModel(navigator), INavigationAware
 {
     private sealed record ProfileFormSnapshot(
@@ -27,6 +28,7 @@ public partial class ProfileEditorViewModel(
     );
 
     private readonly IProfileService _service = service;
+    private readonly IDialogPresenter _dialogPresenter = dialogPresenter;
 
     // Only Edit needs to remember which row gets updated on Save.
     // Add and (future) Duplicate always create a new row.
@@ -206,6 +208,18 @@ public partial class ProfileEditorViewModel(
     [RelayCommand(CanExecute = nameof(CanReset))]
     private async Task ResetAsync()
     {
+        bool confirmed = await _dialogPresenter.ShowDangerConfirmationAsync(
+            title: "Discard changes?",
+            message: "Your unsaved changes will be lost. This action cannot be undone.",
+            primaryButtonText: "Discard",
+            closeButtonText: "Keep editing"
+        );
+
+        if (!confirmed)
+        {
+            return;
+        }
+
         switch (EditorParameter)
         {
             case ProfileEditorParameter.Edit edit:

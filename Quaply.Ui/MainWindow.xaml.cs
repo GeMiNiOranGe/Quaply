@@ -1,4 +1,5 @@
-﻿using Wpf.Ui.Controls;
+﻿using Wpf.Ui;
+using Wpf.Ui.Controls;
 
 namespace Quaply.Ui;
 
@@ -7,8 +8,9 @@ namespace Quaply.Ui;
 /// </summary>
 public partial class MainWindow : FluentWindow
 {
-    public MainWindow()
+    public MainWindow(IContentDialogService contentDialogService)
     {
         InitializeComponent();
+        contentDialogService.SetDialogHost(rootContentDialogPresenter);
     }
 }
