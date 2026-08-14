@@ -15,7 +15,7 @@ public partial class ProfileEditorViewModel(
     INavigator navigator,
     IProfileService service,
     IDialogPresenter dialogPresenter
-) : NavigableViewModel(navigator), INavigationAware
+) : NavigableViewModel(navigator), INavigationAware<ProfileEditorParameter>
 {
     private sealed record ProfileFormSnapshot(
         string FullName,
@@ -117,7 +117,7 @@ public partial class ProfileEditorViewModel(
         }
     }
 
-    public async Task OnNavigatedToAsync(object? parameter)
+    public async Task OnNavigatedToAsync(ProfileEditorParameter parameter)
     {
         switch (parameter)
         {

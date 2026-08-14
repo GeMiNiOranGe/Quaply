@@ -28,7 +28,7 @@ public partial class ProfileViewModel(
         }
     } = [];
 
-    public async Task OnNavigatedToAsync(object? parameter)
+    public async Task OnNavigatedToAsync()
     {
         await LoadProfilesAsync();
     }
@@ -54,9 +54,10 @@ public partial class ProfileViewModel(
     [RelayCommand]
     private async Task AddProfileAsync()
     {
-        await Navigator.NavigateToAsync<ProfileEditorViewModel>(
-            ProfileEditorParameter.ForAdd()
-        );
+        await Navigator.NavigateToAsync<
+            ProfileEditorViewModel,
+            ProfileEditorParameter
+        >(ProfileEditorParameter.ForAdd());
     }
 
     [RelayCommand]
@@ -67,9 +68,10 @@ public partial class ProfileViewModel(
             return;
         }
 
-        await Navigator.NavigateToAsync<ProfileEditorViewModel>(
-            ProfileEditorParameter.ForEdit(profile.Id)
-        );
+        await Navigator.NavigateToAsync<
+            ProfileEditorViewModel,
+            ProfileEditorParameter
+        >(ProfileEditorParameter.ForEdit(profile.Id));
     }
 
     [RelayCommand]
@@ -80,9 +82,10 @@ public partial class ProfileViewModel(
             return;
         }
 
-        await Navigator.NavigateToAsync<ProfileEditorViewModel>(
-            ProfileEditorParameter.ForDuplicate(profile.Id)
-        );
+        await Navigator.NavigateToAsync<
+            ProfileEditorViewModel,
+            ProfileEditorParameter
+        >(ProfileEditorParameter.ForDuplicate(profile.Id));
     }
 
     [RelayCommand]
