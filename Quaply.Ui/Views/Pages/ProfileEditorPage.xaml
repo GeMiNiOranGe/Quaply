@@ -121,17 +121,17 @@
               <molecules:PrefixedTextBoxField
                 Margin="0,0,0,16"
                 Label="LinkedIn"
-                PlaceholderText="john-doe"
+                PlaceholderText="john-doe (or paste link)"
                 Prefix="https://linkedin.com/in/"
-                Text="{Binding LinkedInUsername, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding LinkedInUsername, UpdateSourceTrigger=LostFocus}" />
 
               <!--  GitHub  -->
               <molecules:PrefixedTextBoxField
                 Margin="0,0,0,16"
                 Label="GitHub"
-                PlaceholderText="JohnDoe"
+                PlaceholderText="JohnDoe (or paste link)"
                 Prefix="https://github.com/"
-                Text="{Binding GitHubUsername, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding GitHubUsername, UpdateSourceTrigger=LostFocus}" />
 
               <!--  Portfolio  -->
               <molecules:ValidatedTextBoxField

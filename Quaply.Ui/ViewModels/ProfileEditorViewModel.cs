@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Quaply.Data.Models;
 using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
+using Quaply.Ui.Utilities;
 using Quaply.Ui.Validations;
 using Quaply.Ui.ViewModels.Base;
 using Wpf.Ui.Controls;
@@ -97,6 +98,24 @@ public partial class ProfileEditorViewModel(
     [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
     [ObservableProperty]
     public partial DateOnly? DateOfBirth { get; set; }
+
+    partial void OnLinkedInUsernameChanged(string value)
+    {
+        string normalized = UrlNormalizer.ExtractLinkedInUsername(value);
+        if (normalized != value)
+        {
+            LinkedInUsername = normalized;
+        }
+    }
+
+    partial void OnGitHubUsernameChanged(string value)
+    {
+        string normalized = UrlNormalizer.ExtractGithubUsername(value);
+        if (normalized != value)
+        {
+            GitHubUsername = normalized;
+        }
+    }
 
     public async Task OnNavigatedToAsync(object? parameter)
     {
