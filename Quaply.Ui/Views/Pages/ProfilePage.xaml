@@ -119,9 +119,9 @@
               Binding="{Binding FullName}"
               Header="Full Name" />
 
-            <!--  TODO: Considering remove Border, go back to DataGridTextColumn  -->
-            <!--  Title  -->
-            <DataGridTemplateColumn Width="224" Header="Title">
+            <!--  TODO: Considering remove Border, go back to DataGridTextColumn, or add prefixed textbox https  -->
+            <!--  GitHubUsername  -->
+            <DataGridTemplateColumn Width="224" Header="GitHub">
               <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
                   <Border
@@ -130,7 +130,7 @@
                     BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="4">
-                    <TextBlock Text="{Binding Title}" />
+                    <TextBlock Text="{Binding GitHubUsername}" />
                   </Border>
                 </DataTemplate>
               </DataGridTemplateColumn.CellTemplate>

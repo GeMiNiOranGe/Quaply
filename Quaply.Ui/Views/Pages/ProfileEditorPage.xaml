@@ -75,9 +75,10 @@
 
               <molecules:ValidatedTextBoxField
                 Grid.Column="2"
-                Label="Title"
-                PlaceholderText="Software Engineer"
-                Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" />
+                Icon="{ui:SymbolIcon Mail24}"
+                Label="Email Address"
+                PlaceholderText="john.doe@example.com"
+                Text="{Binding Email, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" />
             </Grid>
 
             <Grid Margin="0,0,0,16">
@@ -89,24 +90,17 @@
 
               <molecules:ValidatedTextBoxField
                 Grid.Column="0"
-                Icon="{ui:SymbolIcon Mail24}"
-                Label="Email Address"
-                PlaceholderText="john.doe@example.com"
-                Text="{Binding Email, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" />
-
-              <molecules:ValidatedTextBoxField
-                Grid.Column="2"
                 Icon="{ui:SymbolIcon Call24}"
                 Label="Phone Number"
                 PlaceholderText="+1 555 123 4567"
                 Text="{Binding PhoneNumber, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" />
+
+              <StackPanel Grid.Column="2" Margin="0,0,0,16">
+                <TextBlock Margin="0,0,0,4" Text="Date of Birth" />
+
+                <DatePicker SelectedDate="{Binding DateOfBirth, Converter={converters:DateOnlyToDateTimeConverter}}" />
+              </StackPanel>
             </Grid>
-
-            <StackPanel Grid.Column="0" Margin="0,0,0,16">
-              <TextBlock Margin="0,0,0,4" Text="Date of Birth" />
-
-              <DatePicker SelectedDate="{Binding DateOfBirth, Converter={converters:DateOnlyToDateTimeConverter}}" />
-            </StackPanel>
 
             <TextBlock
               Margin="0,0,0,8"

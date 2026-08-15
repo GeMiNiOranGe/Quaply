@@ -19,7 +19,6 @@ public partial class ProfileEditorViewModel(
 {
     private sealed record ProfileFormSnapshot(
         string FullName,
-        string Title,
         string Email,
         string PhoneNumber,
         string LinkedInUsername,
@@ -68,10 +67,6 @@ public partial class ProfileEditorViewModel(
     [ObservableProperty]
     [OptionalEmailAddress(ErrorMessage = "Email is not valid.")]
     public partial string Email { get; set; } = string.Empty;
-
-    [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
-    [ObservableProperty]
-    public partial string Title { get; set; } = string.Empty;
 
     [NotifyDataErrorInfo]
     [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
@@ -329,7 +324,6 @@ public partial class ProfileEditorViewModel(
     private void ClearForm()
     {
         FullName = string.Empty;
-        Title = string.Empty;
         Email = string.Empty;
         PhoneNumber = string.Empty;
         LinkedInUsername = string.Empty;
@@ -342,7 +336,6 @@ public partial class ProfileEditorViewModel(
     private void FillFormFrom(Profile profile)
     {
         FullName = profile.FullName;
-        Title = profile.Title ?? string.Empty;
         Email = profile.Email ?? string.Empty;
         PhoneNumber = profile.PhoneNumber ?? string.Empty;
         LinkedInUsername = profile.LinkedInUsername ?? string.Empty;
@@ -354,7 +347,6 @@ public partial class ProfileEditorViewModel(
     private void ApplyFormTo(Profile profile)
     {
         profile.FullName = FullName.Trim();
-        profile.Title = string.IsNullOrWhiteSpace(Title) ? null : Title.Trim();
         profile.Email = Email.Trim();
         profile.PhoneNumber = string.IsNullOrWhiteSpace(PhoneNumber)
             ? null
@@ -382,7 +374,6 @@ public partial class ProfileEditorViewModel(
     {
         return new(
             FullName,
-            Title,
             Email,
             PhoneNumber,
             LinkedInUsername,
@@ -395,7 +386,6 @@ public partial class ProfileEditorViewModel(
     private static ProfileFormSnapshot EmptySnapshot()
     {
         return new(
-            string.Empty,
             string.Empty,
             string.Empty,
             string.Empty,

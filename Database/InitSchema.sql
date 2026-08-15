@@ -29,7 +29,6 @@ CREATE TABLE "Profile"
 (
     "Id"               INTEGER PRIMARY KEY AUTOINCREMENT,
     "FullName"         TEXT    NOT NULL,
-    "Title"            TEXT,
     "Email"            TEXT,
     "PhoneNumber"      TEXT,
     "LinkedInUsername" TEXT,

@@ -27,7 +27,6 @@ INSERT INTO "Profile"
     (
         "Id",
         "FullName",
-        "Title",
         "Email",
         "PhoneNumber",
         "LinkedInUsername",
@@ -39,7 +38,6 @@ VALUES
     (
         1,
         'Ethan Carter',
-        'Backend Software Engineer',
         'ethan.carter.dev@gmail.com',
         '+1 415 234 5678',
         'ethan-carter-dev',
@@ -50,7 +48,6 @@ VALUES
     (
         2,
         'Ethan Carter',
-        'DevOps / Cloud Engineer',
         'ethan.carter.dev@gmail.com',
         '+1 415 234 5678',
         'ethan-carter-dev',
