@@ -15,6 +15,16 @@ CREATE TABLE "ProjectType"
 )
 STRICT;
 
+CREATE TABLE "Resume"
+(
+    "Id"         INTEGER PRIMARY KEY AUTOINCREMENT,
+    "Name"       TEXT    NOT NULL,
+    "ExportedAt" TEXT,
+
+    CHECK ("ExportedAt" IS NULL OR datetime("ExportedAt") = "ExportedAt")
+)
+STRICT;
+
 CREATE TABLE "Profile"
 (
     "Id"               INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -130,67 +140,80 @@ CREATE TABLE "Skill"
 STRICT;
 
 -- many-to-many relationship ---------------------------------------------------
-CREATE TABLE "ProfilePersonalSummary"
+CREATE TABLE "ResumeProfile"
+(
+    "Id"        INTEGER PRIMARY KEY AUTOINCREMENT,
+    "ResumeId"  INTEGER NOT NULL,
+    "ProfileId" INTEGER NOT NULL,
+
+    UNIQUE ("ResumeId", "ProfileId"),
+
+    FOREIGN KEY ("ResumeId")  REFERENCES "Resume"("Id"),
+    FOREIGN KEY ("ProfileId") REFERENCES "Profile"("Id")
+)
+STRICT;
+
+CREATE TABLE "ResumePersonalSummary"
 (
     "Id"                INTEGER PRIMARY KEY AUTOINCREMENT,
-    "ProfileId"         INTEGER NOT NULL,
+    "ResumeId"          INTEGER NOT NULL,
     "PersonalSummaryId" INTEGER NOT NULL,
 
-    UNIQUE ("ProfileId", "PersonalSummaryId")
+    UNIQUE ("ResumeId", "PersonalSummaryId"),
 
-    FOREIGN KEY ("ProfileId")         REFERENCES "Profile"("Id"),
+    FOREIGN KEY ("ResumeId")          REFERENCES "Resume"("Id"),
     FOREIGN KEY ("PersonalSummaryId") REFERENCES "PersonalSummary"("Id")
 )
 STRICT;
 
-CREATE TABLE "ProfileWorkExperience"
+CREATE TABLE "ResumeWorkExperience"
 (
     "Id"               INTEGER PRIMARY KEY AUTOINCREMENT,
-    "ProfileId"        INTEGER NOT NULL,
+    "ResumeId"         INTEGER NOT NULL,
     "WorkExperienceId" INTEGER NOT NULL,
 
-    UNIQUE ("ProfileId", "WorkExperienceId")
+    UNIQUE ("ResumeId", "WorkExperienceId"),
 
-    FOREIGN KEY ("ProfileId")        REFERENCES "Profile"("Id"),
+    FOREIGN KEY ("ResumeId")         REFERENCES "Resume"("Id"),
     FOREIGN KEY ("WorkExperienceId") REFERENCES "WorkExperience"("Id")
 )
 STRICT;
 
-CREATE TABLE "ProfileEducation"
+CREATE TABLE "ResumeEducation"
 (
     "Id"          INTEGER PRIMARY KEY AUTOINCREMENT,
-    "ProfileId"   INTEGER NOT NULL,
+    "ResumeId"    INTEGER NOT NULL,
     "EducationId" INTEGER NOT NULL,
 
-    UNIQUE ("ProfileId", "EducationId")
+    UNIQUE ("ResumeId", "EducationId"),
 
-    FOREIGN KEY ("ProfileId")   REFERENCES "Profile"("Id"),
+    FOREIGN KEY ("ResumeId")    REFERENCES "Resume"("Id"),
     FOREIGN KEY ("EducationId") REFERENCES "Education"("Id")
 )
 STRICT;
 
-CREATE TABLE "ProfileLanguage"
+CREATE TABLE "ResumeLanguage"
 (
     "Id"         INTEGER PRIMARY KEY AUTOINCREMENT,
-    "ProfileId"  INTEGER NOT NULL,
+    "ResumeId"   INTEGER NOT NULL,
     "LanguageId" INTEGER NOT NULL,
 
-    UNIQUE ("ProfileId", "LanguageId")
+    UNIQUE ("ResumeId", "LanguageId"),
 
-    FOREIGN KEY ("ProfileId")  REFERENCES "Profile"("Id"),
+    FOREIGN KEY ("ResumeId")   REFERENCES "Resume"("Id"),
     FOREIGN KEY ("LanguageId") REFERENCES "Language"("Id")
 )
 STRICT;
 
-CREATE TABLE "ProfileCertification"
+CREATE TABLE "ResumeCertification"
 (
     "Id"              INTEGER PRIMARY KEY AUTOINCREMENT,
-    "ProfileId"       INTEGER NOT NULL,
+    "ResumeId"        INTEGER NOT NULL,
     "CertificationId" INTEGER NOT NULL,
 
-    UNIQUE ("ProfileId", "CertificationId")
+    UNIQUE ("ResumeId", "CertificationId"),
 
-    FOREIGN KEY ("ProfileId")       REFERENCES "Profile"("Id"),
+    FOREIGN KEY ("ResumeId")        REFERENCES "Resume"("Id"),
     FOREIGN KEY ("CertificationId") REFERENCES "Certification"("Id")
 )
 STRICT;
@@ -201,7 +224,7 @@ CREATE TABLE "ProjectSkill"
     "ProjectId" INTEGER NOT NULL,
     "SkillId"   INTEGER NOT NULL,
 
-    UNIQUE ("ProjectId", "SkillId")
+    UNIQUE ("ProjectId", "SkillId"),
 
     FOREIGN KEY ("ProjectId") REFERENCES "Project"("Id"),
     FOREIGN KEY ("SkillId")   REFERENCES "Skill"("Id")

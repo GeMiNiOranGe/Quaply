@@ -1,3 +1,21 @@
+INSERT INTO "Resume"
+    (
+        "Id",
+        "Name",
+        "ExportedAt"
+    )
+VALUES
+    (
+        1,
+        'Ethan Carter - Backend Developer',
+        NULL
+    ),
+    (
+        2,
+        'Ethan Carter - DevOps / Cloud Engineer',
+        NULL
+    );
+
 -- =============================================================================
 -- PROFILE
 -- Profile 1: Backend Developer
@@ -41,6 +59,12 @@ VALUES
         '1997-08-15'
     );
 
+INSERT INTO "ResumeProfile"
+        ("ResumeId", "ProfileId")
+VALUES  (1,           1)
+     ,  (2,           2)
+;
+
 -- =============================================================================
 -- PERSONAL SUMMARY
 -- =============================================================================
@@ -63,10 +87,10 @@ VALUES
         'DevOps engineer with 4+ years of experience designing and maintaining CI/CD pipelines, container orchestration on Kubernetes, and cloud infrastructure on AWS. Experienced in infrastructure-as-code (Terraform, Ansible) and platform reliability engineering. Focused on automating everything and reducing MTTR.'
     );
 
-INSERT INTO "ProfilePersonalSummary"
-        ("ProfileId", "PersonalSummaryId")
-VALUES  (1,           1)
-     ,  (2,           2)
+INSERT INTO "ResumePersonalSummary"
+        ("ResumeId", "PersonalSummaryId")
+VALUES  (1,          1)
+     ,  (2,          2)
 ;
 
 -- =============================================================================
@@ -116,14 +140,14 @@ VALUES
         '2019-08-01'
     );
 
-INSERT INTO "ProfileWorkExperience"
-        ("ProfileId", "WorkExperienceId")
-    -- Profile 1 (Backend): Stripe Backend + Shopify
-VALUES  (1,           1)
-     ,  (1,           2)
-    -- Profile 2 (DevOps): Stripe DevOps + AWS Intern
-     ,  (2,           3)
-     ,  (2,           4)
+INSERT INTO "ResumeWorkExperience"
+        ("ResumeId", "WorkExperienceId")
+    -- Resume 1 (Backend): Stripe Backend + Shopify
+VALUES  (1,          1)
+     ,  (1,          2)
+    -- Resume 2 (DevOps): Stripe DevOps + AWS Intern
+     ,  (2,          3)
+     ,  (2,          4)
 ;
 
 -- =============================================================================
@@ -149,11 +173,11 @@ VALUES
         '2019-05-01'
     );
 
--- Both profiles share the same education
-INSERT INTO "ProfileEducation"
-        ("ProfileId", "EducationId")
-VALUES  (1,           1)
-     ,  (2,           1)
+-- Both resumes share the same education
+INSERT INTO "ResumeEducation"
+        ("ResumeId", "EducationId")
+VALUES  (1,          1)
+     ,  (2,          1)
 ;
 
 -- =============================================================================
@@ -166,19 +190,19 @@ VALUES  (1,    'English', 'Native')
      ,  (2,    'Spanish', 'Limited Working Proficiency')
 ;
 
--- Both profiles share languages
-INSERT INTO "ProfileLanguage"
-        ("ProfileId", "LanguageId")
-VALUES  (1,           1)
-     ,  (1,           2)
-     ,  (2,           1)
-     ,  (2,           2)
+-- Both resumes share languages
+INSERT INTO "ResumeLanguage"
+        ("ResumeId", "LanguageId")
+VALUES  (1,          1)
+     ,  (1,          2)
+     ,  (2,          1)
+     ,  (2,          2)
 ;
 
 -- =============================================================================
 -- CERTIFICATION
--- Profile 1 (Backend): Java cert
--- Profile 2 (DevOps): AWS SAA + CKA
+-- Resume 1 (Backend): Java cert
+-- Resume 2 (DevOps): AWS SAA + CKA
 -- =============================================================================
 
 INSERT INTO "Certification"
@@ -212,11 +236,11 @@ VALUES
         '2026-04-01'
     );
 
-INSERT INTO "ProfileCertification"
-        ("ProfileId", "CertificationId")
-VALUES  (1,           1)  -- Backend profile gets Java cert
-     ,  (2,           2)  -- DevOps profile gets AWS SAA
-     ,  (2,           3)  -- DevOps profile gets CKA
+INSERT INTO "ResumeCertification"
+        ("ResumeId", "CertificationId")
+VALUES  (1,          1)  -- Backend resume gets Java cert
+     ,  (2,          2)  -- DevOps resume gets AWS SAA
+     ,  (2,          3)  -- DevOps resume gets CKA
 ;
 
 -- =============================================================================
@@ -297,7 +321,7 @@ INSERT INTO "Project"
         "ProjectTypeId"
     )
 VALUES
-    -- -- PROFILE 1 (Backend) projects ------------------------------------------
+    -- -- Resume 1 (Backend) projects ------------------------------------------
     (
         1,
         'Stripe Notification Service',
@@ -341,7 +365,7 @@ VALUES
         2      -- Personal
     ),
 
-    -- -- PROFILE 2 (DevOps) projects ------------------------------------------
+    -- -- Resume 2 (DevOps) projects ------------------------------------------
     (
         4,
         'Internal Developer Platform - Stripe',
@@ -387,8 +411,8 @@ VALUES
 
 -- =============================================================================
 -- PROJECT SKILLS
--- Profile 1 projects use backend-focused skills
--- Profile 2 projects use DevOps-focused skills
+-- Resume 1 projects use backend-focused skills
+-- Resume 2 projects use DevOps-focused skills
 -- =============================================================================
 
 INSERT INTO "ProjectSkill"
