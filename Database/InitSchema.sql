@@ -42,10 +42,10 @@ STRICT;
 
 CREATE TABLE "PersonalSummary"
 (
-    "Id"            INTEGER PRIMARY KEY AUTOINCREMENT,
-    "PositionTitle" TEXT    NOT NULL,
-    "Summary"       TEXT,
-    "CreatedAt"     TEXT    NOT NULL DEFAULT (datetime('now'))
+    "Id"                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    "TargetPositionTitle" TEXT    NOT NULL,
+    "Summary"             TEXT,
+    "CreatedAt"           TEXT    NOT NULL DEFAULT (datetime('now'))
 )
 STRICT;
 

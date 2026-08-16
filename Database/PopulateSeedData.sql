@@ -69,7 +69,7 @@ VALUES  (1,           1)
 INSERT INTO "PersonalSummary"
     (
         "Id",
-        "PositionTitle",
+        "TargetPositionTitle",
         "Summary"
     )
 VALUES
