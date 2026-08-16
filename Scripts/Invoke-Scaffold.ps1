@@ -97,6 +97,10 @@ function Move-DatabaseToDataProject {
         return
     }
 
+    if (Test-Path $script:NewDatabasePath) {
+        Remove-Item -Path $script:NewDatabasePath -Recurse -Force
+    }
+
     try {
         Move-Item `
             -Path $script:DatabasePath `
