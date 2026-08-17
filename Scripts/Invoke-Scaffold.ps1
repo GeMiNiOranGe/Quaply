@@ -6,19 +6,12 @@ Scaffolds EF Core models from the Quaply SQLite database.
 .DESCRIPTION
 Ensures the database exists, restores dotnet tools, scaffolds EF Core models
 into a throwaway EfScaffoldSandbox project (to avoid the circular dependency
-with Quaply.Data), then copies the generated files into Quaply.Data. Use -Force
-to reset the database and overwrite existing models.
-
-.PARAMETER Force
-Resets the database and overwrites existing scaffolded models.
+with Quaply.Data), then copies the generated files into Quaply.Data.
 
 .EXAMPLE
 .\Invoke-Scaffold.ps1
-.\Invoke-Scaffold.ps1 -Force
 #>
-param(
-    [switch]$Force
-)
+param()
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
@@ -62,11 +55,7 @@ function Assert-DotnetInstalled {
 function Initialize-ScaffoldDatabase {
     $invokeDatabase = Join-Path $PSScriptRoot "Invoke-Database.ps1"
 
-    if ($Force) {
-        Write-Step "Resetting database..."
-        & $invokeDatabase -Action Reset
-    }
-    elseif (-not (Test-Path $script:DatabasePath)) {
+    if (-not (Test-Path $script:DatabasePath)) {
         Write-Step "Database not found. Initializing..."
         & $invokeDatabase -Action Initialize
     }
@@ -168,10 +157,6 @@ function Invoke-EfScaffold {
         "--context", "QuaplyDbContext",
         "--no-onconfiguring"
     )
-
-    if ($Force) {
-        $scaffoldArgs += "--force"
-    }
 
     Write-Step "Scaffolding EF Core models into sandbox project..."
     dotnet @scaffoldArgs
