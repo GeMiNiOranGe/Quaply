@@ -202,6 +202,17 @@ public partial class ProfileEditorViewModel(
 
             await Navigator.NavigateToAsync<ProfileViewModel>();
         }
+        // TODO: Catch specific exceptions and show a dialog with the error
+        // message.
+        /*
+        catch (Exception ex)
+        {
+            await _dialogPresenter.ShowErrorAsync(
+                title: "Failed to save profile",
+                message: ex.Message
+            );
+        }
+        */
         finally
         {
             IsSaving = false;
