@@ -3,15 +3,23 @@ PRAGMA foreign_keys = ON;
 -- have no key -----------------------------------------------------------------
 CREATE TABLE "SkillCategory"
 (
-    "Id"   INTEGER PRIMARY KEY AUTOINCREMENT,
-    "Name" TEXT    NOT NULL
+    "Id"        INTEGER PRIMARY KEY AUTOINCREMENT,
+    "Name"      TEXT    NOT NULL,
+
+    "DeletedAt" TEXT,
+
+    CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
 
 CREATE TABLE "ProjectType"
 (
-    "Id"   INTEGER PRIMARY KEY AUTOINCREMENT,
-    "Name" TEXT    NOT NULL
+    "Id"        INTEGER PRIMARY KEY AUTOINCREMENT,
+    "Name"      TEXT    NOT NULL,
+
+    "DeletedAt" TEXT,
+
+    CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
 
@@ -21,7 +29,10 @@ CREATE TABLE "Resume"
     "Name"       TEXT    NOT NULL,
     "ExportedAt" TEXT,
 
-    CHECK ("ExportedAt" IS NULL OR datetime("ExportedAt") = "ExportedAt")
+    "DeletedAt"  TEXT,
+
+    CHECK ("ExportedAt" IS NULL OR datetime("ExportedAt") = "ExportedAt"),
+    CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
 
@@ -36,7 +47,10 @@ CREATE TABLE "Profile"
     "PortfolioUrl"     TEXT,
     "DateOfBirth"      TEXT,
 
-    CHECK ("DateOfBirth" IS NULL OR date("DateOfBirth") = "DateOfBirth")
+    "DeletedAt"        TEXT,
+
+    CHECK ("DateOfBirth" IS NULL OR date("DateOfBirth") = "DateOfBirth"),
+    CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
 
@@ -45,7 +59,11 @@ CREATE TABLE "PersonalSummary"
     "Id"                  INTEGER PRIMARY KEY AUTOINCREMENT,
     "TargetPositionTitle" TEXT    NOT NULL,
     "Summary"             TEXT,
-    "CreatedAt"           TEXT    NOT NULL DEFAULT (datetime('now'))
+
+    "CreatedAt"           TEXT    NOT NULL DEFAULT (datetime('now')),
+    "DeletedAt"           TEXT,
+
+    CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
 
@@ -58,8 +76,11 @@ CREATE TABLE "WorkExperience"
     "StartDate"     TEXT,
     "EndDate"       TEXT,
 
+    "DeletedAt"     TEXT,
+
     CHECK ("StartDate" IS NULL OR date("StartDate") = "StartDate"),
-    CHECK ("EndDate" IS NULL OR date("EndDate") = "EndDate")
+    CHECK ("EndDate" IS NULL OR date("EndDate") = "EndDate"),
+    CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
 
@@ -72,8 +93,11 @@ CREATE TABLE "Education"
     "StartDate"  TEXT,
     "EndDate"    TEXT,
 
+    "DeletedAt"  TEXT,
+
     CHECK ("StartDate" IS NULL OR date("StartDate") = "StartDate"),
-    CHECK ("EndDate" IS NULL OR date("EndDate") = "EndDate")
+    CHECK ("EndDate" IS NULL OR date("EndDate") = "EndDate"),
+    CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
 
@@ -81,7 +105,11 @@ CREATE TABLE "Language"
 (
     "Id"               INTEGER PRIMARY KEY AUTOINCREMENT,
     "Name"             TEXT    NOT NULL,
-    "ProficiencyLevel" TEXT    NOT NULL
+    "ProficiencyLevel" TEXT    NOT NULL,
+
+    "DeletedAt"        TEXT,
+
+    CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
 
@@ -93,8 +121,11 @@ CREATE TABLE "Certification"
     "IssueDate"      TEXT,
     "ExpirationDate" TEXT,
 
+    "DeletedAt"      TEXT,
+
     CHECK ("IssueDate" IS NULL OR date("IssueDate") = "IssueDate"),
-    CHECK ("ExpirationDate" IS NULL OR date("ExpirationDate") = "ExpirationDate")
+    CHECK ("ExpirationDate" IS NULL OR date("ExpirationDate") = "ExpirationDate"),
+    CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
 
@@ -112,6 +143,8 @@ CREATE TABLE "Project"
     "StartDate"        TEXT,
     "EndDate"          TEXT,
 
+    "DeletedAt"        TEXT,
+
     "WorkExperienceId" INTEGER,
     "ProjectTypeId"    INTEGER NOT NULL,
 
@@ -120,7 +153,8 @@ CREATE TABLE "Project"
 
     CHECK ("HasGaps" IN (0, 1)),
     CHECK ("StartDate" IS NULL OR date("StartDate") = "StartDate"),
-    CHECK ("EndDate" IS NULL OR date("EndDate") = "EndDate")
+    CHECK ("EndDate" IS NULL OR date("EndDate") = "EndDate"),
+    CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
 
@@ -130,11 +164,14 @@ CREATE TABLE "Skill"
     "Name"            TEXT    NOT NULL,
     "IsHighlight"     INTEGER NOT NULL DEFAULT 0,
 
+    "DeletedAt"       TEXT,
+
     "SkillCategoryId" INTEGER NOT NULL,
 
     FOREIGN KEY ("SkillCategoryId") REFERENCES "SkillCategory"("Id"),
 
-    CHECK ("IsHighlight" IN (0, 1))
+    CHECK ("IsHighlight" IN (0, 1)),
+    CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
 
