@@ -31,6 +31,7 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
 
     public void Remove(Profile profile)
     {
-        _context.Profiles.Remove(profile);
+        profile.DeletedAt = DateTime.UtcNow;
+        _context.Profiles.Update(profile);
     }
 }
