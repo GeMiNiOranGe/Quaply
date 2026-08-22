@@ -6,6 +6,8 @@ CREATE TABLE "SkillCategory"
     "Id"        INTEGER PRIMARY KEY AUTOINCREMENT,
     "Name"      TEXT    NOT NULL,
 
+    "CreatedAt" TEXT    NOT NULL DEFAULT (datetime('now')),
+    "UpdatedAt" TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt" TEXT,
 
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
@@ -17,6 +19,8 @@ CREATE TABLE "ProjectType"
     "Id"        INTEGER PRIMARY KEY AUTOINCREMENT,
     "Name"      TEXT    NOT NULL,
 
+    "CreatedAt" TEXT    NOT NULL DEFAULT (datetime('now')),
+    "UpdatedAt" TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt" TEXT,
 
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
@@ -29,6 +33,8 @@ CREATE TABLE "Resume"
     "Name"       TEXT    NOT NULL,
     "ExportedAt" TEXT,
 
+    "CreatedAt"  TEXT    NOT NULL DEFAULT (datetime('now')),
+    "UpdatedAt"  TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt"  TEXT,
 
     CHECK ("ExportedAt" IS NULL OR datetime("ExportedAt") = "ExportedAt"),
@@ -47,6 +53,8 @@ CREATE TABLE "Profile"
     "PortfolioUrl"     TEXT,
     "DateOfBirth"      TEXT,
 
+    "CreatedAt"        TEXT    NOT NULL DEFAULT (datetime('now')),
+    "UpdatedAt"        TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt"        TEXT,
 
     CHECK ("DateOfBirth" IS NULL OR date("DateOfBirth") = "DateOfBirth"),
@@ -61,6 +69,7 @@ CREATE TABLE "PersonalSummary"
     "Summary"             TEXT,
 
     "CreatedAt"           TEXT    NOT NULL DEFAULT (datetime('now')),
+    "UpdatedAt"           TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt"           TEXT,
 
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
@@ -76,6 +85,8 @@ CREATE TABLE "WorkExperience"
     "StartDate"     TEXT,
     "EndDate"       TEXT,
 
+    "CreatedAt"     TEXT    NOT NULL DEFAULT (datetime('now')),
+    "UpdatedAt"     TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt"     TEXT,
 
     CHECK ("StartDate" IS NULL OR date("StartDate") = "StartDate"),
@@ -93,6 +104,8 @@ CREATE TABLE "Education"
     "StartDate"  TEXT,
     "EndDate"    TEXT,
 
+    "CreatedAt"  TEXT    NOT NULL DEFAULT (datetime('now')),
+    "UpdatedAt"  TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt"  TEXT,
 
     CHECK ("StartDate" IS NULL OR date("StartDate") = "StartDate"),
@@ -107,6 +120,8 @@ CREATE TABLE "Language"
     "Name"             TEXT    NOT NULL,
     "ProficiencyLevel" TEXT    NOT NULL,
 
+    "CreatedAt"        TEXT    NOT NULL DEFAULT (datetime('now')),
+    "UpdatedAt"        TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt"        TEXT,
 
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
@@ -121,6 +136,8 @@ CREATE TABLE "Certification"
     "IssueDate"      TEXT,
     "ExpirationDate" TEXT,
 
+    "CreatedAt"      TEXT    NOT NULL DEFAULT (datetime('now')),
+    "UpdatedAt"      TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt"      TEXT,
 
     CHECK ("IssueDate" IS NULL OR date("IssueDate") = "IssueDate"),
@@ -143,6 +160,8 @@ CREATE TABLE "Project"
     "StartDate"        TEXT,
     "EndDate"          TEXT,
 
+    "CreatedAt"        TEXT    NOT NULL DEFAULT (datetime('now')),
+    "UpdatedAt"        TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt"        TEXT,
 
     "WorkExperienceId" INTEGER,
@@ -164,6 +183,8 @@ CREATE TABLE "Skill"
     "Name"            TEXT    NOT NULL,
     "IsHighlight"     INTEGER NOT NULL DEFAULT 0,
 
+    "CreatedAt"       TEXT    NOT NULL DEFAULT (datetime('now')),
+    "UpdatedAt"       TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt"       TEXT,
 
     "SkillCategoryId" INTEGER NOT NULL,
