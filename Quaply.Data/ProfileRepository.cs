@@ -26,6 +26,7 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
 
     public void Update(Profile profile)
     {
+        profile.UpdatedAt = DateTime.UtcNow;
         _context.Profiles.Update(profile);
     }
 

@@ -13,6 +13,14 @@ public partial class QuaplyDbContext
             entity.HasQueryFilter(e => e.DeletedAt == null);
 
             entity
+                .Property(e => e.CreatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
+                .Property(e => e.UpdatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
                 .Property(e => e.DeletedAt)
                 .HasConversion<NullableUtcDateTimeConverter>();
         });
@@ -20,6 +28,14 @@ public partial class QuaplyDbContext
         modelBuilder.Entity<Project>(entity =>
         {
             entity.HasQueryFilter(e => e.DeletedAt == null);
+
+            entity
+                .Property(e => e.CreatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
+                .Property(e => e.UpdatedAt)
+                .HasConversion<UtcDateTimeConverter>();
 
             entity
                 .Property(e => e.DeletedAt)
@@ -31,6 +47,14 @@ public partial class QuaplyDbContext
             entity.HasQueryFilter(e => e.DeletedAt == null);
 
             entity
+                .Property(e => e.CreatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
+                .Property(e => e.UpdatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
                 .Property(e => e.DeletedAt)
                 .HasConversion<NullableUtcDateTimeConverter>();
         });
@@ -38,6 +62,14 @@ public partial class QuaplyDbContext
         modelBuilder.Entity<SkillCategory>(entity =>
         {
             entity.HasQueryFilter(e => e.DeletedAt == null);
+
+            entity
+                .Property(e => e.CreatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
+                .Property(e => e.UpdatedAt)
+                .HasConversion<UtcDateTimeConverter>();
 
             entity
                 .Property(e => e.DeletedAt)
@@ -49,6 +81,14 @@ public partial class QuaplyDbContext
             entity.HasQueryFilter(e => e.DeletedAt == null);
 
             entity
+                .Property(e => e.CreatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
+                .Property(e => e.UpdatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
                 .Property(e => e.DeletedAt)
                 .HasConversion<NullableUtcDateTimeConverter>();
         });
@@ -56,6 +96,14 @@ public partial class QuaplyDbContext
         modelBuilder.Entity<Resume>(entity =>
         {
             entity.HasQueryFilter(e => e.DeletedAt == null);
+
+            entity
+                .Property(e => e.CreatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
+                .Property(e => e.UpdatedAt)
+                .HasConversion<UtcDateTimeConverter>();
 
             entity
                 .Property(e => e.DeletedAt)
@@ -67,6 +115,14 @@ public partial class QuaplyDbContext
             entity.HasQueryFilter(e => e.DeletedAt == null);
 
             entity
+                .Property(e => e.CreatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
+                .Property(e => e.UpdatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
                 .Property(e => e.DeletedAt)
                 .HasConversion<NullableUtcDateTimeConverter>();
         });
@@ -74,6 +130,14 @@ public partial class QuaplyDbContext
         modelBuilder.Entity<PersonalSummary>(entity =>
         {
             entity.HasQueryFilter(e => e.DeletedAt == null);
+
+            entity
+                .Property(e => e.CreatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
+                .Property(e => e.UpdatedAt)
+                .HasConversion<UtcDateTimeConverter>();
 
             entity
                 .Property(e => e.DeletedAt)
@@ -85,6 +149,14 @@ public partial class QuaplyDbContext
             entity.HasQueryFilter(e => e.DeletedAt == null);
 
             entity
+                .Property(e => e.CreatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
+                .Property(e => e.UpdatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
                 .Property(e => e.DeletedAt)
                 .HasConversion<NullableUtcDateTimeConverter>();
         });
@@ -94,6 +166,14 @@ public partial class QuaplyDbContext
             entity.HasQueryFilter(e => e.DeletedAt == null);
 
             entity
+                .Property(e => e.CreatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
+                .Property(e => e.UpdatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
                 .Property(e => e.DeletedAt)
                 .HasConversion<NullableUtcDateTimeConverter>();
         });
@@ -101,6 +181,14 @@ public partial class QuaplyDbContext
         modelBuilder.Entity<Language>(entity =>
         {
             entity.HasQueryFilter(e => e.DeletedAt == null);
+
+            entity
+                .Property(e => e.CreatedAt)
+                .HasConversion<UtcDateTimeConverter>();
+
+            entity
+                .Property(e => e.UpdatedAt)
+                .HasConversion<UtcDateTimeConverter>();
 
             entity
                 .Property(e => e.DeletedAt)
