@@ -14,9 +14,25 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
         return await _context.Profiles.FirstOrDefaultAsync(p => p.Id == id);
     }
 
+    public async Task<Profile?> GetByIdIncludingDeletedAsync(int id)
+    {
+        return await _context
+            .Profiles.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(p => p.Id == id);
+    }
+
     public async Task<IEnumerable<Profile>> GetManyAsync()
     {
         return await _context.Profiles.AsNoTracking().ToListAsync();
+    }
+
+    public async Task<IEnumerable<Profile>> GetManyDeletedAsync()
+    {
+        return await _context
+            .Profiles.IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(p => p.DeletedAt != null)
+            .ToListAsync();
     }
 
     public void Add(Profile profile)
@@ -34,5 +50,10 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
     {
         profile.DeletedAt = DateTime.UtcNow;
         _context.Profiles.Update(profile);
+    }
+
+    public void Purge(Profile profile)
+    {
+        _context.Profiles.Remove(profile);
     }
 }

@@ -18,6 +18,11 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
         return _unitOfWork.Profiles.GetManyAsync();
     }
 
+    public Task<IEnumerable<Profile>> GetDeletedProfilesAsync()
+    {
+        return _unitOfWork.Profiles.GetManyDeletedAsync();
+    }
+
     public async Task CreateProfileAsync(Profile profile)
     {
         _unitOfWork.Profiles.Add(profile);
@@ -39,6 +44,31 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
         }
 
         _unitOfWork.Profiles.Remove(profile);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task PurgeProfileAsync(int id)
+    {
+        Profile? profile =
+            await _unitOfWork.Profiles.GetByIdIncludingDeletedAsync(id);
+        if (profile is null)
+        {
+            return;
+        }
+
+        if (profile.DeletedAt is null)
+        {
+            throw new InvalidOperationException(
+                "The profile must be soft-deleted before it can be permanently hard-deleted."
+            );
+        }
+
+        IEnumerable<ResumeProfile> links =
+            _unitOfWork.ResumeProfiles.GetByProfileId(id);
+        _unitOfWork.ResumeProfiles.RemoveRange(links);
+
+        _unitOfWork.Profiles.Purge(profile);
+
         await _unitOfWork.SaveChangesAsync();
     }
 }
