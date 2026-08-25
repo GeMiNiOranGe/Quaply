@@ -13,14 +13,14 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
         return _unitOfWork.Profiles.GetByIdAsync(id);
     }
 
-    public Task<IEnumerable<Profile>> GetProfilesAsync()
+    public async Task<IEnumerable<Profile>> GetProfilesAsync()
     {
-        return _unitOfWork.Profiles.GetManyAsync();
+        return await _unitOfWork.Profiles.GetManyAsync().ToListAsync();
     }
 
-    public Task<IEnumerable<Profile>> GetDeletedProfilesAsync()
+    public async Task<IEnumerable<Profile>> GetDeletedProfilesAsync()
     {
-        return _unitOfWork.Profiles.GetManyDeletedAsync();
+        return await _unitOfWork.Profiles.GetManyDeletedAsync().ToListAsync();
     }
 
     public async Task CreateProfileAsync(Profile profile)

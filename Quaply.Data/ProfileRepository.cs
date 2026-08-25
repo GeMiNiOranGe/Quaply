@@ -9,30 +9,30 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
 {
     private readonly QuaplyDbContext _context = context;
 
-    public async Task<Profile?> GetByIdAsync(int id)
+    public Task<Profile?> GetByIdAsync(int id)
     {
-        return await _context.Profiles.FirstOrDefaultAsync(p => p.Id == id);
+        return _context.Profiles.FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task<Profile?> GetByIdIncludingDeletedAsync(int id)
+    public Task<Profile?> GetByIdIncludingDeletedAsync(int id)
     {
-        return await _context
+        return _context
             .Profiles.IgnoreQueryFilters()
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task<IEnumerable<Profile>> GetManyAsync()
+    public IAsyncEnumerable<Profile> GetManyAsync()
     {
-        return await _context.Profiles.AsNoTracking().ToListAsync();
+        return _context.Profiles.AsNoTracking().AsAsyncEnumerable();
     }
 
-    public async Task<IEnumerable<Profile>> GetManyDeletedAsync()
+    public IAsyncEnumerable<Profile> GetManyDeletedAsync()
     {
-        return await _context
+        return _context
             .Profiles.IgnoreQueryFilters()
             .AsNoTracking()
             .Where(p => p.DeletedAt != null)
-            .ToListAsync();
+            .AsAsyncEnumerable();
     }
 
     public void Add(Profile profile)
