@@ -8,6 +8,7 @@ public interface IDialogPresenter
         string primaryButtonText = "Confirm",
         string closeButtonText = "Cancel"
     );
+
     Task<bool> ShowDangerConfirmationAsync(
         string title,
         string message,
