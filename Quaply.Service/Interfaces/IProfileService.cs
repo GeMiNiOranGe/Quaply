@@ -17,4 +17,6 @@ public interface IProfileService
     Task DeleteProfileAsync(int id);
 
     Task PurgeProfileAsync(int id);
+
+    Task RestoreProfileAsync(int id);
 }

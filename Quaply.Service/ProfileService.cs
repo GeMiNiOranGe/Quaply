@@ -71,4 +71,22 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
 
         await _unitOfWork.SaveChangesAsync();
     }
+
+    public async Task RestoreProfileAsync(int id)
+    {
+        Profile? profile =
+            await _unitOfWork.Profiles.GetByIdIncludingDeletedAsync(id);
+        if (profile is null)
+        {
+            return;
+        }
+
+        if (profile.DeletedAt is null)
+        {
+            return;
+        }
+
+        _unitOfWork.Profiles.Restore(profile);
+        await _unitOfWork.SaveChangesAsync();
+    }
 }

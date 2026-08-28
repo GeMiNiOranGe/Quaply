@@ -19,4 +19,6 @@ public interface IProfileRepository
     void Remove(Profile profile);
 
     void Purge(Profile profile);
+
+    void Restore(Profile profile);
 }
