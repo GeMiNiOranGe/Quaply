@@ -26,6 +26,10 @@
         <pages:ProfilePage />
       </DataTemplate>
 
+      <DataTemplate DataType="{x:Type viewModels:ProfileTrashViewModel}">
+        <pages:ProfileTrashPage />
+      </DataTemplate>
+
       <DataTemplate DataType="{x:Type viewModels:WorkExperienceViewModel}">
         <pages:WorkExperiencePage />
       </DataTemplate>

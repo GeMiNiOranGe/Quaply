@@ -28,10 +28,12 @@ public static class DependencyInjection
             services.AddTransient<MainViewModel>();
             services.AddTransient<ProfileEditorViewModel>();
             services.AddTransient<ProfileViewModel>();
+            services.AddTransient<ProfileTrashViewModel>();
             services.AddTransient<WorkExperienceViewModel>();
 
             services.AddSingleton<ProfileEditorPage>();
             services.AddSingleton<ProfilePage>();
+            services.AddSingleton<ProfileTrashPage>();
             services.AddSingleton<WorkExperiencePage>();
             services.AddSingleton(provider => new MainWindow(
                 provider.GetRequiredService<IContentDialogService>()

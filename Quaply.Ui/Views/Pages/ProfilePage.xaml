@@ -34,6 +34,11 @@
         Padding="8"
         Command="{Binding NavigateToWorkExperienceCommand}"
         Content="Go to Work Experience page" />
+      <Button
+        Margin="8,0,0,0"
+        Padding="8"
+        Command="{Binding NavigateToProfileTrashCommand}"
+        Content="View Deleted Profiles" />
     </StackPanel>
 
     <!--  List  -->

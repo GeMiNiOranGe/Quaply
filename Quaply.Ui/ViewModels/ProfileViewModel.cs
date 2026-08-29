@@ -45,6 +45,12 @@ public partial class ProfileViewModel(
     }
 
     [RelayCommand]
+    private async Task NavigateToProfileTrashAsync()
+    {
+        await Navigator.NavigateToAsync<ProfileTrashViewModel>();
+    }
+
+    [RelayCommand]
     private async Task LoadProfilesAsync()
     {
         IEnumerable<Profile> profiles = await _service.GetProfilesAsync();
