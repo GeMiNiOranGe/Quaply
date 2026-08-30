@@ -2,9 +2,11 @@
   x:Class="Quaply.Ui.Views.Pages.ProfilePage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:converters="clr-namespace:Quaply.Ui.Converters"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:local="clr-namespace:Quaply.Ui.Views.Pages"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:system="clr-namespace:System;assembly=mscorlib"
   xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
   xmlns:viewModels="clr-namespace:Quaply.Ui.ViewModels"
   x:Name="profilePage"
@@ -148,10 +150,20 @@
               Header="Email" />
 
             <!--  Last Modified  -->
-            <DataGridTextColumn
-              Width="170"
-              Binding="{Binding LastModified}"
-              Header="Last Modified" />
+            <DataGridTextColumn Width="170" Header="Last Modified">
+              <DataGridTextColumn.ElementStyle>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Text" Value="{Binding UpdatedAt, Converter={converters:RelativeDateTimeConverter}}" />
+                  <Setter Property="ToolTip">
+                    <Setter.Value>
+                      <ToolTip MaxWidth="{x:Static system:Double.PositiveInfinity}">
+                        <TextBlock Text="{Binding UpdatedAt, Converter={converters:FullLocalDateTimeConverter}}" TextWrapping="NoWrap" />
+                      </ToolTip>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </DataGridTextColumn.ElementStyle>
+            </DataGridTextColumn>
 
             <!--  TODO: Finding the way to center the Actions header  -->
             <!--  Actions  -->
