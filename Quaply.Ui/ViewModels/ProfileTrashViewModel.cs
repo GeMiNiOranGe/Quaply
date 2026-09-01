@@ -36,14 +36,6 @@ public partial class ProfileTrashViewModel(
     }
 
     [RelayCommand]
-    private async Task LoadDeletedProfilesAsync()
-    {
-        IEnumerable<Profile> profiles =
-            await _service.GetDeletedProfilesAsync();
-        DeletedProfiles = new(profiles);
-    }
-
-    [RelayCommand]
     private async Task RestoreProfileAsync(Profile? profile)
     {
         if (profile is null)
@@ -93,5 +85,12 @@ public partial class ProfileTrashViewModel(
     private async Task BackToProfilesAsync()
     {
         await Navigator.NavigateToAsync<ProfileViewModel>();
+    }
+
+    private async Task LoadDeletedProfilesAsync()
+    {
+        IEnumerable<Profile> deletedProfiles =
+            await _service.GetDeletedProfilesAsync();
+        DeletedProfiles = new(deletedProfiles);
     }
 }

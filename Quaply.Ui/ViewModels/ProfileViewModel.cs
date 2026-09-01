@@ -51,13 +51,6 @@ public partial class ProfileViewModel(
     }
 
     [RelayCommand]
-    private async Task LoadProfilesAsync()
-    {
-        IEnumerable<Profile> profiles = await _service.GetProfilesAsync();
-        Profiles = new(profiles);
-    }
-
-    [RelayCommand]
     private async Task AddProfileAsync()
     {
         await Navigator.NavigateToAsync<
@@ -109,5 +102,11 @@ public partial class ProfileViewModel(
         {
             SelectedProfile = null;
         }
+    }
+
+    private async Task LoadProfilesAsync()
+    {
+        IEnumerable<Profile> profiles = await _service.GetProfilesAsync();
+        Profiles = new(profiles);
     }
 }
