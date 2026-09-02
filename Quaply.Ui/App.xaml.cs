@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quaply.Data;
 using Quaply.Service;
+using Quaply.Ui.Diagnostics;
 
 namespace Quaply.Ui;
 
@@ -55,6 +56,10 @@ public partial class App : Application
         }
 
         await _host.StartAsync();
+
+#if DEBUG
+        ViewModelTemplateValidator.ValidateAll(Resources);
+#endif
 
         MainWindow mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
