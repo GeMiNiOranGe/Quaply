@@ -82,7 +82,7 @@ CREATE TABLE "WorkExperience"
     "CompanyName"   TEXT    NOT NULL,
     "PositionTitle" TEXT,
     "Description"   TEXT,
-    "StartDate"     TEXT,
+    "StartDate"     TEXT    NOT NULL,
     "EndDate"       TEXT,
 
     "CreatedAt"     TEXT    NOT NULL DEFAULT (datetime('now')),
