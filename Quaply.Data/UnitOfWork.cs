@@ -8,12 +8,16 @@ internal class UnitOfWork(QuaplyDbContext context) : IUnitOfWork
     private readonly QuaplyDbContext _context = context;
     private IProfileRepository? _profiles;
     private IResumeProfileRepository? _resumeProfiles;
+    private IWorkExperienceRepository? _workExperiences;
 
     public IProfileRepository Profiles =>
         _profiles ??= new ProfileRepository(_context);
 
     public IResumeProfileRepository ResumeProfiles =>
         _resumeProfiles ??= new ResumeProfileRepository(_context);
+
+    public IWorkExperienceRepository WorkExperiences =>
+        _workExperiences ??= new WorkExperienceRepository(_context);
 
     public Task<int> SaveChangesAsync() => _context.SaveChangesAsync();
 }

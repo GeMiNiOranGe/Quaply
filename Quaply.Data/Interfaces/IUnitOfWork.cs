@@ -6,5 +6,7 @@ public interface IUnitOfWork
 
     IResumeProfileRepository ResumeProfiles { get; }
 
+    IWorkExperienceRepository WorkExperiences { get; }
+
     Task<int> SaveChangesAsync();
 }
