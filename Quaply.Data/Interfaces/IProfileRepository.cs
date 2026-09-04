@@ -12,13 +12,13 @@ public interface IProfileRepository
 
     IAsyncEnumerable<Profile> GetManyDeletedAsync();
 
-    void Add(Profile profile);
+    void Add(Profile entity);
 
-    void Update(Profile profile);
+    void Update(Profile entity);
 
-    void Remove(Profile profile);
+    void Remove(Profile entity);
 
-    void Purge(Profile profile);
+    void Purge(Profile entity);
 
-    void Restore(Profile profile);
+    void Restore(Profile entity);
 }

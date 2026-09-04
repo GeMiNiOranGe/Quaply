@@ -11,14 +11,14 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
 
     public Task<Profile?> GetByIdAsync(int id)
     {
-        return _context.Profiles.FirstOrDefaultAsync(p => p.Id == id);
+        return _context.Profiles.FirstOrDefaultAsync(entity => entity.Id == id);
     }
 
     public Task<Profile?> GetByIdIncludingDeletedAsync(int id)
     {
         return _context
             .Profiles.IgnoreQueryFilters()
-            .FirstOrDefaultAsync(p => p.Id == id);
+            .FirstOrDefaultAsync(entity => entity.Id == id);
     }
 
     public IAsyncEnumerable<Profile> GetManyAsync()
@@ -31,36 +31,36 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
         return _context
             .Profiles.IgnoreQueryFilters()
             .AsNoTracking()
-            .Where(p => p.DeletedAt != null)
+            .Where(entity => entity.DeletedAt != null)
             .AsAsyncEnumerable();
     }
 
-    public void Add(Profile profile)
+    public void Add(Profile entity)
     {
-        _context.Profiles.Add(profile);
+        _context.Profiles.Add(entity);
     }
 
-    public void Update(Profile profile)
+    public void Update(Profile entity)
     {
-        profile.UpdatedAt = DateTime.UtcNow;
-        _context.Profiles.Update(profile);
+        entity.UpdatedAt = DateTime.UtcNow;
+        _context.Profiles.Update(entity);
     }
 
-    public void Remove(Profile profile)
+    public void Remove(Profile entity)
     {
-        profile.DeletedAt = DateTime.UtcNow;
-        _context.Profiles.Update(profile);
+        entity.DeletedAt = DateTime.UtcNow;
+        _context.Profiles.Update(entity);
     }
 
-    public void Purge(Profile profile)
+    public void Purge(Profile entity)
     {
-        _context.Profiles.Remove(profile);
+        _context.Profiles.Remove(entity);
     }
 
-    public void Restore(Profile profile)
+    public void Restore(Profile entity)
     {
-        profile.DeletedAt = null;
-        profile.UpdatedAt = DateTime.UtcNow;
-        _context.Profiles.Update(profile);
+        entity.DeletedAt = null;
+        entity.UpdatedAt = DateTime.UtcNow;
+        _context.Profiles.Update(entity);
     }
 }

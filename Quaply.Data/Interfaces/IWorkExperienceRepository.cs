@@ -12,13 +12,13 @@ public interface IWorkExperienceRepository
 
     IAsyncEnumerable<WorkExperience> GetManyDeletedAsync();
 
-    void Add(WorkExperience workExperience);
+    void Add(WorkExperience entity);
 
-    void Update(WorkExperience workExperience);
+    void Update(WorkExperience entity);
 
-    void Remove(WorkExperience workExperience);
+    void Remove(WorkExperience entity);
 
-    void Purge(WorkExperience workExperience);
+    void Purge(WorkExperience entity);
 
-    void Restore(WorkExperience workExperience);
+    void Restore(WorkExperience entity);
 }
