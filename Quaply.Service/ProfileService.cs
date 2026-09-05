@@ -43,6 +43,10 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
             return;
         }
 
+        IEnumerable<ResumeProfile> links =
+            _unitOfWork.ResumeProfiles.GetByProfileId(id);
+        _unitOfWork.ResumeProfiles.RemoveRange(links);
+
         _unitOfWork.Profiles.Remove(profile);
         await _unitOfWork.SaveChangesAsync();
     }
@@ -63,12 +67,7 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
             );
         }
 
-        IEnumerable<ResumeProfile> links =
-            _unitOfWork.ResumeProfiles.GetByProfileId(id);
-        _unitOfWork.ResumeProfiles.RemoveRange(links);
-
         _unitOfWork.Profiles.Purge(profile);
-
         await _unitOfWork.SaveChangesAsync();
     }
 
