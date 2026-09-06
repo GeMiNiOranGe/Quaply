@@ -37,6 +37,10 @@
       <DataTemplate DataType="{x:Type viewModels:WorkExperienceViewModel}">
         <pages:WorkExperiencePage />
       </DataTemplate>
+
+      <DataTemplate DataType="{x:Type viewModels:WorkExperienceTrashViewModel}">
+        <pages:WorkExperienceTrashPage />
+      </DataTemplate>
     </ResourceDictionary>
   </Application.Resources>
 </Application>
