@@ -11,19 +11,21 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
 
     public Task<WorkExperience?> GetWorkExperienceByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return _unitOfWork.WorkExperiences.GetByIdAsync(id);
     }
 
     public async Task<IEnumerable<WorkExperience>> GetWorkExperiencesAsync()
     {
-        throw new NotImplementedException();
+        return await _unitOfWork.WorkExperiences.GetManyAsync().ToListAsync();
     }
 
     public async Task<
         IEnumerable<WorkExperience>
     > GetDeletedWorkExperiencesAsync()
     {
-        throw new NotImplementedException();
+        return await _unitOfWork
+            .WorkExperiences.GetManyDeletedAsync()
+            .ToListAsync();
     }
 
     public async Task CreateWorkExperienceAsync(WorkExperience workExperience)
