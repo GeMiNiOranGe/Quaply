@@ -2,28 +2,268 @@
   x:Class="Quaply.Ui.Views.Pages.WorkExperiencePage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:converters="clr-namespace:Quaply.Ui.Converters"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:local="clr-namespace:Quaply.Ui.Views.Pages"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:system="clr-namespace:System;assembly=mscorlib"
+  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
   xmlns:viewModels="clr-namespace:Quaply.Ui.ViewModels"
+  x:Name="workExperiencePage"
   d:DataContext="{d:DesignInstance Type=viewModels:WorkExperienceViewModel,
                                    IsDesignTimeCreatable=False}"
   d:DesignHeight="450"
   d:DesignWidth="800"
   Style="{StaticResource FadeInSlideUpPage}"
   mc:Ignorable="d">
-  <Grid>
-    <TextBlock
-      HorizontalAlignment="Center"
-      VerticalAlignment="Center"
-      FontSize="24"
-      FontWeight="Bold"
-      Text="Work experience page" />
-    <Button
-      Padding="8"
-      HorizontalAlignment="Left"
-      VerticalAlignment="Top"
-      Command="{Binding NavigateToProfileCommand}"
-      Content="Go to Profile page" />
+  <Grid Margin="24,16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <!--  Top actions  -->
+    <StackPanel
+      Grid.Row="0"
+      Margin="0,0,0,8"
+      Orientation="Horizontal">
+      <ui:Button
+        Margin="0,0,8,0"
+        Padding="8"
+        Appearance="Transparent"
+        Command="{Binding NavigateToProfileCommand}"
+        ToolTip="Go to Profile Page">
+        <ui:SymbolIcon Symbol="ArrowLeft24" />
+      </ui:Button>
+      <Button
+        Padding="8"
+        Command="{Binding AddWorkExperienceCommand}"
+        Content="+ Add Work Experience" />
+      <Button
+        Margin="8,0,0,0"
+        Padding="8"
+        Command="{Binding NavigateToWorkExperienceTrashCommand}"
+        Content="View Deleted Work Experiences" />
+    </StackPanel>
+
+    <!--  List  -->
+    <ui:Card
+      Grid.Row="1"
+      Padding="0"
+      HorizontalAlignment="Stretch"
+      VerticalAlignment="Stretch"
+      HorizontalContentAlignment="Stretch"
+      VerticalContentAlignment="Stretch">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--  Header  -->
+        <Border
+          Grid.Row="0"
+          Padding="24,16"
+          BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+          BorderThickness="0,0,0,1">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock
+              VerticalAlignment="Center"
+              FontSize="18"
+              FontWeight="SemiBold"
+              Text="Work Experiences" />
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+              <ui:Button
+                Margin="0,0,8,0"
+                Padding="8"
+                Appearance="Transparent"
+                ToolTip="Filter">
+                <ui:SymbolIcon Symbol="Filter24" />
+              </ui:Button>
+
+              <ui:Button
+                Padding="8"
+                Appearance="Transparent"
+                ToolTip="More">
+                <ui:SymbolIcon Symbol="MoreVertical24" />
+              </ui:Button>
+            </StackPanel>
+          </Grid>
+        </Border>
+
+        <!--  Table  -->
+        <DataGrid
+          Grid.Row="1"
+          AutoGenerateColumns="False"
+          CanUserAddRows="False"
+          CanUserDeleteRows="False"
+          HeadersVisibility="Column"
+          IsReadOnly="True"
+          ItemsSource="{Binding WorkExperiences}"
+          RowHeight="52"
+          SelectedItem="{Binding SelectedWorkExperience}"
+          SelectionMode="Extended">
+          <DataGrid.Columns>
+            <!--  Checkbox  -->
+            <DataGridTemplateColumn Width="64">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <CheckBox />
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+
+            <!--  Company + Position (grouped into one column for readability)  -->
+            <DataGridTemplateColumn Width="240" Header="Company / Position">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <StackPanel VerticalAlignment="Center">
+                    <TextBlock FontWeight="SemiBold" Text="{Binding CompanyName}" />
+                    <TextBlock
+                      FontSize="12"
+                      Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                      Text="{Binding PositionTitle}" />
+                  </StackPanel>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+
+            <!--  Duration + "Current" badge  -->
+            <DataGridTemplateColumn Width="220" Header="Duration">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                    <TextBlock Text="{Binding Converter={converters:WorkExperienceDurationConverter}}" />
+                    <Border
+                      Margin="8,0,0,0"
+                      Padding="6,2"
+                      Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}"
+                      CornerRadius="4"
+                      Visibility="{Binding EndDate, Converter={converters:InverseNullToVisibilityConverter}}">
+                      <TextBlock
+                        FontSize="11"
+                        Foreground="{DynamicResource SystemFillColorSuccessBrush}"
+                        Text="Current" />
+                    </Border>
+                  </StackPanel>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+
+            <!--  Description preview  -->
+            <DataGridTextColumn
+              Width="*"
+              Binding="{Binding Description}"
+              Header="Description">
+              <DataGridTextColumn.ElementStyle>
+                <Style TargetType="TextBlock">
+                  <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                  <Setter Property="ToolTip" Value="{Binding Description}" />
+                </Style>
+              </DataGridTextColumn.ElementStyle>
+            </DataGridTextColumn>
+
+            <!--  Projects count  -->
+            <DataGridTemplateColumn Width="90" Header="Projects">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="{Binding Projects.Count}" />
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+
+            <!--  Actions  -->
+            <DataGridTemplateColumn Width="128" Header="Actions">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                    <ui:Button
+                      Margin="0,0,8,0"
+                      Padding="8"
+                      Appearance="Transparent"
+                      Command="{Binding DataContext.EditWorkExperienceCommand, ElementName=workExperiencePage}"
+                      CommandParameter="{Binding}"
+                      ToolTip="Edit">
+                      <ui:SymbolIcon Symbol="Edit24" />
+                    </ui:Button>
+
+                    <ui:Button
+                      Margin="0,0,8,0"
+                      Padding="8"
+                      Appearance="Transparent"
+                      Command="{Binding DataContext.DuplicateWorkExperienceCommand, ElementName=workExperiencePage}"
+                      CommandParameter="{Binding}"
+                      ToolTip="Duplicate">
+                      <ui:SymbolIcon Symbol="Copy24" />
+                    </ui:Button>
+
+                    <ui:Button
+                      Padding="8"
+                      Appearance="Transparent"
+                      Command="{Binding DataContext.DeleteWorkExperienceCommand, ElementName=workExperiencePage}"
+                      CommandParameter="{Binding}"
+                      ToolTip="Delete">
+                      <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />
+                    </ui:Button>
+                  </StackPanel>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+          </DataGrid.Columns>
+        </DataGrid>
+
+        <!--  Footer  -->
+        <Border
+          Grid.Row="2"
+          Padding="24,8"
+          BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+          BorderThickness="0,1,0,0">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock VerticalAlignment="Center" Text="{Binding WorkExperiences.Count, StringFormat='Showing {0} work experiences'}" />
+
+            <StackPanel
+              Grid.Column="1"
+              VerticalAlignment="Center"
+              Orientation="Horizontal">
+              <TextBlock
+                Margin="0,0,16,0"
+                VerticalAlignment="Center"
+                FontWeight="SemiBold"
+                Text="Page 1 of 1" />
+
+              <ui:Button
+                Margin="0,0,8,0"
+                Padding="8"
+                Appearance="Transparent"
+                IsEnabled="False">
+                <ui:SymbolIcon Symbol="ChevronLeft24" />
+              </ui:Button>
+
+              <ui:Button
+                Padding="8"
+                Appearance="Transparent"
+                IsEnabled="False">
+                <ui:SymbolIcon Symbol="ChevronRight24" />
+              </ui:Button>
+            </StackPanel>
+          </Grid>
+        </Border>
+      </Grid>
+    </ui:Card>
   </Grid>
 </UserControl>
