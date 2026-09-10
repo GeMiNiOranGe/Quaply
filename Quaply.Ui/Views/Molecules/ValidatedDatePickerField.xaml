@@ -5,8 +5,24 @@
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:local="clr-namespace:Quaply.Ui.Views.Molecules"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  d:DesignHeight="450"
-  d:DesignWidth="800"
+  xmlns:primitives="clr-namespace:Quaply.Ui.Views.Molecules.Primitives"
+  x:Name="validatedDatePickerField"
+  d:DesignWidth="300"
+  Validation.Error="ValidatedDatePickerField_OnValidationError"
+  Validation.ErrorTemplate="{x:Null}"
   mc:Ignorable="d">
-  <Grid />
+  <primitives:ValidatedField ErrorText="{Binding ErrorText, ElementName=validatedDatePickerField}" Label="{Binding Label, ElementName=validatedDatePickerField}">
+    <DatePicker IsEnabled="{Binding IsValueEditable, ElementName=validatedDatePickerField}" SelectedDate="{Binding SelectedDate, ElementName=validatedDatePickerField, Mode=TwoWay}">
+      <DatePicker.Style>
+        <Style BasedOn="{StaticResource {x:Type DatePicker}}" TargetType="DatePicker">
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding (Validation.HasError), ElementName=validatedDatePickerField}" Value="True">
+              <Setter Property="BorderBrush" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+              <Setter Property="BorderThickness" Value="1" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </DatePicker.Style>
+    </DatePicker>
+  </primitives:ValidatedField>
 </UserControl>

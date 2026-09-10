@@ -95,11 +95,10 @@
                 PlaceholderText="+1 555 123 4567"
                 Text="{Binding PhoneNumber, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" />
 
-              <StackPanel Grid.Column="2" Margin="0,0,0,16">
-                <TextBlock Margin="0,0,0,4" Text="Date of Birth" />
-
-                <DatePicker SelectedDate="{Binding DateOfBirth, Converter={converters:DateOnlyToDateTimeConverter}}" />
-              </StackPanel>
+              <molecules:ValidatedDatePickerField
+                Grid.Column="2"
+                Label="Date of Birth"
+                SelectedDate="{Binding DateOfBirth, Converter={converters:DateOnlyToDateTimeConverter}}" />
             </Grid>
 
             <TextBlock
