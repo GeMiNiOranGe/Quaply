@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
@@ -13,6 +14,10 @@ public sealed class DateNotBeforeAttribute(string comparisonPropertyName)
     : ValidationAttribute
 {
     private readonly string _comparisonPropertyName = comparisonPropertyName;
+    private static readonly ConcurrentDictionary<
+        (Type, string),
+        PropertyInfo?
+    > PropertyCache = new();
 
     protected override ValidationResult? IsValid(
         object? value,
@@ -24,29 +29,42 @@ public sealed class DateNotBeforeAttribute(string comparisonPropertyName)
             return ValidationResult.Success;
         }
 
-        PropertyInfo? comparisonProperty =
-            validationContext.ObjectType.GetProperty(_comparisonPropertyName);
-
-        if (comparisonProperty is null)
-        {
-            return new ValidationResult(
-                $"Unknown property: {_comparisonPropertyName}"
+        // A developer configuration error, not a user data error.
+        PropertyInfo? property =
+            PropertyCache.GetOrAdd(
+                (validationContext.ObjectType, _comparisonPropertyName),
+                key => key.Item1.GetProperty(key.Item2)
+            )
+            ?? throw new InvalidOperationException(
+                $"{nameof(DateNotBeforeAttribute)}: property '{_comparisonPropertyName}' not found on {validationContext.ObjectType.Name}."
             );
-        }
 
-        if (
-            comparisonProperty.GetValue(validationContext.ObjectInstance)
-            is not DateOnly startValue
-        )
+        object? rawValue = property.GetValue(validationContext.ObjectInstance);
+
+        if (rawValue is null)
         {
             return ValidationResult.Success;
         }
 
-        return endValue >= startValue
-            ? ValidationResult.Success
-            : new ValidationResult(
-                ErrorMessage ?? "End date cannot be earlier than start date.",
-                [validationContext.MemberName!]
+        if (rawValue is not DateOnly startValue)
+        {
+            throw new InvalidOperationException(
+                $"{nameof(DateNotBeforeAttribute)}: property '{_comparisonPropertyName}' must be of type DateOnly or DateOnly?, but was {rawValue.GetType().Name}."
             );
+        }
+
+        if (endValue >= startValue)
+        {
+            return ValidationResult.Success;
+        }
+
+        string[] memberNames = validationContext.MemberName is { } name
+            ? [name]
+            : [];
+
+        return new ValidationResult(
+            ErrorMessage ?? "End date cannot be earlier than start date.",
+            memberNames
+        );
     }
 }

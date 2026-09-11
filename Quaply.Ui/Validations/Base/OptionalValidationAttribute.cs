@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Quaply.Ui.Validations.Base;
 
+[AttributeUsage(AttributeTargets.Property)]
 public abstract class OptionalValidationAttribute : ValidationAttribute
 {
     protected abstract ValidationAttribute Inner { get; }
@@ -19,8 +20,18 @@ public abstract class OptionalValidationAttribute : ValidationAttribute
             return ValidationResult.Success;
         }
 
-        return Inner.IsValid(value)
-            ? ValidationResult.Success
-            : new ValidationResult(ErrorMessage ?? "Value is not valid.");
+        if (Inner.IsValid(value))
+        {
+            return ValidationResult.Success;
+        }
+
+        string[] memberNames = validationContext.MemberName is { } name
+            ? [name]
+            : [];
+
+        return new ValidationResult(
+            ErrorMessage ?? "Value is not valid.",
+            memberNames
+        );
     }
 }
