@@ -53,6 +53,38 @@ public partial class ValidatedTextBoxField : UserControl
             new PropertyMetadata(string.Empty)
         );
 
+    public static readonly DependencyProperty AcceptsReturnProperty =
+        DependencyProperty.Register(
+            nameof(AcceptsReturn),
+            typeof(bool),
+            typeof(ValidatedTextBoxField),
+            new PropertyMetadata(false)
+        );
+
+    public static readonly DependencyProperty TextWrappingProperty =
+        DependencyProperty.Register(
+            nameof(TextWrapping),
+            typeof(TextWrapping),
+            typeof(ValidatedTextBoxField),
+            new PropertyMetadata(TextWrapping.NoWrap)
+        );
+
+    public static readonly DependencyProperty MinLinesProperty =
+        DependencyProperty.Register(
+            nameof(MinLines),
+            typeof(int),
+            typeof(ValidatedTextBoxField),
+            new PropertyMetadata(1)
+        );
+
+    public static readonly DependencyProperty MaxLinesProperty =
+        DependencyProperty.Register(
+            nameof(MaxLines),
+            typeof(int),
+            typeof(ValidatedTextBoxField),
+            new PropertyMetadata(int.MaxValue)
+        );
+
     public ValidatedTextBoxField()
     {
         InitializeComponent();
@@ -86,6 +118,30 @@ public partial class ValidatedTextBoxField : UserControl
     {
         get => (string)GetValue(ErrorTextProperty);
         set => SetValue(ErrorTextProperty, value);
+    }
+
+    public bool AcceptsReturn
+    {
+        get => (bool)GetValue(AcceptsReturnProperty);
+        set => SetValue(AcceptsReturnProperty, value);
+    }
+
+    public TextWrapping TextWrapping
+    {
+        get => (TextWrapping)GetValue(TextWrappingProperty);
+        set => SetValue(TextWrappingProperty, value);
+    }
+
+    public int MinLines
+    {
+        get => (int)GetValue(MinLinesProperty);
+        set => SetValue(MinLinesProperty, value);
+    }
+
+    public int MaxLines
+    {
+        get => (int)GetValue(MaxLinesProperty);
+        set => SetValue(MaxLinesProperty, value);
     }
 
     private void ValidatedTextBoxField_OnValidationError(

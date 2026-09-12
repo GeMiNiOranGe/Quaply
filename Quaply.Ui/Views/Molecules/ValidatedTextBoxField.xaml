@@ -14,9 +14,13 @@
   mc:Ignorable="d">
   <primitives:ValidatedField ErrorText="{Binding ErrorText, ElementName=validatedTextBoxField}" Label="{Binding Label, ElementName=validatedTextBoxField}">
     <ui:TextBox
+      AcceptsReturn="{Binding AcceptsReturn, ElementName=validatedTextBoxField}"
       Icon="{Binding Icon, ElementName=validatedTextBoxField}"
+      MaxLines="{Binding MaxLines, ElementName=validatedTextBoxField}"
+      MinLines="{Binding MinLines, ElementName=validatedTextBoxField}"
       PlaceholderText="{Binding PlaceholderText, ElementName=validatedTextBoxField}"
-      Text="{Binding Text, ElementName=validatedTextBoxField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+      Text="{Binding Text, ElementName=validatedTextBoxField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+      TextWrapping="{Binding TextWrapping, ElementName=validatedTextBoxField}">
       <ui:TextBox.Style>
         <Style BasedOn="{StaticResource {x:Type ui:TextBox}}" TargetType="ui:TextBox">
           <Style.Triggers>
