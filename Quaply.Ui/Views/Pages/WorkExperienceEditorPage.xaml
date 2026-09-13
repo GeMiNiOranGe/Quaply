@@ -97,7 +97,8 @@
                 Padding="8,4"
                 VerticalAlignment="Bottom"
                 Appearance="Secondary"
-                Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                Visibility="{Binding DurationPreview, Converter={converters:NullToVisibilityConverter}}">
                 <TextBlock FontSize="12" Text="{Binding DurationPreview}" />
               </ui:Badge>
             </Grid>

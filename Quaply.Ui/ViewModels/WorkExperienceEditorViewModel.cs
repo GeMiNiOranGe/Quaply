@@ -61,7 +61,7 @@ public partial class WorkExperienceEditorViewModel(
 
     public int DescriptionCharacterCount => Description.Length;
 
-    public string DurationPreview =>
+    public string? DurationPreview =>
         BuildDurationPreview(StartDate, EndDate, IsCurrentlyWorking);
 
     [NotifyDataErrorInfo]
@@ -412,35 +412,26 @@ public partial class WorkExperienceEditorViewModel(
         );
     }
 
-    private static string BuildDurationPreview(
-        DateOnly? start,
+    private static string? BuildDurationPreview(
+        DateOnly start,
         DateOnly? end,
         bool isCurrent
     )
     {
-        if (start is null && end is null)
-        {
-            return "Invalid date range";
-        }
-
-        if (start is null)
-        {
-            return "Invalid start date";
-        }
-
         DateOnly resolvedEnd =
             isCurrent || end is null
                 ? DateOnly.FromDateTime(DateTime.Today)
                 : end.Value;
+
         if (resolvedEnd < start)
         {
-            return "Invalid date range";
+            return null;
         }
 
         int totalMonths =
-            ((resolvedEnd.Year - start.Value.Year) * 12)
+            ((resolvedEnd.Year - start.Year) * 12)
             + resolvedEnd.Month
-            - start.Value.Month;
+            - start.Month;
         int years = totalMonths / 12;
         int months = totalMonths % 12;
 
