@@ -4,6 +4,7 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:converters="clr-namespace:Quaply.Ui.Converters"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:layout="clr-namespace:Quaply.Ui.AttachedProperties"
   xmlns:local="clr-namespace:Quaply.Ui.Views.Pages"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:molecules="clr-namespace:Quaply.Ui.Views.Molecules"
@@ -50,83 +51,88 @@
             <RowDefinition Height="Auto" />
           </Grid.RowDefinitions>
 
-          <StackPanel Grid.Row="0" Margin="24">
-            <!--  Section: Basic info  -->
-            <TextBlock
-              Margin="0,0,0,8"
-              FontSize="20"
-              FontWeight="SemiBold"
-              Text="Personal information" />
+          <StackPanel
+            Grid.Row="0"
+            Margin="24"
+            layout:Gap.Vertical="24">
+            <StackPanel layout:Gap.Vertical="16">
+              <!--  Section: Basic info  -->
+              <StackPanel>
+                <TextBlock
+                  Margin="0,0,0,8"
+                  FontSize="20"
+                  FontWeight="SemiBold"
+                  Text="Personal information" />
 
-            <Separator Margin="0,0,0,8" />
+                <Separator />
+              </StackPanel>
 
-            <Grid Margin="0,0,0,16">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="16" />
-                <ColumnDefinition Width="*" />
-              </Grid.ColumnDefinitions>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="16" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-              <molecules:ValidatedTextBoxField
-                Grid.Column="0"
-                Label="Full Name *"
-                PlaceholderText="John Doe"
-                Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" />
+                <molecules:ValidatedTextBoxField
+                  Grid.Column="0"
+                  Label="Full Name *"
+                  PlaceholderText="John Doe"
+                  Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" />
 
-              <molecules:ValidatedTextBoxField
-                Grid.Column="2"
-                Icon="{ui:SymbolIcon Mail24}"
-                Label="Email Address"
-                PlaceholderText="john.doe@example.com"
-                Text="{Binding Email, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" />
-            </Grid>
+                <molecules:ValidatedTextBoxField
+                  Grid.Column="2"
+                  Icon="{ui:SymbolIcon Mail24}"
+                  Label="Email Address"
+                  PlaceholderText="john.doe@example.com"
+                  Text="{Binding Email, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" />
+              </Grid>
 
-            <Grid Margin="0,0,0,16">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="16" />
-                <ColumnDefinition Width="*" />
-              </Grid.ColumnDefinitions>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="16" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-              <molecules:ValidatedTextBoxField
-                Grid.Column="0"
-                Icon="{ui:SymbolIcon Call24}"
-                Label="Phone Number"
-                PlaceholderText="+1 555 123 4567"
-                Text="{Binding PhoneNumber, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" />
+                <molecules:ValidatedTextBoxField
+                  Grid.Column="0"
+                  Icon="{ui:SymbolIcon Call24}"
+                  Label="Phone Number"
+                  PlaceholderText="+1 555 123 4567"
+                  Text="{Binding PhoneNumber, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" />
 
-              <molecules:ValidatedDatePickerField
-                Grid.Column="2"
-                Label="Date of Birth"
-                SelectedDate="{Binding DateOfBirth, Converter={converters:DateOnlyToDateTimeConverter}}" />
-            </Grid>
+                <molecules:ValidatedDatePickerField
+                  Grid.Column="2"
+                  Label="Date of Birth"
+                  SelectedDate="{Binding DateOfBirth, Converter={converters:DateOnlyToDateTimeConverter}}" />
+              </Grid>
+            </StackPanel>
 
-            <TextBlock
-              Margin="0,0,0,8"
-              FontSize="20"
-              FontWeight="SemiBold"
-              Text="Social media links" />
+            <StackPanel layout:Gap.Vertical="16" Grid.IsSharedSizeScope="True">
+              <!--  Section: Links  -->
+              <StackPanel>
+                <TextBlock
+                  Margin="0,0,0,8"
+                  FontSize="20"
+                  FontWeight="SemiBold"
+                  Text="Social media links" />
 
-            <Separator Margin="0,0,0,8" />
+                <Separator />
+              </StackPanel>
 
-            <StackPanel Grid.IsSharedSizeScope="True">
-              <!--  LinkedIn  -->
               <molecules:PrefixedTextBoxField
-                Margin="0,0,0,16"
                 Label="LinkedIn"
                 PlaceholderText="john-doe (or paste link)"
                 Prefix="https://linkedin.com/in/"
                 Text="{Binding LinkedInUsername, UpdateSourceTrigger=LostFocus}" />
 
-              <!--  GitHub  -->
               <molecules:PrefixedTextBoxField
-                Margin="0,0,0,16"
                 Label="GitHub"
                 PlaceholderText="JohnDoe (or paste link)"
                 Prefix="https://github.com/"
                 Text="{Binding GitHubUsername, UpdateSourceTrigger=LostFocus}" />
 
-              <!--  Portfolio  -->
               <molecules:ValidatedTextBoxField
                 Label="Portfolio"
                 PlaceholderText="https://johndoe.com"
