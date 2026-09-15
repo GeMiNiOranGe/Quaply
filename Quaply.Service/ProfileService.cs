@@ -43,8 +43,9 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
             return;
         }
 
-        IEnumerable<ResumeProfile> links =
-            _unitOfWork.ResumeProfiles.GetByProfileId(id);
+        IEnumerable<ResumeProfile> links = await _unitOfWork
+            .ResumeProfiles.GetManyByProfileIdAsync(id)
+            .ToListAsync();
         _unitOfWork.ResumeProfiles.RemoveRange(links);
 
         _unitOfWork.Profiles.Remove(profile);

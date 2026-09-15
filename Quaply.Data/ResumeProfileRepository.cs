@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Quaply.Data.Contexts;
 using Quaply.Data.Interfaces;
 using Quaply.Data.Models;
@@ -9,13 +10,17 @@ internal class ResumeProfileRepository(QuaplyDbContext context)
 {
     private readonly QuaplyDbContext _context = context;
 
-    public IEnumerable<ResumeProfile> GetByProfileId(int profileId)
+    public IAsyncEnumerable<ResumeProfile> GetManyByProfileIdAsync(
+        int profileId
+    )
     {
-        return _context.ResumeProfiles.Where(rp => rp.ProfileId == profileId);
+        return _context
+            .ResumeProfiles.Where(rp => rp.ProfileId == profileId)
+            .AsAsyncEnumerable();
     }
 
-    public void RemoveRange(IEnumerable<ResumeProfile> links)
+    public void RemoveRange(IEnumerable<ResumeProfile> entities)
     {
-        _context.ResumeProfiles.RemoveRange(links);
+        _context.ResumeProfiles.RemoveRange(entities);
     }
 }

@@ -4,7 +4,7 @@ namespace Quaply.Data.Interfaces;
 
 public interface IResumeProfileRepository
 {
-    IEnumerable<ResumeProfile> GetByProfileId(int profileId);
+    IAsyncEnumerable<ResumeProfile> GetManyByProfileIdAsync(int profileId);
 
-    void RemoveRange(IEnumerable<ResumeProfile> links);
+    void RemoveRange(IEnumerable<ResumeProfile> entities);
 }
