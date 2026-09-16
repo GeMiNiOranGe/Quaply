@@ -91,6 +91,28 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
         await _unitOfWork.SaveChangesAsync();
     }
 
+    public async Task PurgeRangeWorkExperiencesAsync(IEnumerable<int> ids)
+    {
+        if (!ids.Any())
+        {
+            return;
+        }
+
+        List<WorkExperience> workExperiences = await _unitOfWork
+            .WorkExperiences.GetManyByIdsIncludingDeletedAsync(ids)
+            .ToListAsync();
+
+        if (workExperiences.Any(entity => entity.DeletedAt is null))
+        {
+            throw new InvalidOperationException(
+                "All work experiences must be soft-deleted before they can be permanently hard-deleted."
+            );
+        }
+
+        _unitOfWork.WorkExperiences.PurgeRange(workExperiences);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
     public async Task RestoreWorkExperienceAsync(int id)
     {
         WorkExperience? workExperience =
@@ -106,6 +128,31 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
         }
 
         _unitOfWork.WorkExperiences.Restore(workExperience);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task RestoreRangeWorkExperiencesAsync(IEnumerable<int> ids)
+    {
+        if (!ids.Any())
+        {
+            return;
+        }
+
+        List<WorkExperience> workExperiences = await _unitOfWork
+            .WorkExperiences.GetManyByIdsIncludingDeletedAsync(ids)
+            .ToListAsync();
+
+        List<WorkExperience> toRestore =
+        [
+            .. workExperiences.Where(entity => entity.DeletedAt is not null),
+        ];
+
+        if (toRestore.Count == 0)
+        {
+            return;
+        }
+
+        _unitOfWork.WorkExperiences.RestoreRange(toRestore);
         await _unitOfWork.SaveChangesAsync();
     }
 }

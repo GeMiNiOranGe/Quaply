@@ -18,5 +18,9 @@ public interface IWorkExperienceService
 
     Task PurgeWorkExperienceAsync(int id);
 
+    Task PurgeRangeWorkExperiencesAsync(IEnumerable<int> ids);
+
     Task RestoreWorkExperienceAsync(int id);
+
+    Task RestoreRangeWorkExperiencesAsync(IEnumerable<int> ids);
 }

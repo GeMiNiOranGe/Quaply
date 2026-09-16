@@ -24,6 +24,16 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
             .FirstOrDefaultAsync(entity => entity.Id == id);
     }
 
+    public IAsyncEnumerable<WorkExperience> GetManyByIdsIncludingDeletedAsync(
+        IEnumerable<int> ids
+    )
+    {
+        return _context
+            .WorkExperiences.IgnoreQueryFilters()
+            .Where(entity => ids.Contains(entity.Id))
+            .AsAsyncEnumerable();
+    }
+
     public IAsyncEnumerable<WorkExperience> GetManyAsync()
     {
         return _context
@@ -63,10 +73,26 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
         _context.WorkExperiences.Remove(entity);
     }
 
+    public void PurgeRange(IEnumerable<WorkExperience> entities)
+    {
+        _context.WorkExperiences.RemoveRange(entities);
+    }
+
     public void Restore(WorkExperience entity)
     {
         entity.DeletedAt = null;
         entity.UpdatedAt = DateTime.UtcNow;
         _context.WorkExperiences.Update(entity);
+    }
+
+    public void RestoreRange(IEnumerable<WorkExperience> entities)
+    {
+        foreach (WorkExperience entity in entities)
+        {
+            entity.DeletedAt = null;
+            entity.UpdatedAt = DateTime.UtcNow;
+        }
+
+        _context.WorkExperiences.UpdateRange(entities);
     }
 }

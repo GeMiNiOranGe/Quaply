@@ -8,6 +8,10 @@ public interface IWorkExperienceRepository
 
     Task<WorkExperience?> GetByIdIncludingDeletedAsync(int id);
 
+    IAsyncEnumerable<WorkExperience> GetManyByIdsIncludingDeletedAsync(
+        IEnumerable<int> ids
+    );
+
     IAsyncEnumerable<WorkExperience> GetManyAsync();
 
     IAsyncEnumerable<WorkExperience> GetManyDeletedAsync();
@@ -20,5 +24,9 @@ public interface IWorkExperienceRepository
 
     void Purge(WorkExperience entity);
 
+    void PurgeRange(IEnumerable<WorkExperience> entities);
+
     void Restore(WorkExperience entity);
+
+    void RestoreRange(IEnumerable<WorkExperience> entities);
 }
