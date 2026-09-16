@@ -42,7 +42,33 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
 
     public async Task DeleteWorkExperienceAsync(int id)
     {
-        throw new NotImplementedException();
+        WorkExperience? workExperience =
+            await _unitOfWork.WorkExperiences.GetByIdAsync(id);
+        if (workExperience == null)
+        {
+            return;
+        }
+
+        // Remove links to ResumeWorkExperience
+        IEnumerable<ResumeWorkExperience> links = await _unitOfWork
+            .ResumeWorkExperiences.GetManyByWorkExperienceIdAsync(id)
+            .ToListAsync();
+        _unitOfWork.ResumeWorkExperiences.RemoveRange(links);
+
+        // and set WorkExperienceId to null for Projects
+        IEnumerable<Project> projects = await _unitOfWork
+            .Projects.GetManyByWorkExperienceIdAsync(id)
+            .ToListAsync();
+        foreach (Project project in projects)
+        {
+            project.WorkExperienceId = null;
+            _unitOfWork.Projects.Update(project);
+            // TODO: Consider using the Remove (aka Delete) method via ProjectService.
+            _unitOfWork.Projects.Remove(project);
+        }
+
+        _unitOfWork.WorkExperiences.Remove(workExperience);
+        await _unitOfWork.SaveChangesAsync();
     }
 
     public async Task PurgeWorkExperienceAsync(int id)
