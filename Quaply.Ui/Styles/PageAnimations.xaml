@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Style x:Key="FadeInSlideUpPage" TargetType="UserControl">
     <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
 
@@ -17,14 +17,18 @@
               Storyboard.TargetProperty="Opacity"
               From="0"
               To="1"
-              Duration="0:0:0.10" />
+              Duration="0:0:0.25">
+              <DoubleAnimation.EasingFunction>
+                <QuadraticEase EasingMode="EaseOut" />
+              </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
 
             <!--  Move bottom to top  -->
             <DoubleAnimation
               Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
-              From="20"
+              From="12"
               To="0"
-              Duration="0:0:0.20">
+              Duration="0:0:0.25">
               <DoubleAnimation.EasingFunction>
                 <CubicEase EasingMode="EaseOut" />
               </DoubleAnimation.EasingFunction>
