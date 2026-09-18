@@ -13,6 +13,7 @@
         <ui:ThemesDictionary Theme="Dark" />
         <ui:ControlsDictionary />
 
+        <ResourceDictionary Source="Styles/ButtonStyles.xaml" />
         <ResourceDictionary Source="Styles/DataGridStyles.xaml" />
         <ResourceDictionary Source="Styles/PageAnimations.xaml" />
       </ResourceDictionary.MergedDictionaries>
