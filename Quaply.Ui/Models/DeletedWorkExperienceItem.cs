@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Quaply.Data.Models;
+using Quaply.Ui.Interfaces;
 
 namespace Quaply.Ui.Models;
 
@@ -8,7 +9,8 @@ namespace Quaply.Ui.Models;
 /// purge countdown) without polluting the EF entity itself.
 /// </summary>
 public partial class DeletedWorkExperienceItem(WorkExperience workExperience)
-    : ObservableObject
+    : ObservableObject,
+        ISelectableItem
 {
     public WorkExperience WorkExperience { get; } = workExperience;
 

@@ -225,7 +225,10 @@
 
             <!--  Table  -->
             <DataGrid
+              x:Name="workExperienceTrashDataGrid"
               Padding="{Binding SelectedCount, Converter={converters:ConditionalBottomInsetConverter}, ConverterParameter='0,0,0,0|72'}"
+              layout:DataGridMultiSelectBehavior.AfterSyncCommand="{Binding ToggleSelectionCommand}"
+              layout:DataGridMultiSelectBehavior.IsEnabled="True"
               AutoGenerateColumns="False"
               CanUserAddRows="False"
               CanUserDeleteRows="False"
@@ -233,6 +236,7 @@
               IsReadOnly="True"
               ItemsSource="{Binding DeletedItems}"
               RowHeight="52"
+              RowStyle="{StaticResource SelectableDataGridRowStyle}"
               SelectedItem="{Binding SelectedItem}"
               SelectionMode="Extended"
               Visibility="{Binding HasDeletedItems, Converter={converters:BooleanToVisibilityConverter}}">
@@ -244,7 +248,7 @@
                       <CheckBox
                         Margin="16,0,0,0"
                         Padding="0"
-                        Click="SelectAllCheckBox_Click"
+                        layout:DataGridMultiSelectBehavior.SelectAllFor="{Binding ElementName=workExperienceTrashDataGrid}"
                         IsChecked="{Binding DataContext.IsAllSelected, RelativeSource={RelativeSource AncestorType=DataGrid}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         IsThreeState="True" />
                     </DataTemplate>
