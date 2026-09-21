@@ -5,6 +5,8 @@ namespace Quaply.Ui.AttachedProperties;
 
 public static class ContextMenuBehavior
 {
+    // --- OpenOnClick ---
+
     public static readonly DependencyProperty OpenOnClickProperty =
         DependencyProperty.RegisterAttached(
             "OpenOnClick",
@@ -35,15 +37,15 @@ public static class ContextMenuBehavior
 
         if ((bool)e.NewValue)
         {
-            button.Click += Button_Click;
+            button.Click += OnButtonClick;
         }
         else
         {
-            button.Click -= Button_Click;
+            button.Click -= OnButtonClick;
         }
     }
 
-    private static void Button_Click(object sender, RoutedEventArgs e)
+    private static void OnButtonClick(object sender, RoutedEventArgs e)
     {
         Button button = (Button)sender;
         button.ContextMenu.PlacementTarget = button;

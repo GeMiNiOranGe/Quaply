@@ -29,6 +29,17 @@ public static class Gap
             new PropertyMetadata(0.0, OnUniformChanged)
         );
 
+    // Store the original margin of each child so that Apply() is always idempotent.
+    private static readonly DependencyProperty BaseMarginProperty =
+        DependencyProperty.RegisterAttached(
+            "BaseMargin",
+            typeof(Thickness),
+            typeof(Gap),
+            new PropertyMetadata(new Thickness(double.NaN))
+        ); // NaN = Not yet captured
+
+    // --- Vertical ---
+
     public static void SetVertical(DependencyObject d, double value)
     {
         d.SetValue(VerticalProperty, value);
@@ -39,6 +50,8 @@ public static class Gap
         return (double)d.GetValue(VerticalProperty);
     }
 
+    // --- Horizontal ---
+
     public static void SetHorizontal(DependencyObject d, double value)
     {
         d.SetValue(HorizontalProperty, value);
@@ -48,6 +61,8 @@ public static class Gap
     {
         return (double)d.GetValue(HorizontalProperty);
     }
+
+    // --- Uniform ---
 
     public static void SetUniform(DependencyObject d, double value)
     {
@@ -64,18 +79,14 @@ public static class Gap
         DependencyPropertyChangedEventArgs e
     )
     {
+        // Setting both Vertical and Horizontal here triggers OnGapChanged twice
+        // (once per property), so Apply() runs twice. This is intentional and
+        // harmless - Apply() is idempotent - not a bug to "optimize" away.
         d.SetValue(VerticalProperty, e.NewValue);
         d.SetValue(HorizontalProperty, e.NewValue);
     }
 
-    // Store the original margin of each child so that Apply() is always idempotent.
-    private static readonly DependencyProperty BaseMarginProperty =
-        DependencyProperty.RegisterAttached(
-            "BaseMargin",
-            typeof(Thickness),
-            typeof(Gap),
-            new PropertyMetadata(new Thickness(double.NaN))
-        ); // NaN = Not yet captured
+    // --- Layout application (internal)---
 
     private static void OnGapChanged(
         DependencyObject d,
@@ -88,8 +99,8 @@ public static class Gap
         }
 
         // Avoid duplicate registrations if the Vertical/Horizontal changes frequently.
-        panel.Loaded -= Panel_Loaded;
-        panel.Loaded += Panel_Loaded;
+        panel.Loaded -= OnPanelLoaded;
+        panel.Loaded += OnPanelLoaded;
 
         if (panel.IsLoaded)
         {
@@ -97,7 +108,7 @@ public static class Gap
         }
     }
 
-    private static void Panel_Loaded(object sender, RoutedEventArgs e)
+    private static void OnPanelLoaded(object sender, RoutedEventArgs e)
     {
         Apply((Panel)sender);
     }
