@@ -23,7 +23,7 @@ public partial class WorkExperienceEditorViewModel(
     private sealed record WorkExperienceFormSnapshot(
         string CompanyName,
         string PositionTitle,
-        string Description,
+        string? Description,
         DateOnly StartDate,
         DateOnly? EndDate,
         bool IsCurrentlyWorking
@@ -59,7 +59,18 @@ public partial class WorkExperienceEditorViewModel(
 
     public bool CanEditEndDate => !IsCurrentlyWorking;
 
-    public int DescriptionCharacterCount => Description.Length;
+    public int DescriptionCharacterCount
+    {
+        get
+        {
+            if (Description is null)
+            {
+                return 0;
+            }
+
+            return Description.Length;
+        }
+    }
 
     public string? DurationPreview =>
         BuildDurationPreview(StartDate, EndDate, IsCurrentlyWorking);
@@ -94,7 +105,7 @@ public partial class WorkExperienceEditorViewModel(
         ErrorMessage = "Description must be at most 1000 characters."
     )]
     [ObservableProperty]
-    public partial string Description { get; set; } = string.Empty;
+    public partial string? Description { get; set; }
 
     [NotifyCanExecuteChangedFor(nameof(ResetCommand))]
     [ObservableProperty]
@@ -110,7 +121,7 @@ public partial class WorkExperienceEditorViewModel(
     [ObservableProperty]
     public partial DateOnly? EndDate { get; set; }
 
-    partial void OnDescriptionChanged(string value)
+    partial void OnDescriptionChanged(string? value)
     {
         OnPropertyChanged(nameof(DescriptionCharacterCount));
     }
@@ -354,7 +365,7 @@ public partial class WorkExperienceEditorViewModel(
     {
         CompanyName = string.Empty;
         PositionTitle = string.Empty;
-        Description = string.Empty;
+        Description = null;
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow);
         EndDate = null;
         IsCurrentlyWorking = false;
@@ -364,7 +375,7 @@ public partial class WorkExperienceEditorViewModel(
     {
         CompanyName = workExperience.CompanyName;
         PositionTitle = workExperience.PositionTitle;
-        Description = workExperience.Description ?? string.Empty;
+        Description = workExperience.Description;
         StartDate = workExperience.StartDate;
         EndDate = workExperience.EndDate;
         IsCurrentlyWorking = workExperience.EndDate is null;
@@ -404,7 +415,7 @@ public partial class WorkExperienceEditorViewModel(
         return new(
             string.Empty,
             string.Empty,
-            string.Empty,
+            null,
             DateOnly.FromDateTime(DateTime.UtcNow),
             null,
             false
