@@ -19,7 +19,7 @@ public partial class DeletedWorkExperienceItem(WorkExperience workExperience)
 
     public string CompanyName => WorkExperience.CompanyName;
 
-    public string? PositionTitle => WorkExperience.PositionTitle;
+    public string PositionTitle => WorkExperience.PositionTitle;
 
     public string? Description => WorkExperience.Description;
 

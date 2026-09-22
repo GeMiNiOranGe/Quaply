@@ -83,6 +83,7 @@ public partial class WorkExperienceEditorViewModel(
         ErrorMessage = "Position title must be at most 255 characters."
     )]
     [ObservableProperty]
+    [Required(ErrorMessage = "Position title is required.")]
     public partial string PositionTitle { get; set; } = string.Empty;
 
     [NotifyDataErrorInfo]
@@ -362,7 +363,7 @@ public partial class WorkExperienceEditorViewModel(
     private void FillFormFrom(WorkExperience workExperience)
     {
         CompanyName = workExperience.CompanyName;
-        PositionTitle = workExperience.PositionTitle ?? string.Empty;
+        PositionTitle = workExperience.PositionTitle;
         Description = workExperience.Description ?? string.Empty;
         StartDate = workExperience.StartDate;
         EndDate = workExperience.EndDate;
@@ -372,9 +373,7 @@ public partial class WorkExperienceEditorViewModel(
     private void ApplyFormTo(WorkExperience workExperience)
     {
         workExperience.CompanyName = CompanyName.Trim();
-        workExperience.PositionTitle = string.IsNullOrWhiteSpace(PositionTitle)
-            ? null
-            : PositionTitle.Trim();
+        workExperience.PositionTitle = PositionTitle.Trim();
         workExperience.Description = string.IsNullOrWhiteSpace(Description)
             ? null
             : Description.Trim();

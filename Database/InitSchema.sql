@@ -80,7 +80,7 @@ CREATE TABLE "WorkExperience"
 (
     "Id"            INTEGER PRIMARY KEY AUTOINCREMENT,
     "CompanyName"   TEXT    NOT NULL,
-    "PositionTitle" TEXT,
+    "PositionTitle" TEXT    NOT NULL,
     "Description"   TEXT,
     "StartDate"     TEXT    NOT NULL,
     "EndDate"       TEXT,

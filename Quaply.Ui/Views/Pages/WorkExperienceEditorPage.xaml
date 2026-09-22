@@ -82,7 +82,7 @@
 
                 <molecules:ValidatedTextBoxField
                   Grid.Column="2"
-                  Label="Position Title"
+                  Label="Position Title *"
                   PlaceholderText="Software Engineer"
                   Text="{Binding PositionTitle, UpdateSourceTrigger=PropertyChanged, NotifyOnValidationError=True}" />
               </Grid>
