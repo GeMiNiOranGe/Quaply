@@ -102,22 +102,19 @@ public partial class WorkExperienceTrashViewModel(
         PurgeSelectedCommand.NotifyCanExecuteChanged();
     }
 
-    partial void OnSelectedItemChanged(DeletedWorkExperienceItem? value)
-    {
-        // Auto-close the side panel when the user deselects the item or item is
-        // deleted/restored, but keep it open when a new item is selected.
-        if (value is null || !IsPreviewPanelPinned)
-        {
-            IsPreviewPanelOpen = false;
-        }
-    }
-
     partial void OnIsPreviewPanelPinnedChanged(bool value)
     {
         // The panel width adjusts based on its pinned state: wider when pinned
         // for long-term use, and narrower when unpinned for quick viewing.
         // TODO: Consider implementing an automatic resizing feature.
         PreviewPanelWidth = value ? 360.0 : 320.0;
+
+        // Unpin while the panel is empty: there's no reason to keep it open,
+        // following the rule "unpinned + nothing to show = closed."
+        if (!value && PreviewedItem is null)
+        {
+            IsPreviewPanelOpen = false;
+        }
     }
 
     [RelayCommand]
@@ -142,6 +139,7 @@ public partial class WorkExperienceTrashViewModel(
     private void ClosePreviewPanel()
     {
         IsPreviewPanelOpen = false;
+        IsPreviewPanelPinned = false;
     }
 
     [RelayCommand]
@@ -305,6 +303,25 @@ public partial class WorkExperienceTrashViewModel(
         UpdateSelectAllState();
     }
 
+    private void ClearPreviewIfRemoved(
+        IEnumerable<DeletedWorkExperienceItem> removedItems
+    )
+    {
+        if (PreviewedItem is null || !removedItems.Contains(PreviewedItem))
+        {
+            return;
+        }
+
+        PreviewedItem = null;
+
+        // If pinned: keep the panel open and display the empty state instead of
+        // having it disappear abruptly. If not pinned: close as usual.
+        if (!IsPreviewPanelPinned)
+        {
+            IsPreviewPanelOpen = false;
+        }
+    }
+
     private static string BuildPurgeWarning(
         List<DeletedWorkExperienceItem> items
     )
@@ -326,7 +343,7 @@ public partial class WorkExperienceTrashViewModel(
             0 => false,
             _ when DeletedItems.All(i => i.IsSelected) => true,
             _ when DeletedItems.All(i => !i.IsSelected) => false,
-            _ => null, // Indeterminate: chỉ chọn một phần
+            _ => null, // Indeterminate: select only a portion
         };
 
         _isSyncingSelectAll = false;
@@ -345,6 +362,7 @@ public partial class WorkExperienceTrashViewModel(
         EmptyTrashCommand.NotifyCanExecuteChanged();
 
         UpdateSelectAllState();
+        ClearPreviewIfRemoved([item]);
     }
 
     private void RemoveFromList(IEnumerable<DeletedWorkExperienceItem> items)
@@ -363,6 +381,7 @@ public partial class WorkExperienceTrashViewModel(
         EmptyTrashCommand.NotifyCanExecuteChanged();
 
         UpdateSelectAllState();
+        ClearPreviewIfRemoved(items);
     }
 
     private async Task LoadDeletedWorkExperiencesAsync()
