@@ -130,6 +130,14 @@ public partial class WorkExperienceTrashViewModel(
     }
 
     [RelayCommand]
+    private async Task RefreshAsync()
+    {
+        await LoadDeletedWorkExperiencesAsync();
+
+        OnPropertyChanged(nameof(HasSelection));
+    }
+
+    [RelayCommand]
     private void TogglePreviewPanelPin()
     {
         IsPreviewPanelPinned = !IsPreviewPanelPinned;
