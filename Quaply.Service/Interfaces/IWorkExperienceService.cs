@@ -1,4 +1,5 @@
 using Quaply.Data.Models;
+using Quaply.Data.Querying;
 
 namespace Quaply.Service.Interfaces;
 
@@ -8,7 +9,9 @@ public interface IWorkExperienceService
 
     Task<IEnumerable<WorkExperience>> GetWorkExperiencesAsync();
 
-    Task<IEnumerable<WorkExperience>> GetDeletedWorkExperiencesAsync();
+    Task<IEnumerable<WorkExperience>> GetDeletedWorkExperiencesAsync(
+        WorkExperienceSortOption sort
+    );
 
     Task CreateWorkExperienceAsync(WorkExperience workExperience);
 

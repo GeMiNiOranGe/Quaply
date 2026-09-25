@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Quaply.Data.Contexts;
 using Quaply.Data.Interfaces;
 using Quaply.Data.Models;
+using Quaply.Data.Querying;
 
 namespace Quaply.Data;
 
@@ -42,13 +43,26 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
             .AsAsyncEnumerable();
     }
 
-    public IAsyncEnumerable<WorkExperience> GetManyDeletedAsync()
+    public IAsyncEnumerable<WorkExperience> GetManyDeletedAsync(
+        WorkExperienceSortOption sort
+    )
     {
-        return _context
+        IQueryable<WorkExperience> query = _context
             .WorkExperiences.IgnoreQueryFilters()
             .AsNoTracking()
-            .Where(entity => entity.DeletedAt != null)
-            .AsAsyncEnumerable();
+            .Where(entity => entity.DeletedAt != null);
+
+        query = sort.Field switch
+        {
+            WorkExperienceSortField.CompanyName => sort.Descending
+                ? query.OrderByDescending(e => e.CompanyName)
+                : query.OrderBy(e => e.CompanyName),
+            _ => sort.Descending
+                ? query.OrderByDescending(e => e.DeletedAt)
+                : query.OrderBy(e => e.DeletedAt),
+        };
+
+        return query.AsAsyncEnumerable();
     }
 
     public void Add(WorkExperience entity)

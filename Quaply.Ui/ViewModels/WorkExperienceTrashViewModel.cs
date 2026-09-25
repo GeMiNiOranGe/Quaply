@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quaply.Data.Models;
+using Quaply.Data.Querying;
 using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
 using Quaply.Ui.Models;
@@ -69,7 +70,13 @@ public partial class WorkExperienceTrashViewModel(
     public partial bool? IsAllSelected { get; set; } = false;
 
     [ObservableProperty]
-    public partial string SortOption { get; set; } = "Deleted date";
+    public partial WorkExperienceSortField SortField { get; set; } =
+        WorkExperienceSortField.DeletedAt;
+
+    // ComboBox data source - derived directly from an enum;
+    // do not hardcode the list.
+    public IEnumerable<WorkExperienceSortField> SortFieldOptions { get; } =
+        Enum.GetValues<WorkExperienceSortField>();
 
     [NotifyPropertyChangedFor(nameof(SortDirectionTooltip))]
     [ObservableProperty]
@@ -115,6 +122,16 @@ public partial class WorkExperienceTrashViewModel(
         {
             IsPreviewPanelOpen = false;
         }
+    }
+
+    partial void OnSortFieldChanged(WorkExperienceSortField value)
+    {
+        _ = LoadDeletedWorkExperiencesAsync();
+    }
+
+    partial void OnIsSortDescendingChanged(bool value)
+    {
+        _ = LoadDeletedWorkExperiencesAsync();
     }
 
     [RelayCommand]
@@ -394,8 +411,11 @@ public partial class WorkExperienceTrashViewModel(
 
     private async Task LoadDeletedWorkExperiencesAsync()
     {
+        WorkExperienceSortOption sortOption = new(SortField, IsSortDescending);
+
         IEnumerable<WorkExperience> deleted =
-            await _service.GetDeletedWorkExperiencesAsync();
+            await _service.GetDeletedWorkExperiencesAsync(sortOption);
+
         DeletedItems = new(
             deleted.Select(w => new DeletedWorkExperienceItem(w))
         );

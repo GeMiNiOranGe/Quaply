@@ -1,5 +1,6 @@
 using Quaply.Data.Interfaces;
 using Quaply.Data.Models;
+using Quaply.Data.Querying;
 using Quaply.Service.Interfaces;
 
 namespace Quaply.Service;
@@ -21,10 +22,10 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
 
     public async Task<
         IEnumerable<WorkExperience>
-    > GetDeletedWorkExperiencesAsync()
+    > GetDeletedWorkExperiencesAsync(WorkExperienceSortOption sort)
     {
         return await _unitOfWork
-            .WorkExperiences.GetManyDeletedAsync()
+            .WorkExperiences.GetManyDeletedAsync(sort)
             .ToListAsync();
     }
 
