@@ -23,6 +23,8 @@ public partial class WorkExperienceTrashViewModel(
     // from re-triggering each other in a loop.
     private bool _isSyncingSelectAll;
 
+    private int _loadRequestId;
+
     [ObservableProperty]
     public partial double PreviewPanelWidth { get; set; } = 320.0;
 
@@ -85,6 +87,11 @@ public partial class WorkExperienceTrashViewModel(
     public async Task OnNavigatedToAsync()
     {
         await LoadDeletedWorkExperiencesAsync();
+    }
+
+    partial void OnSearchTextChanged(string value)
+    {
+        _ = LoadDeletedWorkExperiencesAsync(debounce: true);
     }
 
     partial void OnIsAllSelectedChanged(bool? value)
@@ -409,12 +416,35 @@ public partial class WorkExperienceTrashViewModel(
         ClearPreviewIfRemoved(items);
     }
 
-    private async Task LoadDeletedWorkExperiencesAsync()
+    private async Task LoadDeletedWorkExperiencesAsync(bool debounce = false)
     {
+        int requestId = ++_loadRequestId;
+
+        if (debounce)
+        {
+            await Task.Delay(300);
+
+            // While waiting, if the user types another character
+            // -> this request is obsolete; discard it.
+            if (requestId != _loadRequestId)
+            {
+                return;
+            }
+        }
+
         WorkExperienceSortOption sortOption = new(SortField, IsSortDescending);
+        WorkExperienceDeletedQuery query = new(SearchText, sortOption);
 
         IEnumerable<WorkExperience> deleted =
-            await _service.GetDeletedWorkExperiencesAsync(sortOption);
+            await _service.GetDeletedWorkExperiencesAsync(query);
+
+        // To handle cases where the database query runs slowly
+        // and a newer request intervenes while waiting for the result
+        // (even without debouncing).
+        if (requestId != _loadRequestId)
+        {
+            return;
+        }
 
         DeletedItems = new(
             deleted.Select(w => new DeletedWorkExperienceItem(w))

@@ -10,7 +10,7 @@ public interface IWorkExperienceService
     Task<IEnumerable<WorkExperience>> GetWorkExperiencesAsync();
 
     Task<IEnumerable<WorkExperience>> GetDeletedWorkExperiencesAsync(
-        WorkExperienceSortOption sort
+        WorkExperienceDeletedQuery query
     );
 
     Task CreateWorkExperienceAsync(WorkExperience workExperience);

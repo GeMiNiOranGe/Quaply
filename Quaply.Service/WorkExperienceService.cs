@@ -22,10 +22,10 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
 
     public async Task<
         IEnumerable<WorkExperience>
-    > GetDeletedWorkExperiencesAsync(WorkExperienceSortOption sort)
+    > GetDeletedWorkExperiencesAsync(WorkExperienceDeletedQuery query)
     {
         return await _unitOfWork
-            .WorkExperiences.GetManyDeletedAsync(sort)
+            .WorkExperiences.GetManyDeletedAsync(query)
             .ToListAsync();
     }
 

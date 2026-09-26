@@ -16,7 +16,7 @@ public interface IWorkExperienceRepository
     IAsyncEnumerable<WorkExperience> GetManyAsync();
 
     IAsyncEnumerable<WorkExperience> GetManyDeletedAsync(
-        WorkExperienceSortOption sort
+        WorkExperienceDeletedQuery query
     );
 
     void Add(WorkExperience entity);
