@@ -3,6 +3,7 @@ using Quaply.Data.Contexts;
 using Quaply.Data.Interfaces;
 using Quaply.Data.Models;
 using Quaply.Data.Querying;
+using Quaply.Data.Querying.Extensions;
 
 namespace Quaply.Data;
 
@@ -47,43 +48,13 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
         WorkExperienceDeletedQuery query
     )
     {
-        IQueryable<WorkExperience> filteredQuery = _context
+        return _context
             .WorkExperiences.IgnoreQueryFilters()
             .AsNoTracking()
-            .Where(entity => entity.DeletedAt != null);
-
-        if (!string.IsNullOrWhiteSpace(query.SearchText))
-        {
-            // Escape LIKE wildcard characters ('%', '_') if the user types them
-            // literally, to prevent the input from being interpreted
-            // as an unintended pattern.
-            string term = query
-                .SearchText.Trim()
-                .Replace("%", "\\%")
-                .Replace("_", "\\_");
-
-            // NOTE: SQLite's LIKE operator is case-insensitive only for
-            // ASCII characters. Vietnamese characters with diacritics (e.g.,
-            //"Đà Nẵng" vs. "đà nẵng") may not match if the casing differs.
-            // This limitation is acceptable for the initial version;
-            // it can be addressed later if necessary.
-            filteredQuery = filteredQuery.Where(entity =>
-                EF.Functions.Like(entity.CompanyName, $"%{term}%", "\\")
-                || EF.Functions.Like(entity.PositionTitle, $"%{term}%", "\\")
-            );
-        }
-
-        filteredQuery = query.Sort.Field switch
-        {
-            WorkExperienceSortField.CompanyName => query.Sort.Descending
-                ? filteredQuery.OrderByDescending(e => e.CompanyName)
-                : filteredQuery.OrderBy(e => e.CompanyName),
-            _ => query.Sort.Descending
-                ? filteredQuery.OrderByDescending(e => e.DeletedAt)
-                : filteredQuery.OrderBy(e => e.DeletedAt),
-        };
-
-        return filteredQuery.AsAsyncEnumerable();
+            .Where(entity => entity.DeletedAt != null)
+            .ApplySearch(query.SearchText)
+            .ApplySort(query.Sort)
+            .AsAsyncEnumerable();
     }
 
     public void Add(WorkExperience entity)
