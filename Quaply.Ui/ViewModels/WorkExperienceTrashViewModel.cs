@@ -26,6 +26,12 @@ public partial class WorkExperienceTrashViewModel(
     private int _loadRequestId;
 
     [ObservableProperty]
+    public partial bool IsSearching { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsLoading { get; set; }
+
+    [ObservableProperty]
     public partial double PreviewPanelWidth { get; set; } = 320.0;
 
     [NotifyPropertyChangedFor(nameof(IsPreviewPanelOpen))]
@@ -91,6 +97,7 @@ public partial class WorkExperienceTrashViewModel(
 
     partial void OnSearchTextChanged(string value)
     {
+        IsSearching = true;
         _ = LoadDeletedWorkExperiencesAsync(debounce: true);
     }
 
@@ -157,8 +164,6 @@ public partial class WorkExperienceTrashViewModel(
     private async Task RefreshAsync()
     {
         await LoadDeletedWorkExperiencesAsync();
-
-        OnPropertyChanged(nameof(HasSelection));
     }
 
     [RelayCommand]
@@ -432,24 +437,47 @@ public partial class WorkExperienceTrashViewModel(
             }
         }
 
-        WorkExperienceSortOption sortOption = new(SortField, IsSortDescending);
-        WorkExperienceDeletedQuery query = new(SearchText, sortOption);
+        IsSearching = false;
+        IsLoading = true;
 
-        IEnumerable<WorkExperience> deleted =
-            await _service.GetDeletedWorkExperiencesAsync(query);
-
-        // To handle cases where the database query runs slowly
-        // and a newer request intervenes while waiting for the result
-        // (even without debouncing).
-        if (requestId != _loadRequestId)
+        try
         {
-            return;
+            WorkExperienceSortOption sortOption = new(
+                SortField,
+                IsSortDescending
+            );
+
+            WorkExperienceDeletedQuery query = new(SearchText, sortOption);
+
+            IEnumerable<WorkExperience> deleted =
+                await _service.GetDeletedWorkExperiencesAsync(query);
+
+            // To handle cases where the database query runs slowly
+            // and a newer request intervenes while waiting for the result
+            // (even without debouncing).
+            if (requestId != _loadRequestId)
+            {
+                return;
+            }
+
+            DeletedItems = new(
+                deleted.Select(w => new DeletedWorkExperienceItem(w))
+            );
+
+            UpdateSelectAllState();
+
+            OnPropertyChanged(nameof(SelectedCount));
+            OnPropertyChanged(nameof(HasSelection));
+
+            RestoreSelectedCommand.NotifyCanExecuteChanged();
+            PurgeSelectedCommand.NotifyCanExecuteChanged();
         }
-
-        DeletedItems = new(
-            deleted.Select(w => new DeletedWorkExperienceItem(w))
-        );
-
-        UpdateSelectAllState();
+        finally
+        {
+            if (requestId == _loadRequestId)
+            {
+                IsLoading = false;
+            }
+        }
     }
 }
