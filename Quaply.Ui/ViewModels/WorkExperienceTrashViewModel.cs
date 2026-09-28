@@ -170,6 +170,12 @@ public partial class WorkExperienceTrashViewModel(
     }
 
     [RelayCommand]
+    private void SetSortField(WorkExperienceSortField field)
+    {
+        SortField = field;
+    }
+
+    [RelayCommand]
     private void ToggleSortDirection()
     {
         IsSortDescending = !IsSortDescending;

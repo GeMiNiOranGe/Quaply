@@ -82,6 +82,7 @@
                   Width="*"
                   MinWidth="160"
                   MaxWidth="320" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
@@ -97,76 +98,143 @@
                 </ui:TextBox.Icon>
               </ui:TextBox>
 
-              <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <StackPanel
-                  Grid.Column="1"
-                  Margin="8,0,0,0"
-                  Orientation="Horizontal">
-                  <!--  Filter: scoping the current view, not an action  -->
-                  <ui:Button
-                    Padding="8"
-                    layout:ContextMenuBehavior.OpenOnClick="True"
-                    Icon="{ui:SymbolIcon Filter24}"
-                    Style="{StaticResource IconOnlyButtonStyle}"
-                    ToolTip="Filter">
-                    <ui:Button.ContextMenu>
-                      <ContextMenu Placement="Bottom">
-                        <MenuItem
-                          Command="{Binding SetDeletedRangeCommand}"
-                          CommandParameter="{x:Static querying:RelativeDateRange.All}"
-                          Header="Deleted: All time"
-                          IsCheckable="True"
-                          IsChecked="{Binding SelectedDeletedRange, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:RelativeDateRange.All}}" />
+              <ui:ProgressRing
+                Grid.Column="1"
+                Width="20"
+                Height="20"
+                Margin="8,0"
+                VerticalAlignment="Center"
+                IsIndeterminate="True"
+                Visibility="{Binding IsSearching, Converter={converters:BooleanToVisibilityConverter}}" />
 
-                        <MenuItem
-                          Command="{Binding SetDeletedRangeCommand}"
-                          CommandParameter="{x:Static querying:RelativeDateRange.Last7Days}"
-                          Header="Deleted: Last 7 days"
-                          IsCheckable="True"
-                          IsChecked="{Binding SelectedDeletedRange, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:RelativeDateRange.Last7Days}}" />
-
-                        <MenuItem
-                          Command="{Binding SetDeletedRangeCommand}"
-                          CommandParameter="{x:Static querying:RelativeDateRange.Last30Days}"
-                          Header="Deleted: Last 30 days"
-                          IsCheckable="True"
-                          IsChecked="{Binding SelectedDeletedRange, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:RelativeDateRange.Last30Days}}" />
-                      </ContextMenu>
-                    </ui:Button.ContextMenu>
-                  </ui:Button>
-
-                  <ui:ProgressRing
-                    Grid.Column="0"
-                    Width="20"
-                    Height="20"
-                    Margin="8,0,0,0"
-                    HorizontalAlignment="Right"
+              <StackPanel Grid.Column="3" Orientation="Horizontal">
+                <!--  Filter: scoping the current view, not an action  -->
+                <!--
+                  Expanded (>= 1100px): segmented buttons displayed directly
+                -->
+                <StackPanel Orientation="Horizontal" Visibility="{Binding ActualWidth, ElementName=workExperienceTrashPage, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='1100;'}">
+                  <TextBlock
+                    Margin="0,0,8,0"
                     VerticalAlignment="Center"
-                    IsIndeterminate="True"
-                    Visibility="{Binding IsSearching, Converter={converters:BooleanToVisibilityConverter}}" />
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="Deleted" />
+
+                  <ui:Button
+                    Padding="16,6"
+                    Appearance="{Binding SelectedDeletedRange, Converter={converters:EnumToButtonAppearanceConverter}, ConverterParameter={x:Static querying:RelativeDateRange.All}}"
+                    Command="{Binding SetDeletedRangeCommand}"
+                    CommandParameter="{x:Static querying:RelativeDateRange.All}"
+                    Content="All time"
+                    CornerRadius="4,0,0,4" />
+
+                  <ui:Button
+                    Padding="16,6"
+                    Appearance="{Binding SelectedDeletedRange, Converter={converters:EnumToButtonAppearanceConverter}, ConverterParameter={x:Static querying:RelativeDateRange.Last7Days}}"
+                    Command="{Binding SetDeletedRangeCommand}"
+                    CommandParameter="{x:Static querying:RelativeDateRange.Last7Days}"
+                    Content="7 days"
+                    CornerRadius="0" />
+
+                  <ui:Button
+                    Padding="16,6"
+                    Appearance="{Binding SelectedDeletedRange, Converter={converters:EnumToButtonAppearanceConverter}, ConverterParameter={x:Static querying:RelativeDateRange.Last30Days}}"
+                    Command="{Binding SetDeletedRangeCommand}"
+                    CommandParameter="{x:Static querying:RelativeDateRange.Last30Days}"
+                    Content="30 days"
+                    CornerRadius="0,4,4,0" />
                 </StackPanel>
-              </StackPanel>
 
-              <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <TextBlock
-                  Margin="0,0,8,0"
-                  VerticalAlignment="Center"
-                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                  Text="Sort by" />
+                <!--
+                  Collapsed (< 1100px): icon button + ContextMenu,
+                  identical to existing logic.
+                -->
+                <ui:Button
+                  Padding="8,6"
+                  layout:ContextMenuBehavior.OpenOnClick="True"
+                  Content="{Binding SelectedDeletedRange, Converter={converters:EnumDisplayNameConverter}}"
+                  Icon="{ui:SymbolIcon Filter24}"
+                  Style="{StaticResource IconOnlyButtonStyle}"
+                  ToolTip="Filter by deleted date"
+                  Visibility="{Binding ActualWidth, ElementName=workExperienceTrashPage, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='0;1100'}">
+                  <ui:Button.ContextMenu>
+                    <ContextMenu Placement="Bottom">
+                      <MenuItem
+                        Command="{Binding SetDeletedRangeCommand}"
+                        CommandParameter="{x:Static querying:RelativeDateRange.All}"
+                        Header="{Binding Source={x:Static querying:RelativeDateRange.All}, Converter={converters:EnumDisplayNameConverter}}"
+                        IsCheckable="True"
+                        IsChecked="{Binding SelectedDeletedRange, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:RelativeDateRange.All}}" />
 
-                <ComboBox
-                  Width="160"
+                      <MenuItem
+                        Command="{Binding SetDeletedRangeCommand}"
+                        CommandParameter="{x:Static querying:RelativeDateRange.Last7Days}"
+                        Header="{Binding Source={x:Static querying:RelativeDateRange.Last7Days}, Converter={converters:EnumDisplayNameConverter}}"
+                        IsCheckable="True"
+                        IsChecked="{Binding SelectedDeletedRange, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:RelativeDateRange.Last7Days}}" />
+
+                      <MenuItem
+                        Command="{Binding SetDeletedRangeCommand}"
+                        CommandParameter="{x:Static querying:RelativeDateRange.Last30Days}"
+                        Header="{Binding Source={x:Static querying:RelativeDateRange.Last30Days}, Converter={converters:EnumDisplayNameConverter}}"
+                        IsCheckable="True"
+                        IsChecked="{Binding SelectedDeletedRange, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:RelativeDateRange.Last30Days}}" />
+                    </ContextMenu>
+                  </ui:Button.ContextMenu>
+                </ui:Button>
+
+                <atoms:Divider Margin="12,8" Orientation="Vertical" />
+
+                <!--  Expanded (>= 1100): Full label + ComboBox, unchanged.  -->
+                <StackPanel Orientation="Horizontal" Visibility="{Binding ActualWidth, ElementName=workExperienceTrashPage, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='1100;'}">
+                  <TextBlock
+                    Margin="0,0,8,0"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="Sort by" />
+
+                  <ComboBox
+                    Width="160"
+                    Margin="0,0,8,0"
+                    Padding="8,6"
+                    Background="Transparent"
+                    ItemsSource="{Binding SortFieldOptions}"
+                    SelectedItem="{Binding SortField}">
+                    <ComboBox.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding Converter={converters:EnumDisplayNameConverter}}" />
+                      </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
+                </StackPanel>
+
+                <!--  Collapse (< 1100): icon button + ContextMenu  -->
+                <ui:Button
                   Margin="0,0,8,0"
                   Padding="8,6"
-                  Background="Transparent"
-                  ItemsSource="{Binding SortFieldOptions}"
-                  SelectedItem="{Binding SortField}">
-                  <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                      <TextBlock Text="{Binding Converter={converters:EnumDisplayNameConverter}}" />
-                    </DataTemplate>
-                  </ComboBox.ItemTemplate>
-                </ComboBox>
+                  layout:ContextMenuBehavior.OpenOnClick="True"
+                  Content="{Binding SortField, Converter={converters:EnumDisplayNameConverter}}"
+                  Icon="{ui:SymbolIcon ArrowSort24}"
+                  Style="{StaticResource IconOnlyButtonStyle}"
+                  ToolTip="Sort by field"
+                  Visibility="{Binding ActualWidth, ElementName=workExperienceTrashPage, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='0;1100'}">
+                  <ui:Button.ContextMenu>
+                    <ContextMenu Placement="Bottom">
+                      <MenuItem
+                        Command="{Binding SetSortFieldCommand}"
+                        CommandParameter="{x:Static querying:WorkExperienceSortField.DeletedAt}"
+                        Header="{Binding Source={x:Static querying:WorkExperienceSortField.DeletedAt}, Converter={converters:EnumDisplayNameConverter}}"
+                        IsCheckable="True"
+                        IsChecked="{Binding SortField, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:WorkExperienceSortField.DeletedAt}}" />
+
+                      <MenuItem
+                        Command="{Binding SetSortFieldCommand}"
+                        CommandParameter="{x:Static querying:WorkExperienceSortField.CompanyName}"
+                        Header="{Binding Source={x:Static querying:WorkExperienceSortField.CompanyName}, Converter={converters:EnumDisplayNameConverter}}"
+                        IsCheckable="True"
+                        IsChecked="{Binding SortField, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:WorkExperienceSortField.CompanyName}}" />
+                    </ContextMenu>
+                  </ui:Button.ContextMenu>
+                </ui:Button>
 
                 <ui:Button
                   Command="{Binding ToggleSortDirectionCommand}"
