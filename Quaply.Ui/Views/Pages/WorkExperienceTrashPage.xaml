@@ -1,4 +1,4 @@
-<UserControl
+﻿<UserControl
   x:Class="Quaply.Ui.Views.Pages.WorkExperienceTrashPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,6 +8,7 @@
   xmlns:layout="clr-namespace:Quaply.Ui.AttachedProperties"
   xmlns:local="clr-namespace:Quaply.Ui.Views.Pages"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:querying="clr-namespace:Quaply.Data.Querying;assembly=Quaply.Data"
   xmlns:system="clr-namespace:System;assembly=mscorlib"
   xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
   xmlns:viewModels="clr-namespace:Quaply.Ui.ViewModels"
@@ -111,26 +112,25 @@
                     <ui:Button.ContextMenu>
                       <ContextMenu Placement="Bottom">
                         <MenuItem
-                          Header="Expiring soon only"
-                          IsCheckable="True"
-                          IsChecked="{Binding ShowExpiringSoonOnly}" />
-
-                        <Separator />
-
-                        <MenuItem
+                          Command="{Binding SetDeletedRangeCommand}"
+                          CommandParameter="{x:Static querying:RelativeDateRange.All}"
                           Header="Deleted: All time"
                           IsCheckable="True"
-                          IsChecked="{Binding DeletedRangeIsAll}" />
+                          IsChecked="{Binding SelectedDeletedRange, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:RelativeDateRange.All}}" />
 
                         <MenuItem
+                          Command="{Binding SetDeletedRangeCommand}"
+                          CommandParameter="{x:Static querying:RelativeDateRange.Last7Days}"
                           Header="Deleted: Last 7 days"
                           IsCheckable="True"
-                          IsChecked="{Binding DeletedRangeIsLast7Days}" />
+                          IsChecked="{Binding SelectedDeletedRange, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:RelativeDateRange.Last7Days}}" />
 
                         <MenuItem
+                          Command="{Binding SetDeletedRangeCommand}"
+                          CommandParameter="{x:Static querying:RelativeDateRange.Last30Days}"
                           Header="Deleted: Last 30 days"
                           IsCheckable="True"
-                          IsChecked="{Binding DeletedRangeIsLast30Days}" />
+                          IsChecked="{Binding SelectedDeletedRange, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:RelativeDateRange.Last30Days}}" />
                       </ContextMenu>
                     </ui:Button.ContextMenu>
                   </ui:Button>

@@ -23,6 +23,23 @@ internal static class WorkExperienceQueryableExtensions
         );
     }
 
+    public static IQueryable<WorkExperience> ApplyDeletedRange(
+        this IQueryable<WorkExperience> query,
+        RelativeDateRange range
+    )
+    {
+        DateTime? cutoff = range switch
+        {
+            RelativeDateRange.Last7Days => DateTime.UtcNow.AddDays(-7),
+            RelativeDateRange.Last30Days => DateTime.UtcNow.AddDays(-30),
+            _ => null, // All time - unfiltered
+        };
+
+        return cutoff is null
+            ? query
+            : query.Where(entity => entity.DeletedAt >= cutoff);
+    }
+
     public static IQueryable<WorkExperience> ApplySort(
         this IQueryable<WorkExperience> query,
         WorkExperienceSortOption sort

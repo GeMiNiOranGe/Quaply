@@ -53,6 +53,7 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
             .AsNoTracking()
             .Where(entity => entity.DeletedAt != null)
             .ApplySearch(query.SearchText)
+            .ApplyDeletedRange(query.DeletedRange)
             .ApplySort(query.Sort)
             .AsAsyncEnumerable();
     }

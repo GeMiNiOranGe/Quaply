@@ -75,6 +75,10 @@ public partial class WorkExperienceTrashViewModel(
     public bool HasSelection => SelectedCount > 0;
 
     [ObservableProperty]
+    public partial RelativeDateRange SelectedDeletedRange { get; set; } =
+        RelativeDateRange.All;
+
+    [ObservableProperty]
     public partial bool? IsAllSelected { get; set; } = false;
 
     [ObservableProperty]
@@ -138,6 +142,11 @@ public partial class WorkExperienceTrashViewModel(
         }
     }
 
+    partial void OnSelectedDeletedRangeChanged(RelativeDateRange value)
+    {
+        _ = LoadDeletedWorkExperiencesAsync();
+    }
+
     partial void OnSortFieldChanged(WorkExperienceSortField value)
     {
         _ = LoadDeletedWorkExperiencesAsync();
@@ -152,6 +161,12 @@ public partial class WorkExperienceTrashViewModel(
     private async Task BackToWorkExperiencesAsync()
     {
         await Navigator.NavigateToAsync<WorkExperienceViewModel>();
+    }
+
+    [RelayCommand]
+    private void SetDeletedRange(RelativeDateRange range)
+    {
+        SelectedDeletedRange = range;
     }
 
     [RelayCommand]
@@ -442,12 +457,14 @@ public partial class WorkExperienceTrashViewModel(
 
         try
         {
-            WorkExperienceSortOption sortOption = new(
-                SortField,
-                IsSortDescending
+            WorkExperienceDeletedQuery query = new(
+                SearchText: SearchText,
+                DeletedRange: SelectedDeletedRange,
+                Sort: new WorkExperienceSortOption(
+                    Field: SortField,
+                    Descending: IsSortDescending
+                )
             );
-
-            WorkExperienceDeletedQuery query = new(SearchText, sortOption);
 
             IEnumerable<WorkExperience> deleted =
                 await _service.GetDeletedWorkExperiencesAsync(query);
