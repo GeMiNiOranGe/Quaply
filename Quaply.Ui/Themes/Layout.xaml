@@ -1,0 +1,30 @@
+﻿<ResourceDictionary
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:sys="clr-namespace:System;assembly=mscorlib">
+  <!--
+    Page MaxWidth breakpoints - 80px grid (8px base × 10), increasing by
+    progressively smaller percentages (66% -> 30% -> 23% -> 12.5% -> 11%),
+    rather than by a fixed arithmetic progression.
+    
+    Reason: smaller ranges need larger differences to be distinct,
+    while larger ranges need only small differences to be noticeable.
+    
+    Compact   480 - confirmation dialog/popup, NOT for page content
+    Narrow    800 - single-column form (720-800px is a comfortable reading width)
+    Form     1040 - two-column form (~470px/column after padding+gutter)
+    Standard 1280 - default layout, matches xl breakpoint (Tailwind, 1280x1024)
+    Table    1440 - DataGrid + 280px preview sidebar, fits 5-6 columns
+    Wide     1600 - 2-panel split view (e.g. form + PDF preview)
+    
+    Full/Fluid: DO NOT assign a fixed value - use the default MaxWidth
+    (PositiveInfinity) or bind it to the ActualWidth of the parent window,
+    avoiding meaningless values on ultra-wide screens.
+  -->
+  <sys:Double x:Key="PageMaxWidthCompact">480</sys:Double>
+  <sys:Double x:Key="PageMaxWidthNarrow">800</sys:Double>
+  <sys:Double x:Key="PageMaxWidthForm">1040</sys:Double>
+  <sys:Double x:Key="PageMaxWidthStandard">1280</sys:Double>
+  <sys:Double x:Key="PageMaxWidthTable">1440</sys:Double>
+  <sys:Double x:Key="PageMaxWidthWide">1600</sys:Double>
+</ResourceDictionary>
