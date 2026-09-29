@@ -7,6 +7,7 @@
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:layout="clr-namespace:Quaply.Ui.AttachedProperties"
   xmlns:local="clr-namespace:Quaply.Ui.Views.Pages"
+  xmlns:markup="clr-namespace:Quaply.Ui.MarkupHelpers"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:querying="clr-namespace:Quaply.Data.Querying;assembly=Quaply.Data"
   xmlns:system="clr-namespace:System;assembly=mscorlib"
@@ -65,7 +66,7 @@
         VerticalAlignment="Stretch"
         HorizontalContentAlignment="Stretch"
         VerticalContentAlignment="Stretch">
-        <Grid>
+        <Grid x:Name="listCardGrid">
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -112,7 +113,7 @@
                 <!--
                   Expanded (>= 1100px): segmented buttons displayed directly
                 -->
-                <StackPanel Orientation="Horizontal" Visibility="{Binding ActualWidth, ElementName=workExperienceTrashPage, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='1100;'}">
+                <StackPanel Orientation="Horizontal" Visibility="{Binding ActualWidth, ElementName=listCardGrid, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='1100;'}">
                   <TextBlock
                     Margin="0,0,8,0"
                     VerticalAlignment="Center"
@@ -155,7 +156,7 @@
                   Icon="{ui:SymbolIcon Filter24}"
                   Style="{StaticResource IconOnlyButtonStyle}"
                   ToolTip="Filter by deleted date"
-                  Visibility="{Binding ActualWidth, ElementName=workExperienceTrashPage, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='0;1100'}">
+                  Visibility="{Binding ActualWidth, ElementName=listCardGrid, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='0;1100'}">
                   <ui:Button.ContextMenu>
                     <ContextMenu Placement="Bottom">
                       <MenuItem
@@ -185,7 +186,7 @@
                 <atoms:Divider Margin="12,8" Orientation="Vertical" />
 
                 <!--  Expanded (>= 1100): Full label + ComboBox, unchanged.  -->
-                <StackPanel Orientation="Horizontal" Visibility="{Binding ActualWidth, ElementName=workExperienceTrashPage, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='1100;'}">
+                <StackPanel Orientation="Horizontal" Visibility="{Binding ActualWidth, ElementName=listCardGrid, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='1100;'}">
                   <TextBlock
                     Margin="0,0,8,0"
                     VerticalAlignment="Center"
@@ -216,7 +217,7 @@
                   Icon="{ui:SymbolIcon ArrowSort24}"
                   Style="{StaticResource IconOnlyButtonStyle}"
                   ToolTip="Sort by field"
-                  Visibility="{Binding ActualWidth, ElementName=workExperienceTrashPage, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='0;1100'}">
+                  Visibility="{Binding ActualWidth, ElementName=listCardGrid, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='0;1100'}">
                   <ui:Button.ContextMenu>
                     <ContextMenu Placement="Bottom">
                       <MenuItem
@@ -278,6 +279,10 @@
 
           <!--  Table row hosts BOTH the DataGrid and the floating bulk-action bar  -->
           <Grid Grid.Row="1">
+            <Grid.Resources>
+              <markup:BindingProxy x:Key="DataGridWidthProxy" Data="{Binding ActualWidth, ElementName=listCardGrid}" />
+            </Grid.Resources>
+
             <!--  Empty state  -->
             <StackPanel
               HorizontalAlignment="Center"
@@ -309,6 +314,7 @@
               Padding="{Binding SelectedCount, Converter={converters:ConditionalBottomInsetConverter}, ConverterParameter='0,0,0,0|72'}"
               layout:DataGridMultiSelectBehavior.AfterSyncCommand="{Binding ToggleSelectionCommand}"
               layout:DataGridMultiSelectBehavior.IsEnabled="True"
+              layout:DataGridStarColumnRefreshBehavior.RefreshTrigger="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data}"
               AutoGenerateColumns="False"
               CanUserAddRows="False"
               CanUserDeleteRows="False"
@@ -346,7 +352,10 @@
                 </DataGridTemplateColumn>
 
                 <!--  Company / Position  -->
-                <DataGridTemplateColumn Width="240" Header="Company / Position">
+                <DataGridTemplateColumn
+                  Width="*"
+                  Header="Company / Position"
+                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='0;880'}">
                   <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
                       <StackPanel VerticalAlignment="Center">
@@ -361,8 +370,25 @@
                   </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
+                <!--  Company  -->
+                <DataGridTextColumn
+                  Width="2*"
+                  Binding="{Binding CompanyName}"
+                  Header="Company"
+                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='880;'}" />
+
+                <!--  Position  -->
+                <DataGridTextColumn
+                  Width="2*"
+                  Binding="{Binding PositionTitle}"
+                  Header="Position"
+                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='880;'}" />
+
                 <!--  Deleted On  -->
-                <DataGridTextColumn Width="150" Header="Deleted On">
+                <DataGridTextColumn
+                  Width="*"
+                  Header="Deleted On"
+                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='640;'}">
                   <DataGridTextColumn.ElementStyle>
                     <Style TargetType="TextBlock">
                       <Setter Property="Text" Value="{Binding DeletedAt, Converter={converters:RelativeDateTimeConverter}}" />
