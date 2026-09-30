@@ -32,7 +32,7 @@ public partial class WorkExperienceTrashViewModel(
     public partial bool IsLoading { get; set; }
 
     [ObservableProperty]
-    public partial double PreviewPanelWidth { get; set; } = 320.0;
+    public partial double PreviewPanelWidth { get; set; }
 
     [NotifyPropertyChangedFor(nameof(IsPreviewPanelOpen))]
     [NotifyPropertyChangedFor(nameof(PinTooltip))]
@@ -129,11 +129,6 @@ public partial class WorkExperienceTrashViewModel(
 
     partial void OnIsPreviewPanelPinnedChanged(bool value)
     {
-        // The panel width adjusts based on its pinned state: wider when pinned
-        // for long-term use, and narrower when unpinned for quick viewing.
-        // TODO: Consider implementing an automatic resizing feature.
-        PreviewPanelWidth = value ? 360.0 : 320.0;
-
         // Unpin while the panel is empty: there's no reason to keep it open,
         // following the rule "unpinned + nothing to show = closed."
         if (!value && PreviewedItem is null)

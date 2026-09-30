@@ -52,10 +52,18 @@
     </StackPanel>
 
     <!--  Row 1: Card - header now only has the title  -->
-    <Grid Grid.Row="1">
+    <Grid x:Name="previewSplitContainer" Grid.Row="1">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="*" MinWidth="320" />
         <ColumnDefinition Width="Auto" />
+        <ColumnDefinition>
+          <ColumnDefinition.Width>
+            <MultiBinding Converter="{converters:PanelColumnWidthConverter}" Mode="TwoWay">
+              <Binding Path="IsPreviewPanelOpen" />
+              <Binding Mode="TwoWay" Path="PreviewPanelWidth" />
+            </MultiBinding>
+          </ColumnDefinition.Width>
+        </ColumnDefinition>
       </Grid.ColumnDefinitions>
 
       <!--  List  -->
@@ -505,10 +513,19 @@
         </Grid>
       </ui:Card>
 
-      <ui:Card
+      <GridSplitter
         Grid.Column="1"
-        Width="{Binding PreviewPanelWidth}"
-        Margin="8,0,0,0"
+        Width="8"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Background="Transparent"
+        Cursor="SizeWE"
+        ResizeBehavior="PreviousAndNext"
+        ShowsPreview="False"
+        Visibility="{Binding IsPreviewPanelOpen, Converter={converters:BooleanToVisibilityConverter}}" />
+
+      <ui:Card
+        Grid.Column="2"
         Padding="0"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
