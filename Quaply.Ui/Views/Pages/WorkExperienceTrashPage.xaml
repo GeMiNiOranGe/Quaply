@@ -52,14 +52,17 @@
     </StackPanel>
 
     <!--  Row 1: Card - header now only has the title  -->
-    <Grid x:Name="previewSplitContainer" Grid.Row="1">
+    <Grid
+      Grid.Row="1"
+      layout:WidthBreakpointBehavior.Breakpoint="{StaticResource PreviewOverlayBreakpoint}"
+      layout:WidthBreakpointBehavior.IsBelowBreakpoint="{Binding IsPreviewOverlayMode, Mode=OneWayToSource}">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" MinWidth="320" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition>
           <ColumnDefinition.Width>
             <MultiBinding Converter="{converters:PanelColumnWidthConverter}" Mode="TwoWay">
-              <Binding Path="IsPreviewPanelOpen" />
+              <Binding Path="IsPreviewInlineVisible" />
               <Binding Mode="TwoWay" Path="PreviewPanelWidth" />
             </MultiBinding>
           </ColumnDefinition.Width>
@@ -393,10 +396,7 @@
                   Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='880;'}" />
 
                 <!--  Deleted On  -->
-                <DataGridTextColumn
-                  Width="*"
-                  Header="Deleted On"
-                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='640;'}">
+                <DataGridTextColumn Width="*" Header="Deleted On">
                   <DataGridTextColumn.ElementStyle>
                     <Style TargetType="TextBlock">
                       <Setter Property="Text" Value="{Binding DeletedAt, Converter={converters:RelativeDateTimeConverter}}" />
@@ -522,192 +522,234 @@
         Cursor="SizeWE"
         ResizeBehavior="PreviousAndNext"
         ShowsPreview="False"
-        Visibility="{Binding IsPreviewPanelOpen, Converter={converters:BooleanToVisibilityConverter}}" />
+        Visibility="{Binding IsPreviewInlineVisible, Converter={converters:BooleanToVisibilityConverter}}" />
 
-      <ui:Card
-        Grid.Column="2"
-        Padding="0"
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch"
-        HorizontalContentAlignment="Stretch"
-        VerticalContentAlignment="Stretch"
-        Visibility="{Binding IsPreviewPanelOpen, Converter={converters:BooleanToVisibilityConverter}}">
-        <Grid>
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-          </Grid.RowDefinitions>
+      <!--  Scrim: Only appears in overlay mode; click to close.  -->
+      <Border
+        Grid.Column="0"
+        Grid.ColumnSpan="3"
+        Background="{DynamicResource SmokeFillColorDefaultBrush}"
+        CornerRadius="4"
+        Visibility="{Binding IsPreviewOverlayVisible, Converter={converters:BooleanToVisibilityConverter}}">
+        <Border.InputBindings>
+          <MouseBinding Command="{Binding ClosePreviewPanelCommand}" MouseAction="LeftClick" />
+        </Border.InputBindings>
+      </Border>
 
-          <!--  Panel header  -->
-          <Border
-            Grid.Row="0"
-            Padding="24,12"
-            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-            BorderThickness="0,0,0,1">
-            <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="Auto" />
-              </Grid.ColumnDefinitions>
+      <!--  Host: Decide whether the panel is inline (column 2) or floating (overlay).  -->
+      <Grid Visibility="{Binding IsPreviewPanelVisible, Converter={converters:BooleanToVisibilityConverter}}">
+        <Grid.Style>
+          <Style TargetType="Grid">
+            <!--  Default: inline, column 2  -->
+            <Setter Property="Grid.Column" Value="2" />
+            <Setter Property="Grid.ColumnSpan" Value="1" />
+
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsPreviewOverlayMode}" Value="True">
+                <Setter Property="Grid.Column" Value="0" />
+                <Setter Property="Grid.ColumnSpan" Value="3" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="Width" Value="{StaticResource PreviewOverlayWidth}" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Grid.Style>
+
+        <ui:Card
+          Padding="0"
+          HorizontalAlignment="Stretch"
+          VerticalAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
+          VerticalContentAlignment="Stretch">
+          <ui:Card.Style>
+            <Style BasedOn="{StaticResource {x:Type ui:Card}}" TargetType="ui:Card">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding IsPreviewOverlayMode}" Value="True">
+                  <Setter Property="Effect" Value="{StaticResource FloatingBarShadow}" />
+                  <Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorQuarternaryBrush}" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </ui:Card.Style>
+
+          <Grid>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="*" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  Panel header  -->
+            <Border
+              Grid.Row="0"
+              Padding="24,12"
+              BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+              BorderThickness="0,0,0,1">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                  VerticalAlignment="Center"
+                  FontSize="18"
+                  FontWeight="SemiBold"
+                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                  Text="Details" />
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                  <!--  Pin toggle  -->
+                  <ui:Button
+                    Command="{Binding TogglePreviewPanelPinCommand}"
+                    Icon="{Binding IsPreviewPanelPinned, Converter={converters:PinIconConverter}}"
+                    Style="{StaticResource IconOnlyButtonStyle}"
+                    ToolTip="{Binding PinTooltip}"
+                    Visibility="{Binding IsPreviewOverlayMode, Converter={converters:InverseBooleanToVisibilityConverter}}" />
+
+                  <ui:Button
+                    Grid.Column="2"
+                    Margin="8,0,0,0"
+                    Command="{Binding ClosePreviewPanelCommand}"
+                    Icon="{ui:SymbolIcon Dismiss24}"
+                    Style="{StaticResource IconOnlyButtonStyle}"
+                    ToolTip="Close" />
+                </StackPanel>
+              </Grid>
+            </Border>
+
+            <!--  Empty state: panel is pinned but nothing selected yet  -->
+            <StackPanel
+              Grid.Row="1"
+              Margin="16"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Visibility="{Binding PreviewedItem, Converter={converters:InverseNullToVisibilityConverter}}">
+              <ui:SymbolIcon
+                HorizontalAlignment="Center"
+                FontSize="32"
+                Foreground="{DynamicResource TextFillColorDisabledBrush}"
+                Symbol="DocumentSearch24" />
 
               <TextBlock
-                VerticalAlignment="Center"
-                FontSize="18"
-                FontWeight="SemiBold"
+                Margin="0,8,0,0"
+                HorizontalAlignment="Center"
                 Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                Text="Details" />
+                Text="Select a row to preview its details"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            </StackPanel>
 
-              <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <!--  Pin toggle  -->
+            <!--  Content  -->
+            <ScrollViewer
+              Grid.Row="1"
+              VerticalScrollBarVisibility="Auto"
+              Visibility="{Binding PreviewedItem, Converter={converters:NullToVisibilityConverter}}">
+              <StackPanel Margin="24,16">
+                <!--  Company + position  -->
+                <TextBlock
+                  FontSize="18"
+                  FontWeight="SemiBold"
+                  Text="{Binding PreviewedItem.CompanyName}"
+                  TextWrapping="Wrap" />
+
+                <TextBlock
+                  Margin="0,2,0,0"
+                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                  Text="{Binding PreviewedItem.PositionTitle}"
+                  TextWrapping="Wrap" />
+
+                <!--  Duration + current badge  -->
+                <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                  <ui:SymbolIcon
+                    Margin="0,0,6,0"
+                    FontSize="14"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Symbol="CalendarLtr24" />
+                  <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="13"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="{Binding PreviewedItem.WorkExperience, Converter={converters:WorkExperienceDurationConverter}}" />
+
+                  <Border
+                    Margin="8,0,0,0"
+                    Padding="6,2"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}"
+                    CornerRadius="4"
+                    Visibility="{Binding PreviewedItem.EndDate, Converter={converters:InverseNullToVisibilityConverter}}">
+                    <TextBlock
+                      FontSize="11"
+                      Foreground="{DynamicResource SystemFillColorSuccessBrush}"
+                      Text="Current" />
+                  </Border>
+                </StackPanel>
+
+                <atoms:Divider Margin="0,16" />
+
+                <!--  Description  -->
+                <TextBlock
+                  Margin="0,0,0,8"
+                  FontSize="12"
+                  FontWeight="SemiBold"
+                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                  Text="Description" />
+
+                <TextBlock
+                  FontSize="14"
+                  LineHeight="20"
+                  Text="{Binding PreviewedItem.Description}"
+                  TextWrapping="Wrap"
+                  Visibility="{Binding PreviewedItem.Description, Converter={converters:NullToVisibilityConverter}}" />
+
+                <TextBlock
+                  FontSize="13"
+                  FontStyle="Italic"
+                  Foreground="{DynamicResource TextFillColorDisabledBrush}"
+                  Text="No description added."
+                  Visibility="{Binding PreviewedItem.Description, Converter={converters:InverseNullToVisibilityConverter}}" />
+              </StackPanel>
+            </ScrollViewer>
+
+            <Border
+              Grid.Row="2"
+              Padding="24,12"
+              BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+              BorderThickness="0,1,0,0"
+              Visibility="{Binding PreviewedItem, Converter={converters:NullToVisibilityConverter}}">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="8" />
+                  <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
                 <ui:Button
-                  Command="{Binding TogglePreviewPanelPinCommand}"
-                  Icon="{Binding IsPreviewPanelPinned, Converter={converters:PinIconConverter}}"
-                  Style="{StaticResource IconOnlyButtonStyle}"
-                  ToolTip="{Binding PinTooltip}" />
+                  Grid.Column="0"
+                  Padding="16,8"
+                  HorizontalAlignment="Stretch"
+                  Command="{Binding RestoreWorkExperienceCommand}"
+                  CommandParameter="{Binding PreviewedItem}"
+                  Content="Restore"
+                  Icon="{ui:SymbolIcon ArrowUndo24}" />
 
                 <ui:Button
                   Grid.Column="2"
-                  Margin="8,0,0,0"
-                  Command="{Binding ClosePreviewPanelCommand}"
-                  Icon="{ui:SymbolIcon Dismiss24}"
-                  Style="{StaticResource IconOnlyButtonStyle}"
-                  ToolTip="Close" />
-              </StackPanel>
-            </Grid>
-          </Border>
-
-          <!--  Empty state: panel is pinned but nothing selected yet  -->
-          <StackPanel
-            Grid.Row="1"
-            Margin="16"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Visibility="{Binding PreviewedItem, Converter={converters:InverseNullToVisibilityConverter}}">
-            <ui:SymbolIcon
-              HorizontalAlignment="Center"
-              FontSize="32"
-              Foreground="{DynamicResource TextFillColorDisabledBrush}"
-              Symbol="DocumentSearch24" />
-
-            <TextBlock
-              Margin="0,8,0,0"
-              HorizontalAlignment="Center"
-              Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-              Text="Select a row to preview its details"
-              TextAlignment="Center"
-              TextWrapping="Wrap" />
-          </StackPanel>
-
-          <!--  Content  -->
-          <ScrollViewer
-            Grid.Row="1"
-            VerticalScrollBarVisibility="Auto"
-            Visibility="{Binding PreviewedItem, Converter={converters:NullToVisibilityConverter}}">
-            <StackPanel Margin="24,16">
-              <!--  Company + position  -->
-              <TextBlock
-                FontSize="18"
-                FontWeight="SemiBold"
-                Text="{Binding PreviewedItem.CompanyName}"
-                TextWrapping="Wrap" />
-
-              <TextBlock
-                Margin="0,2,0,0"
-                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                Text="{Binding PreviewedItem.PositionTitle}"
-                TextWrapping="Wrap" />
-
-              <!--  Duration + current badge  -->
-              <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
-                <ui:SymbolIcon
-                  Margin="0,0,6,0"
-                  FontSize="14"
-                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                  Symbol="CalendarLtr24" />
-                <TextBlock
-                  VerticalAlignment="Center"
-                  FontSize="13"
-                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                  Text="{Binding PreviewedItem.WorkExperience, Converter={converters:WorkExperienceDurationConverter}}" />
-
-                <Border
-                  Margin="8,0,0,0"
-                  Padding="6,2"
-                  VerticalAlignment="Center"
-                  Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}"
-                  CornerRadius="4"
-                  Visibility="{Binding PreviewedItem.EndDate, Converter={converters:InverseNullToVisibilityConverter}}">
-                  <TextBlock
-                    FontSize="11"
-                    Foreground="{DynamicResource SystemFillColorSuccessBrush}"
-                    Text="Current" />
-                </Border>
-              </StackPanel>
-
-              <atoms:Divider Margin="0,16" />
-
-              <!--  Description  -->
-              <TextBlock
-                Margin="0,0,0,8"
-                FontSize="12"
-                FontWeight="SemiBold"
-                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                Text="Description" />
-
-              <TextBlock
-                FontSize="14"
-                LineHeight="20"
-                Text="{Binding PreviewedItem.Description}"
-                TextWrapping="Wrap"
-                Visibility="{Binding PreviewedItem.Description, Converter={converters:NullToVisibilityConverter}}" />
-
-              <TextBlock
-                FontSize="13"
-                FontStyle="Italic"
-                Foreground="{DynamicResource TextFillColorDisabledBrush}"
-                Text="No description added."
-                Visibility="{Binding PreviewedItem.Description, Converter={converters:InverseNullToVisibilityConverter}}" />
-            </StackPanel>
-          </ScrollViewer>
-
-          <Border
-            Grid.Row="2"
-            Padding="24,12"
-            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-            BorderThickness="0,1,0,0"
-            Visibility="{Binding PreviewedItem, Converter={converters:NullToVisibilityConverter}}">
-            <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition />
-              </Grid.ColumnDefinitions>
-
-              <ui:Button
-                Grid.Column="0"
-                Padding="16,8"
-                HorizontalAlignment="Stretch"
-                Command="{Binding RestoreWorkExperienceCommand}"
-                CommandParameter="{Binding PreviewedItem}"
-                Content="Restore"
-                Icon="{ui:SymbolIcon ArrowUndo24}" />
-
-              <ui:Button
-                Grid.Column="2"
-                Padding="16,8"
-                HorizontalAlignment="Stretch"
-                Appearance="Transparent"
-                Command="{Binding PurgeWorkExperienceCommand}"
-                CommandParameter="{Binding PreviewedItem}"
-                Content="Delete"
-                Foreground="IndianRed"
-                Icon="{ui:SymbolIcon Delete24}"
-                ToolTip="Delete permanently" />
-            </Grid>
-          </Border>
-        </Grid>
-      </ui:Card>
+                  Padding="16,8"
+                  HorizontalAlignment="Stretch"
+                  Appearance="Transparent"
+                  Command="{Binding PurgeWorkExperienceCommand}"
+                  CommandParameter="{Binding PreviewedItem}"
+                  Content="Delete"
+                  Foreground="IndianRed"
+                  Icon="{ui:SymbolIcon Delete24}"
+                  ToolTip="Delete permanently" />
+              </Grid>
+            </Border>
+          </Grid>
+        </ui:Card>
+      </Grid>
     </Grid>
   </Grid>
 </UserControl>

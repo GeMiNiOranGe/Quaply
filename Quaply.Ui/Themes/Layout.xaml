@@ -27,4 +27,7 @@
   <sys:Double x:Key="PageMaxWidthStandard">1280</sys:Double>
   <sys:Double x:Key="PageMaxWidthTable">1440</sys:Double>
   <sys:Double x:Key="PageMaxWidthWide">1600</sys:Double>
+
+  <sys:Double x:Key="PreviewOverlayBreakpoint">1120</sys:Double>
+  <sys:Double x:Key="PreviewOverlayWidth">400</sys:Double>
 </ResourceDictionary>

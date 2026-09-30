@@ -39,14 +39,37 @@ public partial class WorkExperienceTrashViewModel(
     [ObservableProperty]
     public partial bool IsPreviewPanelPinned { get; set; }
 
+    [NotifyPropertyChangedFor(nameof(IsPreviewInlineVisible))]
+    [NotifyPropertyChangedFor(nameof(IsPreviewOverlayVisible))]
+    [NotifyPropertyChangedFor(nameof(IsPreviewPanelVisible))]
     [ObservableProperty]
     public partial bool IsPreviewPanelOpen { get; set; } = false;
+
+    // Pushed from `WidthBreakpointBehavior` (OneWayToSource).
+    [NotifyPropertyChangedFor(nameof(IsPreviewInlineVisible))]
+    [NotifyPropertyChangedFor(nameof(IsPreviewOverlayVisible))]
+    [NotifyPropertyChangedFor(nameof(IsPreviewPanelVisible))]
+    [ObservableProperty]
+    public partial bool IsPreviewOverlayMode { get; set; }
 
     public string PinTooltip =>
         IsPreviewPanelPinned ? "Unpin panel" : "Keep panel open";
 
     public string SortDirectionTooltip =>
         IsSortDescending ? "Sort ascending" : "Sort descending";
+
+    // The panel occupies a separate column next to the card list.
+    public bool IsPreviewInlineVisible =>
+        IsPreviewPanelOpen && !IsPreviewOverlayMode;
+
+    // A panel floats above the list. It appears only when there is an item
+    // to view; an empty state overlay (e.g., "Select a row...")
+    // would merely obscure the list unnecessarily.
+    public bool IsPreviewOverlayVisible =>
+        IsPreviewPanelOpen && IsPreviewOverlayMode && PreviewedItem is not null;
+
+    public bool IsPreviewPanelVisible =>
+        IsPreviewInlineVisible || IsPreviewOverlayVisible;
 
     public ObservableCollection<DeletedWorkExperienceItem> DeletedItems
     {
@@ -62,6 +85,8 @@ public partial class WorkExperienceTrashViewModel(
     [ObservableProperty]
     public partial DeletedWorkExperienceItem? SelectedItem { get; set; }
 
+    [NotifyPropertyChangedFor(nameof(IsPreviewOverlayVisible))]
+    [NotifyPropertyChangedFor(nameof(IsPreviewPanelVisible))]
     [ObservableProperty]
     public partial DeletedWorkExperienceItem? PreviewedItem { get; set; }
 
@@ -137,6 +162,16 @@ public partial class WorkExperienceTrashViewModel(
         }
     }
 
+    partial void OnIsPreviewOverlayModeChanged(bool value)
+    {
+        // Returning to inline mode: the pinned panel must reappear
+        // (it might have been closed while in overlay mode).
+        if (!value && IsPreviewPanelPinned)
+        {
+            IsPreviewPanelOpen = true;
+        }
+    }
+
     partial void OnSelectedDeletedRangeChanged(RelativeDateRange value)
     {
         _ = LoadDeletedWorkExperiencesAsync();
@@ -192,7 +227,13 @@ public partial class WorkExperienceTrashViewModel(
     private void ClosePreviewPanel()
     {
         IsPreviewPanelOpen = false;
-        IsPreviewPanelPinned = false;
+
+        // Pinning is only relevant in inline mode. Temporarily closing
+        // the overlay should not clear the user's pinning selection.
+        if (!IsPreviewOverlayMode)
+        {
+            IsPreviewPanelPinned = false;
+        }
     }
 
     [RelayCommand]
