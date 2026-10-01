@@ -110,11 +110,6 @@ public partial class WorkExperienceTrashViewModel(
     public partial WorkExperienceSortField SortField { get; set; } =
         WorkExperienceSortField.DeletedAt;
 
-    // ComboBox data source - derived directly from an enum;
-    // do not hardcode the list.
-    public IEnumerable<WorkExperienceSortField> SortFieldOptions { get; } =
-        Enum.GetValues<WorkExperienceSortField>();
-
     [NotifyPropertyChangedFor(nameof(SortDirectionTooltip))]
     [ObservableProperty]
     public partial bool IsSortDescending { get; set; } = true;
