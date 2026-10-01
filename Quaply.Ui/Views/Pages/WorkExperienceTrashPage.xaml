@@ -90,10 +90,7 @@
             BorderThickness="0,0,0,1">
             <Grid>
               <Grid.ColumnDefinitions>
-                <ColumnDefinition
-                  Width="*"
-                  MinWidth="160"
-                  MaxWidth="320" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -101,8 +98,8 @@
 
               <ui:TextBox
                 Grid.Column="0"
+                Width="{Binding ActualWidth, ElementName=listCardGrid, Converter={converters:LinearInterpolationConverter}, ConverterParameter='SourceMin=720;SourceMax=880;TargetMin=160;TargetMax=320'}"
                 Padding="8,6"
-                HorizontalAlignment="Stretch"
                 PlaceholderText="Search by company or position..."
                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
                 <ui:TextBox.Icon>
