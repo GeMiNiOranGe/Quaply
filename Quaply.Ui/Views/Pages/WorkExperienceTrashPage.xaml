@@ -157,39 +157,42 @@
                   Collapsed (< 1100px): icon button + ContextMenu,
                   identical to existing logic.
                 -->
-                <ui:Button
+                <ui:DropDownButton
+                  MinWidth="136"
                   Padding="8,6"
+                  HorizontalContentAlignment="Stretch"
                   layout:ContextMenuBehavior.OpenOnClick="True"
+                  Background="Transparent"
                   Content="{Binding SelectedDeletedRange, Converter={converters:EnumDisplayNameConverter}}"
                   Icon="{ui:SymbolIcon Filter24}"
-                  Style="{StaticResource IconOnlyButtonStyle}"
                   ToolTip="Filter by deleted date"
                   Visibility="{Binding ActualWidth, ElementName=listCardGrid, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='0;1100'}">
-                  <ui:Button.ContextMenu>
-                    <ContextMenu Placement="Bottom">
-                      <MenuItem
-                        Command="{Binding SetDeletedRangeCommand}"
-                        CommandParameter="{x:Static querying:RelativeDateRange.All}"
-                        Header="{Binding Source={x:Static querying:RelativeDateRange.All}, Converter={converters:EnumDisplayNameConverter}}"
-                        IsCheckable="True"
-                        IsChecked="{Binding SelectedDeletedRange, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:RelativeDateRange.All}}" />
+                  <ui:DropDownButton.ContextMenu>
+                    <ContextMenu ItemsSource="{markup:EnumBindingSource {x:Type querying:RelativeDateRange}}" Placement="Bottom">
+                      <ContextMenu.ItemContainerStyle>
+                        <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
+                          <Setter Property="Command" Value="{Binding DataContext.SetDeletedRangeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
 
-                      <MenuItem
-                        Command="{Binding SetDeletedRangeCommand}"
-                        CommandParameter="{x:Static querying:RelativeDateRange.Last7Days}"
-                        Header="{Binding Source={x:Static querying:RelativeDateRange.Last7Days}, Converter={converters:EnumDisplayNameConverter}}"
-                        IsCheckable="True"
-                        IsChecked="{Binding SelectedDeletedRange, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:RelativeDateRange.Last7Days}}" />
+                          <Setter Property="CommandParameter" Value="{Binding}" />
 
-                      <MenuItem
-                        Command="{Binding SetDeletedRangeCommand}"
-                        CommandParameter="{x:Static querying:RelativeDateRange.Last30Days}"
-                        Header="{Binding Source={x:Static querying:RelativeDateRange.Last30Days}, Converter={converters:EnumDisplayNameConverter}}"
-                        IsCheckable="True"
-                        IsChecked="{Binding SelectedDeletedRange, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:RelativeDateRange.Last30Days}}" />
+                          <Setter Property="Header" Value="{Binding Converter={converters:EnumDisplayNameConverter}}" />
+
+                          <Setter Property="IsCheckable" Value="True" />
+
+                          <Setter Property="IsChecked">
+                            <Setter.Value>
+                              <MultiBinding Converter="{converters:EnumEqualityConverter}" Mode="OneWay">
+                                <Binding Path="DataContext.SelectedDeletedRange" RelativeSource="{RelativeSource AncestorType=ContextMenu}" />
+
+                                <Binding />
+                              </MultiBinding>
+                            </Setter.Value>
+                          </Setter>
+                        </Style>
+                      </ContextMenu.ItemContainerStyle>
                     </ContextMenu>
-                  </ui:Button.ContextMenu>
-                </ui:Button>
+                  </ui:DropDownButton.ContextMenu>
+                </ui:DropDownButton>
 
                 <atoms:Divider Margin="12,8" Orientation="Vertical" />
 
@@ -202,7 +205,7 @@
                     Text="Sort by" />
 
                   <ComboBox
-                    Width="160"
+                    MinWidth="144"
                     Margin="0,0,8,0"
                     Padding="8,6"
                     Background="Transparent"
@@ -217,33 +220,43 @@
                 </StackPanel>
 
                 <!--  Collapse (< 1100): icon button + ContextMenu  -->
-                <ui:Button
+                <ui:DropDownButton
+                  MinWidth="160"
                   Margin="0,0,8,0"
                   Padding="8,6"
+                  HorizontalContentAlignment="Stretch"
                   layout:ContextMenuBehavior.OpenOnClick="True"
+                  Background="Transparent"
                   Content="{Binding SortField, Converter={converters:EnumDisplayNameConverter}}"
                   Icon="{ui:SymbolIcon ArrowSort24}"
-                  Style="{StaticResource IconOnlyButtonStyle}"
                   ToolTip="Sort by field"
                   Visibility="{Binding ActualWidth, ElementName=listCardGrid, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='0;1100'}">
-                  <ui:Button.ContextMenu>
-                    <ContextMenu Placement="Bottom">
-                      <MenuItem
-                        Command="{Binding SetSortFieldCommand}"
-                        CommandParameter="{x:Static querying:WorkExperienceSortField.DeletedAt}"
-                        Header="{Binding Source={x:Static querying:WorkExperienceSortField.DeletedAt}, Converter={converters:EnumDisplayNameConverter}}"
-                        IsCheckable="True"
-                        IsChecked="{Binding SortField, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:WorkExperienceSortField.DeletedAt}}" />
+                  <ui:DropDownButton.ContextMenu>
+                    <ContextMenu ItemsSource="{markup:EnumBindingSource {x:Type querying:WorkExperienceSortField}}" Placement="Bottom">
+                      <ContextMenu.ItemContainerStyle>
+                        <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
+                          <Setter Property="Command" Value="{Binding DataContext.SetSortFieldCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
 
-                      <MenuItem
-                        Command="{Binding SetSortFieldCommand}"
-                        CommandParameter="{x:Static querying:WorkExperienceSortField.CompanyName}"
-                        Header="{Binding Source={x:Static querying:WorkExperienceSortField.CompanyName}, Converter={converters:EnumDisplayNameConverter}}"
-                        IsCheckable="True"
-                        IsChecked="{Binding SortField, Mode=OneWay, Converter={converters:EnumEqualityConverter}, ConverterParameter={x:Static querying:WorkExperienceSortField.CompanyName}}" />
+                          <Setter Property="CommandParameter" Value="{Binding}" />
+
+                          <Setter Property="Header" Value="{Binding Converter={converters:EnumDisplayNameConverter}}" />
+
+                          <Setter Property="IsCheckable" Value="True" />
+
+                          <Setter Property="IsChecked">
+                            <Setter.Value>
+                              <MultiBinding Converter="{converters:EnumEqualityConverter}" Mode="OneWay">
+                                <Binding Path="DataContext.SortField" RelativeSource="{RelativeSource AncestorType=ContextMenu}" />
+
+                                <Binding />
+                              </MultiBinding>
+                            </Setter.Value>
+                          </Setter>
+                        </Style>
+                      </ContextMenu.ItemContainerStyle>
                     </ContextMenu>
-                  </ui:Button.ContextMenu>
-                </ui:Button>
+                  </ui:DropDownButton.ContextMenu>
+                </ui:DropDownButton>
 
                 <ui:Button
                   Command="{Binding ToggleSortDirectionCommand}"
