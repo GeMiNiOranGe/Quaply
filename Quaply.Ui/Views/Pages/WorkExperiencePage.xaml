@@ -16,10 +16,11 @@
   d:DesignWidth="800"
   Style="{StaticResource FadeInSlideUpPage}"
   mc:Ignorable="d">
-  <Grid Margin="24,16">
+  <Grid Margin="24,16,24,0">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
     <!--  Top actions  -->
@@ -265,5 +266,125 @@
         </Border>
       </Grid>
     </ui:Card>
+
+
+    <!--  Row 2: Stats widget - collapsed by default, doesn't push DataGrid's top position  -->
+    <ui:CardExpander
+      Grid.Row="2"
+      Margin="0,8,0,0"
+      Padding="16,12"
+      ContentPadding="0"
+      CornerRadius="4,4,0,0"
+      Icon="{ui:SymbolIcon DataBarVertical24}"
+      IsExpanded="False">
+      <ui:CardExpander.Header>
+        <TextBlock VerticalAlignment="Center" Text="Archive statistics" />
+      </ui:CardExpander.Header>
+
+      <ItemsControl
+        x:Name="statsItemsControl"
+        Margin="0"
+        ItemsSource="{Binding Stats}"
+        Tag="{Binding ActualWidth, ElementName=statsItemsControl, Converter={converters:LessThanConverter}, ConverterParameter=840}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <UniformGrid Columns="{Binding ActualWidth, ElementName=statsItemsControl, Converter={converters:LinearInterpolationConverter}, ConverterParameter='SourceMin=640;SourceMax=1440;TargetMin=1;TargetMax=3'}" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border
+              x:Name="cardBorder"
+              Margin="1"
+              Padding="16"
+              Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+              <Grid>
+                <!--
+                  Default layout: vertical (icon at the top,
+                  value in the middle, sub-label at the bottom)
+                -->
+                <Grid x:Name="verticalLayout">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+
+                  <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                      VerticalAlignment="Center"
+                      Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                      Text="{Binding Label}" />
+
+                    <ui:SymbolIcon
+                      Grid.Column="1"
+                      Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                      Symbol="{Binding Icon}" />
+                  </Grid>
+
+                  <TextBlock
+                    Grid.Row="1"
+                    Margin="0,8,0,0"
+                    FontSize="24"
+                    FontWeight="Bold"
+                    Text="{Binding Value}" />
+
+                  <TextBlock
+                    Grid.Row="2"
+                    Margin="0,4,0,0"
+                    FontSize="12"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="{Binding SubLabel}"
+                    TextWrapping="Wrap" />
+                </Grid>
+
+                <!--  Compact layout: horizontal, single row, hidden by default.  -->
+                <Grid x:Name="horizontalLayout" Visibility="Collapsed">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+
+                  <ui:SymbolIcon
+                    Grid.Column="0"
+                    Margin="0,0,12,0"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Symbol="{Binding Icon}" />
+
+                  <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="{Binding Label}"
+                    TextTrimming="CharacterEllipsis" />
+
+                  <TextBlock
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    FontSize="16"
+                    FontWeight="Bold"
+                    Text="{Binding Value}" />
+                </Grid>
+              </Grid>
+            </Border>
+
+            <DataTemplate.Triggers>
+              <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=ItemsControl}}" Value="True">
+                <Setter TargetName="verticalLayout" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="horizontalLayout" Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </DataTemplate.Triggers>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ui:CardExpander>
   </Grid>
 </UserControl>

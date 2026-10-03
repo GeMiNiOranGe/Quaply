@@ -4,7 +4,9 @@ using CommunityToolkit.Mvvm.Input;
 using Quaply.Data.Models;
 using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
+using Quaply.Ui.Models;
 using Quaply.Ui.ViewModels.Base;
+using Wpf.Ui.Controls;
 
 namespace Quaply.Ui.ViewModels;
 
@@ -28,9 +30,44 @@ public partial class WorkExperienceViewModel(
         }
     } = [];
 
+    public ObservableCollection<StatItem> Stats { get; } = [];
+
+    private void LoadStats()
+    {
+        Stats.Clear();
+
+        Stats.Add(
+            new StatItem(
+                Icon: SymbolRegular.Delete24,
+                Label: "Total Deleted Records",
+                Value: "03 Items",
+                SubLabel: "Can be restored at any time"
+            )
+        );
+
+        Stats.Add(
+            new StatItem(
+                Icon: SymbolRegular.HistoryDismiss24,
+                Label: "Storage Experience Time",
+                Value: "4.3 Years",
+                SubLabel: "Total experience time in the archive"
+            )
+        );
+
+        Stats.Add(
+            new StatItem(
+                Icon: SymbolRegular.CheckmarkCircle24,
+                Label: "Instant Restoration",
+                Value: "Automatic",
+                SubLabel: "Linked data and skills will be reactivated immediately upon restoration"
+            )
+        );
+    }
+
     public async Task OnNavigatedToAsync()
     {
         await LoadWorkExperiencesAsync();
+        LoadStats();
     }
 
     [RelayCommand]
