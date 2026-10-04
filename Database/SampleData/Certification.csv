@@ -1,0 +1,46 @@
+Id,Name,Issuer,IssueDate,ExpirationDate,DeletedAt
+1,Oracle Certified Professional: Java SE 11 Developer,Oracle,2021-03-01,,
+2,AWS Certified Solutions Architect - Associate,Amazon Web Services,2022-09-01,2025-09-01,
+3,Certified Kubernetes Administrator (CKA),Cloud Native Computing Foundation,2023-04-01,2026-04-01,
+4,MySQL 5.7 Database Administrator,Oracle,2018-05-01,2021-05-01,2022-08-01 10:00:00
+5,HashiCorp Certified: Terraform Associate,HashiCorp,2018-01-01,,
+6,Google Cloud Professional Cloud Architect,Google Cloud,2019-02-01,2022-02-01,
+7,Microsoft Certified: Azure Administrator Associate,Microsoft,2020-03-01,2023-03-01,
+8,Certified Kubernetes Application Developer (CKAD),Cloud Native Computing Foundation,2021-04-01,,
+9,Certified Kubernetes Security Specialist (CKS),Amazon Web Services,2022-05-01,2025-05-01,
+10,AWS Certified DevOps Engineer - Professional,MongoDB,2023-06-01,2026-06-01,
+11,AWS Certified Developer - Associate,Confluent,2024-07-01,,
+12,MongoDB Certified Developer Associate,Docker Inc.,2018-08-01,2021-08-01,
+13,Confluent Certified Developer for Apache Kafka,Linux Foundation,2019-09-01,2022-09-01,
+14,Docker Certified Associate,Red Hat,2020-01-01,,
+15,Linux Foundation Certified Engineer (LFCE),GitLab,2021-02-01,2024-02-01,
+16,Red Hat Certified Engineer (RHCE),Datadog,2022-03-01,2025-03-01,
+17,GitLab Certified CI/CD Associate,PostgreSQL Global Development Group,2023-04-01,,
+18,Datadog Certified Observability Engineer,Scrum Alliance,2024-05-01,2027-05-01,
+19,PostgreSQL Certified Associate,HashiCorp,2018-06-01,2021-06-01,
+20,Certified Kubernetes Security Specialist (CKS),Microsoft,2015-01-01,2017-01-01,7
+21,AWS Certified DevOps Engineer - Professional,Cloud Native Computing Foundation,2016-02-01,2018-02-01,30
+22,AWS Certified Developer - Associate,Amazon Web Services,2017-03-01,2019-03-01,14
+23,MongoDB Certified Developer Associate,MongoDB,2018-04-01,2020-04-01,45
+24,Confluent Certified Developer for Apache Kafka,Confluent,2019-05-01,2021-05-01,3
+25,Docker Certified Associate,Docker Inc.,2020-06-01,2022-06-01,60
+26,Linux Foundation Certified Engineer (LFCE),Linux Foundation,2021-07-01,2023-07-01,21
+27,Red Hat Certified Engineer (RHCE),Red Hat,2015-08-01,2017-08-01,90
+28,GitLab Certified CI/CD Associate,GitLab,2016-09-01,2018-09-01,10
+29,Datadog Certified Observability Engineer,Datadog,2017-01-01,2019-01-01,30
+30,PostgreSQL Certified Associate,PostgreSQL Global Development Group,2018-02-01,2020-02-01,7
+31,Scrum Master Certified (SMC),Scrum Alliance,2019-03-01,2021-03-01,30
+32,HashiCorp Certified: Terraform Associate,HashiCorp,2020-04-01,2022-04-01,7
+33,Google Cloud Professional Cloud Architect,Google Cloud,2021-05-01,2023-05-01,30
+34,Microsoft Certified: Azure Administrator Associate,Microsoft,2015-06-01,2017-06-01,14
+35,Certified Kubernetes Application Developer (CKAD),Cloud Native Computing Foundation,2016-07-01,2018-07-01,45
+36,Certified Kubernetes Security Specialist (CKS),Amazon Web Services,2017-08-01,2019-08-01,3
+37,AWS Certified DevOps Engineer - Professional,MongoDB,2018-09-01,2020-09-01,60
+38,AWS Certified Developer - Associate,Confluent,2019-01-01,2021-01-01,21
+39,MongoDB Certified Developer Associate,Docker Inc.,2020-02-01,2022-02-01,90
+40,Confluent Certified Developer for Apache Kafka,Linux Foundation,2021-03-01,2023-03-01,10
+41,Docker Certified Associate,Red Hat,2015-04-01,2017-04-01,30
+42,Linux Foundation Certified Engineer (LFCE),GitLab,2016-05-01,2018-05-01,7
+43,Red Hat Certified Engineer (RHCE),Datadog,2017-06-01,2019-06-01,30
+44,GitLab Certified CI/CD Associate,PostgreSQL Global Development Group,2018-07-01,2020-07-01,7
+45,Datadog Certified Observability Engineer,Scrum Alliance,2019-08-01,2021-08-01,30

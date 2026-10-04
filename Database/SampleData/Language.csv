@@ -1,0 +1,26 @@
+Id,Name,ProficiencyLevel,DeletedAt
+1,English,Native,
+2,Spanish,Limited Working Proficiency,
+3,French,Elementary Proficiency,2024-01-15 12:00:00
+4,German,Native,
+5,Mandarin Chinese,Full Professional Proficiency,
+6,Japanese,Professional Working Proficiency,
+7,Korean,Limited Working Proficiency,
+8,Portuguese,Elementary Proficiency,
+9,Italian,Native,
+10,Russian,Full Professional Proficiency,
+11,Arabic,Professional Working Proficiency,
+12,Hindi,Professional Working Proficiency,7
+13,Dutch,Limited Working Proficiency,30
+14,Swedish,Elementary Proficiency,14
+15,Norwegian,Native,45
+16,Danish,Full Professional Proficiency,3
+17,Polish,Professional Working Proficiency,60
+18,Turkish,Limited Working Proficiency,21
+19,Vietnamese,Elementary Proficiency,90
+20,Thai,Native,10
+21,Indonesian,Full Professional Proficiency,30
+22,Greek,Professional Working Proficiency,7
+23,Hebrew,Limited Working Proficiency,30
+24,Finnish,Elementary Proficiency,7
+25,Czech,Native,30

@@ -1,0 +1,6 @@
+Id,FullName,Email,PhoneNumber,LinkedInUsername,GitHubUsername,PortfolioUrl,DateOfBirth,DeletedAt
+1,Ethan Carter,ethan.carter.dev@gmail.com,+1 415 234 5678,ethan-carter-dev,ethan-carter-dev,,1997-08-15,
+2,Ethan Carter,ethan.carter.dev@gmail.com,+1 415 234 5678,ethan-carter-dev,ethan-carter-dev,https://ethancarter.dev,1997-08-15,
+3,Ethan Carter,ethan.carter.old@yahoo.com,+1 415 000 1111,ethancarter1997,ethancarter97,,1997-08-15,2023-01-10 08:30:00
+4,Ethan Carter,ethan.carter.old2@hotmail.com,+1 415 222 3333,ethancarter-old,ecarter-old,,1997-08-15,30
+5,Ethan Carter,ethan.c.university@berkeley.edu,,,,,1997-08-15,21

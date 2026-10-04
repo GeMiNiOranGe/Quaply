@@ -1,0 +1,26 @@
+Id,SchoolName,Degree,Major,StartDate,EndDate,DeletedAt
+1,"University of California, Berkeley",Bachelor of Science,Computer Science,2015-09-01,2019-05-01,
+2,Coursera,Online Certificate,Data Structures,2018-06-01,2018-08-01,2023-07-01 09:00:00
+3,Stanford University,Bachelor of Science,Computer Science,2014-09-01,2016-06-01,
+4,MIT,Master of Science,Software Engineering,2015-09-01,2017-06-01,
+5,Carnegie Mellon University,Online Certificate,Information Systems,2016-09-01,2018-06-01,
+6,University of Washington,Bootcamp Certificate,Data Structures,2017-09-01,2019-06-01,
+7,Georgia Institute of Technology,,Cloud Computing,2018-09-01,2020-06-01,
+8,University of Michigan,Bachelor of Science,,2019-09-01,2021-06-01,
+9,Cornell University,Master of Science,Computer Science,2020-09-01,2022-06-01,
+10,University of Texas at Austin,Online Certificate,Software Engineering,2021-09-01,2023-06-01,
+11,UCLA,Bootcamp Certificate,Information Systems,2014-09-01,2016-06-01,
+12,University of Washington,Master of Science,Information Systems,2011-09-01,2012-06-01,7
+13,Georgia Institute of Technology,Online Certificate,Data Structures,2012-09-01,2013-06-01,30
+14,University of Michigan,Bootcamp Certificate,Cloud Computing,2013-09-01,2014-06-01,14
+15,Cornell University,,,2014-09-01,2015-06-01,45
+16,University of Texas at Austin,Bachelor of Science,Computer Science,2015-09-01,2016-06-01,3
+17,UCLA,Master of Science,Software Engineering,2016-09-01,2017-06-01,60
+18,Udemy,Online Certificate,Information Systems,2017-09-01,2018-06-01,21
+19,edX,Bootcamp Certificate,Data Structures,2018-09-01,2019-06-01,90
+20,Pluralsight,,Cloud Computing,2011-09-01,2012-06-01,10
+21,freeCodeCamp,Bachelor of Science,,2012-09-01,2013-06-01,30
+22,Codecademy,Master of Science,Computer Science,2013-09-01,2014-06-01,7
+23,University of Illinois Urbana-Champaign,Online Certificate,Software Engineering,2014-09-01,2015-06-01,30
+24,Stanford University,Bootcamp Certificate,Information Systems,2015-09-01,2016-06-01,7
+25,MIT,,Data Structures,2016-09-01,2017-06-01,30

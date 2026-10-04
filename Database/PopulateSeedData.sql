@@ -1,3 +1,169 @@
+-- =============================================================================
+-- HOW TO RUN (this file uses sqlite3 CLI dot-commands, e.g. ".import" -
+-- it must be run through the sqlite3.exe command-line shell, not through a
+-- generic "execute SQL" box in a GUI tool that only understands plain SQL):
+--
+--   sqlite3 Database/Quaply.db
+--   sqlite> .read Database/PopulateMasterData.sql
+--   sqlite> .read Database/PopulateSeedData.sql
+--
+-- or, from PowerShell / a build script, in one shot:
+--
+--   sqlite3.exe Database/Quaply.db ".read Database/PopulateMasterData.sql" ".read Database/PopulateSeedData.sql"
+--
+-- Assumes the schema (CREATE TABLE ...) and PopulateMasterData.sql
+-- (ProjectType, SkillCategory) have already been applied to the target db.
+-- CSV files are expected at Database/SampleData/<TableName>.csv relative to the
+-- working directory .import is run from - adjust the paths below if needed.
+--
+-- DeletedAt column convention in every CSV (last column, header "DeletedAt"):
+--   - empty                       -> not deleted (DeletedAt = NULL)
+--   - a plain integer, e.g. "7"   -> dynamic: datetime('now', '-7 days')
+--                                     (recomputed fresh every time this
+--                                     script runs, relative to "now")
+--   - a literal timestamp, e.g.
+--     "2024-09-05 14:22:10"       -> used as-is (static/historical date)
+-- =============================================================================
+
+-- re-enabled at the end, after all data is in
+PRAGMA foreign_keys = OFF;
+
+-- -----------------------------------------------------------------------------
+-- STAGING TABLES
+-- Plain TEXT columns, no CHECK/STRICT, so .import always succeeds regardless
+-- of blank vs. populated fields. Dropped automatically (TEMP) when the
+-- connection closes, or explicitly at the end of this script.
+-- -----------------------------------------------------------------------------
+
+DROP TABLE IF EXISTS temp."stg_Resume";
+CREATE TEMP TABLE "stg_Resume" (
+    "Id" TEXT,
+    "Name" TEXT,
+    "ExportedAt" TEXT,
+    "DeletedAt" TEXT
+);
+
+DROP TABLE IF EXISTS temp."stg_Profile";
+CREATE TEMP TABLE "stg_Profile" (
+    "Id" TEXT,
+    "FullName" TEXT,
+    "Email" TEXT,
+    "PhoneNumber" TEXT,
+    "LinkedInUsername" TEXT,
+    "GitHubUsername" TEXT,
+    "PortfolioUrl" TEXT,
+    "DateOfBirth" TEXT,
+    "DeletedAt" TEXT
+);
+
+DROP TABLE IF EXISTS temp."stg_PersonalSummary";
+CREATE TEMP TABLE "stg_PersonalSummary" (
+    "Id" TEXT,
+    "TargetPositionTitle" TEXT,
+    "Summary" TEXT,
+    "DeletedAt" TEXT
+);
+
+DROP TABLE IF EXISTS temp."stg_WorkExperience";
+CREATE TEMP TABLE "stg_WorkExperience" (
+    "Id" TEXT,
+    "CompanyName" TEXT,
+    "PositionTitle" TEXT,
+    "Description" TEXT,
+    "StartDate" TEXT,
+    "EndDate" TEXT,
+    "DeletedAt" TEXT
+);
+
+DROP TABLE IF EXISTS temp."stg_Education";
+CREATE TEMP TABLE "stg_Education" (
+    "Id" TEXT,
+    "SchoolName" TEXT,
+    "Degree" TEXT,
+    "Major" TEXT,
+    "StartDate" TEXT,
+    "EndDate" TEXT,
+    "DeletedAt" TEXT
+);
+
+DROP TABLE IF EXISTS temp."stg_Language";
+CREATE TEMP TABLE "stg_Language" (
+    "Id" TEXT,
+    "Name" TEXT,
+    "ProficiencyLevel" TEXT,
+    "DeletedAt" TEXT
+);
+
+DROP TABLE IF EXISTS temp."stg_Certification";
+CREATE TEMP TABLE "stg_Certification" (
+    "Id" TEXT,
+    "Name" TEXT,
+    "Issuer" TEXT,
+    "IssueDate" TEXT,
+    "ExpirationDate" TEXT,
+    "DeletedAt" TEXT
+);
+
+DROP TABLE IF EXISTS temp."stg_Skill";
+CREATE TEMP TABLE "stg_Skill" (
+    "Id" TEXT,
+    "Name" TEXT,
+    "IsHighlight" TEXT,
+    "DeletedAt" TEXT,
+    "SkillCategoryId" TEXT
+);
+
+DROP TABLE IF EXISTS temp."stg_Project";
+CREATE TEMP TABLE "stg_Project" (
+    "Id" TEXT,
+    "Name" TEXT,
+    "Brief" TEXT,
+    "Role" TEXT,
+    "Responsibilities" TEXT,
+    "RepositoryUrl" TEXT,
+    "DemoUrl" TEXT,
+    "StartDate" TEXT,
+    "EndDate" TEXT,
+    "HasGaps" TEXT,
+    "WorkExperienceId" TEXT,
+    "ProjectTypeId" TEXT,
+    "DeletedAt" TEXT
+);
+
+-- -----------------------------------------------------------------------------
+-- IMPORT CSVs INTO STAGING (dot-commands - sqlite3 CLI only)
+-- -----------------------------------------------------------------------------
+.mode csv
+.import --skip 1 Database/SampleData/Resume.csv stg_Resume
+.import --skip 1 Database/SampleData/Profile.csv stg_Profile
+.import --skip 1 Database/SampleData/PersonalSummary.csv stg_PersonalSummary
+.import --skip 1 Database/SampleData/WorkExperience.csv stg_WorkExperience
+.import --skip 1 Database/SampleData/Education.csv stg_Education
+.import --skip 1 Database/SampleData/Language.csv stg_Language
+.import --skip 1 Database/SampleData/Certification.csv stg_Certification
+.import --skip 1 Database/SampleData/Skill.csv stg_Skill
+.import --skip 1 Database/SampleData/Project.csv stg_Project
+
+-- -----------------------------------------------------------------------------
+-- STAGING -> REAL TABLES
+-- NULLIF('', '') turns blank text into NULL for nullable text columns.
+-- The DeletedAt CASE handles the 3-way convention described at the top.
+-- Insertion order respects FK dependencies (WorkExperience/Skill before
+-- Project; ProjectType/SkillCategory must already exist via master data).
+--
+-- Hour/minute/second jitter on dynamic DeletedAt values: '+' || ((Id * 7) % 24) || ' hours',
+-- '+' || ((Id * 13) % 60) || ' minutes', '+' || ((Id * 19) % 60) || ' seconds' below.
+-- 7 and 24 are coprime (gcd = 1), so as Id increases by 1, (Id * 7) % 24 cycles
+-- through all 24 possible hour values before repeating - same idea for 13/60
+-- (minutes) and 19/60 (seconds). All three multipliers (7, 13, 19) are also
+-- different from each other, so hours/minutes/seconds don't drift in lockstep.
+-- Picking a non-coprime multiplier (e.g. Id * 12 % 24) would collapse the result
+-- to only a couple of values ({0, 12}), making consecutive rows land on visibly
+-- repeating/clustered timestamps instead of a spread-out, natural-looking one.
+-- The exact numbers 7/13/19 have no other significance - any small multipliers
+-- coprime with 24 (hours) or 60 (minutes/seconds) work the same.
+-- -----------------------------------------------------------------------------
+
 INSERT INTO "Resume"
     (
         "Id",
@@ -5,31 +171,25 @@ INSERT INTO "Resume"
         "ExportedAt",
         "DeletedAt"
     )
-VALUES
-    (
-        1,
-        'Ethan Carter - Backend Developer',
-        NULL,
-        NULL
-    ),
-    (
-        2,
-        'Ethan Carter - DevOps / Cloud Engineer',
-        NULL,
-        NULL
-    ),
-    (
-        3,
-        'Ethan Carter - Draft Frontend CV',
-        NULL,
-        '2024-09-05 14:22:10'
-    );
+SELECT
+    CAST("Id" AS INTEGER),
+    "Name",
+    NULLIF("ExportedAt", ''),
+    CASE
+        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
+        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
+            'now',
+            '-' || "DeletedAt" || ' days',
+            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
+            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
+            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
+        )
+        ELSE "DeletedAt"
+    END
+FROM "stg_Resume";
 
 -- =============================================================================
 -- PROFILE
--- Profile 1: Backend Developer
--- Profile 2: DevOps / Cloud Engineer
--- Both profiles belong to the same user: Ethan Carter (American)
 -- =============================================================================
 
 INSERT INTO "Profile"
@@ -44,40 +204,27 @@ INSERT INTO "Profile"
         "DateOfBirth",
         "DeletedAt"
     )
-VALUES
-    (
-        1,
-        'Ethan Carter',
-        'ethan.carter.dev@gmail.com',
-        '+1 415 234 5678',
-        'ethan-carter-dev',
-        'ethan-carter-dev',
-        NULL,
-        '1997-08-15',
-        NULL
-    ),
-    (
-        2,
-        'Ethan Carter',
-        'ethan.carter.dev@gmail.com',
-        '+1 415 234 5678',
-        'ethan-carter-dev',
-        'ethan-carter-dev',
-        'https://ethancarter.dev',
-        '1997-08-15',
-        NULL
-    ),
-    (
-        3,
-        'Ethan Carter',
-        'ethan.carter.old@yahoo.com',
-        '+1 415 000 1111',
-        'ethancarter1997',
-        'ethancarter97',
-        NULL,
-        '1997-08-15',
-        '2023-01-10 08:30:00'
-    );
+SELECT
+    CAST("Id" AS INTEGER),
+    "FullName",
+    NULLIF("Email", ''),
+    NULLIF("PhoneNumber", ''),
+    NULLIF("LinkedInUsername", ''),
+    NULLIF("GitHubUsername", ''),
+    NULLIF("PortfolioUrl", ''),
+    NULLIF("DateOfBirth", ''),
+    CASE
+        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
+        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
+            'now',
+            '-' || "DeletedAt" || ' days',
+            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
+            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
+            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
+        )
+        ELSE "DeletedAt"
+    END
+FROM "stg_Profile";
 
 INSERT INTO "ResumeProfile"
         ("ResumeId", "ProfileId")
@@ -96,25 +243,22 @@ INSERT INTO "PersonalSummary"
         "Summary",
         "DeletedAt"
     )
-VALUES
-    (
-        1,
-        'Backend Software Engineer',
-        'Backend developer with 5+ years of experience building scalable, high-performance REST and gRPC services. Proficient in Go and Java Spring Boot, with strong knowledge of microservices architecture, message queues, and relational/NoSQL databases. Passionate about clean code, domain-driven design, and performance optimization.',
-        NULL
-    ),
-    (
-        2,
-        'DevOps / Cloud Engineer',
-        'DevOps engineer with 4+ years of experience designing and maintaining CI/CD pipelines, container orchestration on Kubernetes, and cloud infrastructure on AWS. Experienced in infrastructure-as-code (Terraform, Ansible) and platform reliability engineering. Focused on automating everything and reducing MTTR.',
-        NULL
-    ),
-    (
-        3,
-        'Fullstack Developer',
-        'Fullstack developer eager to work across frontend and backend, early-career profile.',
-        '2021-02-14 11:00:00'
-    );
+SELECT
+    CAST("Id" AS INTEGER),
+    "TargetPositionTitle",
+    NULLIF("Summary", ''),
+    CASE
+        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
+        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
+            'now',
+            '-' || "DeletedAt" || ' days',
+            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
+            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
+            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
+        )
+        ELSE "DeletedAt"
+    END
+FROM "stg_PersonalSummary";
 
 INSERT INTO "ResumePersonalSummary"
         ("ResumeId", "PersonalSummaryId")
@@ -136,52 +280,25 @@ INSERT INTO "WorkExperience"
         "EndDate",
         "DeletedAt"
     )
-VALUES
-    (
-        1,
-        'Stripe',
-        'Backend Engineer',
-        'Built and maintained high-throughput backend services for Stripe''s payment processing platform. Led migration of legacy monolith to microservices using Go and Kafka.',
-        '2021-06-01',
-        NULL,
-        NULL
-    ),
-    (
-        2,
-        'Shopify',
-        'Junior Backend Developer',
-        'Developed e-commerce order management APIs using Java Spring Boot and MySQL. Implemented caching layers with Redis to reduce DB load by 40%.',
-        '2019-08-01',
-        '2021-05-01',
-        NULL
-    ),
-    (
-        3,
-        'Stripe',
-        'DevOps Engineer',
-        'Owned the internal Kubernetes clusters on AWS EKS for 20+ microservices. Implemented GitOps workflow with ArgoCD and reduced deployment time from 45 min to under 8 min.',
-        '2022-01-01',
-        NULL,
-        NULL
-    ),
-    (
-        4,
-        'Amazon Web Services',
-        'Infrastructure Engineer Intern',
-        'Assisted in provisioning AWS EC2/RDS resources and writing Ansible playbooks for configuration management.',
-        '2019-06-01',
-        '2019-08-01',
-        NULL
-    ),
-    (
-        5,
-        'Freelance',
-        'Part-time Tutor',
-        'Taught introductory programming to bootcamp students on weekends.',
-        '2018-01-01',
-        '2018-12-01',
-        '2022-03-20 16:45:00'
-    );
+SELECT
+    CAST("Id" AS INTEGER),
+    "CompanyName",
+    "PositionTitle",
+    NULLIF("Description", ''),
+    "StartDate",
+    NULLIF("EndDate", ''),
+    CASE
+        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
+        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
+            'now',
+            '-' || "DeletedAt" || ' days',
+            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
+            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
+            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
+        )
+        ELSE "DeletedAt"
+    END
+FROM "stg_WorkExperience";
 
 INSERT INTO "ResumeWorkExperience"
         ("ResumeId", "WorkExperienceId")
@@ -207,25 +324,25 @@ INSERT INTO "Education"
         "EndDate",
         "DeletedAt"
     )
-VALUES
-    (
-        1,
-        'University of California, Berkeley',
-        'Bachelor of Science',
-        'Computer Science',
-        '2015-09-01',
-        '2019-05-01',
-        NULL
-    ),
-    (
-        2,
-        'Coursera',
-        'Online Certificate',
-        'Data Structures',
-        '2018-06-01',
-        '2018-08-01',
-        '2023-07-01 09:00:00'
-    );
+SELECT
+    CAST("Id" AS INTEGER),
+    "SchoolName",
+    NULLIF("Degree", ''),
+    NULLIF("Major", ''),
+    NULLIF("StartDate", ''),
+    NULLIF("EndDate", ''),
+    CASE
+        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
+        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
+            'now',
+            '-' || "DeletedAt" || ' days',
+            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
+            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
+            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
+        )
+        ELSE "DeletedAt"
+    END
+FROM "stg_Education";
 
 -- Both resumes share the same education
 INSERT INTO "ResumeEducation"
@@ -239,11 +356,28 @@ VALUES  (1,          1)
 -- =============================================================================
 
 INSERT INTO "Language"
-        ("Id", "Name",    "ProficiencyLevel",            "DeletedAt")
-VALUES  (1,    'English', 'Native',                      NULL)
-     ,  (2,    'Spanish', 'Limited Working Proficiency', NULL)
-     ,  (3,    'French',  'Elementary Proficiency',      '2024-01-15 12:00:00')
-;
+    (
+        "Id",
+        "Name",
+        "ProficiencyLevel",
+        "DeletedAt"
+    )
+SELECT
+    CAST("Id" AS INTEGER),
+    "Name",
+    "ProficiencyLevel",
+    CASE
+        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
+        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
+            'now',
+            '-' || "DeletedAt" || ' days',
+            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
+            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
+            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
+        )
+        ELSE "DeletedAt"
+    END
+FROM "stg_Language";
 
 -- Both resumes share languages
 INSERT INTO "ResumeLanguage"
@@ -269,39 +403,24 @@ INSERT INTO "Certification"
         "ExpirationDate",
         "DeletedAt"
     )
-VALUES
-    (
-        1,
-        'Oracle Certified Professional: Java SE 11 Developer',
-        'Oracle',
-        '2021-03-01',
-        NULL,
-        NULL
-    ),
-    (
-        2,
-        'AWS Certified Solutions Architect - Associate',
-        'Amazon Web Services',
-        '2022-09-01',
-        '2025-09-01',
-        NULL
-    ),
-    (
-        3,
-        'Certified Kubernetes Administrator (CKA)',
-        'Cloud Native Computing Foundation',
-        '2023-04-01',
-        '2026-04-01',
-        NULL
-    ),
-    (
-        4,
-        'MySQL 5.7 Database Administrator',
-        'Oracle',
-        '2018-05-01',
-        '2021-05-01',
-        '2022-08-01 10:00:00'
-    );
+SELECT
+    CAST("Id" AS INTEGER),
+    "Name",
+    NULLIF("Issuer", ''),
+    NULLIF("IssueDate", ''),
+    NULLIF("ExpirationDate", ''),
+    CASE
+        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
+        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
+            'now',
+            '-' || "DeletedAt" || ' days',
+            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
+            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
+            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
+        )
+        ELSE "DeletedAt"
+    END
+FROM "stg_Certification";
 
 INSERT INTO "ResumeCertification"
         ("ResumeId", "CertificationId")
@@ -315,62 +434,30 @@ VALUES  (1,          1)  -- Backend resume gets Java cert
 -- =============================================================================
 
 INSERT INTO "Skill"
-        ("Id", "Name",                         "IsHighlight", "DeletedAt",           "SkillCategoryId")
-    -- Programming language
-VALUES  (1,    'Go',                           1,             NULL,                  2)
-     ,  (2,    'Java',                         1,             NULL,                  2)
-     ,  (3,    'Python',                       0,             NULL,                  2)
-     ,  (4,    'SQL',                          0,             NULL,                  2)
-     ,  (5,    'Bash',                         0,             NULL,                  2)
-     ,  (6,    'TypeScript',                   0,             NULL,                  2)
-     ,  (7,    'HCL (Terraform)',              1,             NULL,                  2)
-    -- Framework / Library
-     ,  (8,    'Spring Boot',                  1,             NULL,                  3)
-     ,  (9,    'gRPC',                         1,             NULL,                  3)
-     ,  (10,   'Gin',                          1,             NULL,                  3)
-     ,  (11,   'GORM',                         0,             NULL,                  3)
-     ,  (12,   'Ansible',                      1,             NULL,                  3)
-     ,  (13,   'ArgoCD',                       1,             NULL,                  3)
-     ,  (14,   'Helm',                         0,             NULL,                  3)
-    -- Database
-     ,  (15,   'PostgreSQL',                   1,             NULL,                  4)
-     ,  (16,   'MySQL',                        0,             NULL,                  4)
-     ,  (17,   'Redis',                        1,             NULL,                  4)
-     ,  (18,   'MongoDB',                      0,             NULL,                  4)
-     ,  (19,   'Elasticsearch',                0,             NULL,                  4)
-    -- Tool
-     ,  (20,   'Docker',                       1,             NULL,                  5)
-     ,  (21,   'Kubernetes',                   1,             NULL,                  5)
-     ,  (22,   'Kafka',                        1,             NULL,                  5)
-     ,  (23,   'Terraform',                    1,             NULL,                  5)
-     ,  (24,   'GitHub Actions',               0,             NULL,                  5)
-     ,  (25,   'Jenkins',                      0,             NULL,                  5)
-     ,  (26,   'Prometheus',                   0,             NULL,                  5)
-     ,  (27,   'Grafana',                      0,             NULL,                  5)
-     ,  (28,   'Datadog',                      0,             NULL,                  5)
-     ,  (29,   'AWS EKS',                      1,             NULL,                  5)
-     ,  (30,   'AWS RDS',                      0,             NULL,                  5)
-     ,  (31,   'AWS S3',                       0,             NULL,                  5)
-     ,  (32,   'AWS Lambda',                   0,             NULL,                  5)
-     ,  (33,   'Git',                          0,             NULL,                  5)
-     ,  (34,   'Postman',                      0,             NULL,                  5)
-    -- OS
-     ,  (35,   'Linux (Ubuntu/CentOS)',        1,             NULL,                  6)
-    -- Concept
-     ,  (36,   'Microservices',                1,             NULL,                  7)
-     ,  (37,   'Domain-Driven Design',         0,             NULL,                  7)
-     ,  (38,   'RESTful API',                  1,             NULL,                  7)
-     ,  (39,   'Event-Driven Architecture',    0,             NULL,                  7)
-     ,  (40,   'CI/CD',                        1,             NULL,                  7)
-     ,  (41,   'Infrastructure as Code',       1,             NULL,                  7)
-     ,  (42,   'GitOps',                       1,             NULL,                  7)
-     ,  (43,   'Site Reliability Engineering', 0,             NULL,                  7)
-     ,  (44,   'Twelve-Factor App',            0,             NULL,                  7)
-    --  [Deleted]
-     ,  (45,   'PHP',                          0,             '2023-05-12 08:00:00', 2)
-     ,  (46,   'jQuery',                       0,             '2023-05-12 08:00:00', 3)
-     ,  (47,   'CircleCI',                     0,             '2024-02-20 15:30:00', 5)
-;
+    (
+        "Id",
+        "Name",
+        "IsHighlight",
+        "DeletedAt",
+        "SkillCategoryId"
+    )
+SELECT
+    CAST("Id" AS INTEGER),
+    "Name",
+    CAST("IsHighlight" AS INTEGER),
+    CASE
+        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
+        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
+            'now',
+            '-' || "DeletedAt" || ' days',
+            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
+            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
+            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
+        )
+        ELSE "DeletedAt"
+    END,
+    CAST("SkillCategoryId" AS INTEGER)
+FROM "stg_Skill";
 
 -- =============================================================================
 -- PROJECTS
@@ -392,115 +479,31 @@ INSERT INTO "Project"
         "WorkExperienceId",
         "ProjectTypeId"
     )
-VALUES
-    -- -- Resume 1 (Backend) projects ------------------------------------------
-    (
-        1,
-        'Stripe Notification Service',
-        'A high-throughput push notification microservice handling 500k+ messages/day for Stripe users across iOS, Android, and Web.',
-        'Backend Engineer',
-        'Designed the service in Go with a Kafka consumer pipeline. Implemented retry logic, dead-letter queue, and per-device rate limiting. Wrote internal benchmarks achieving <5ms p99 latency.',
-        NULL,
-        NULL,
-        '2022-03-01',
-        NULL,
-        0,
-        NULL,
-        1,  -- Stripe Backend
-        3   -- Professional
-    ),
-    (
-        2,
-        'Order Management System - Shopify',
-        'Core backend API for a B2B e-commerce order flow: cart, checkout, inventory reservation, invoicing.',
-        'Junior Backend Developer',
-        'Built REST APIs with Spring Boot. Integrated Redis for session/cache. Wrote JUnit tests achieving 85% code coverage. Coordinated with frontend team on API contracts.',
-        NULL,
-        NULL,
-        '2020-01-01',
-        '2021-05-01',
-        0,
-        NULL,
-        2,  -- Shopify
-        3   -- Professional
-    ),
-    (
-        3,
-        'go-taskq',
-        'Open-source lightweight task queue library for Go with support for multiple backends (Redis, PostgreSQL).',
-        'Author / Maintainer',
-        'Designed the public API, implemented workers, retry strategies, and backoff. Published on GitHub with documentation and example apps. 200+ GitHub stars.',
-        'https://github.com/ethan-carter-dev/go-taskq',
-        NULL,
-        '2023-01-01',
-        NULL,
-        0,
-        NULL,
-        NULL,  -- personal project
-        2      -- Personal
-    ),
-
-    -- -- Resume 2 (DevOps) projects ------------------------------------------
-    (
-        4,
-        'Internal Developer Platform - Stripe',
-        'Built a self-service Kubernetes platform for 50+ engineers, abstracting cluster operations behind a GitOps workflow.',
-        'DevOps Engineer',
-        'Set up AWS EKS clusters with Terraform. Deployed ArgoCD for GitOps. Wrote Helm chart templates for standardized service deployments. Reduced onboarding time for new services from 3 days to 2 hours.',
-        NULL,
-        NULL,
-        '2022-04-01',
-        NULL,
-        0,
-        NULL,
-        3,  -- Stripe DevOps
-        3   -- Professional
-    ),
-    (
-        5,
-        'Observability Stack Migration',
-        'Migrated monitoring from CloudWatch to a self-hosted Prometheus + Grafana + Alertmanager stack, covering 20+ microservices.',
-        'DevOps Engineer',
-        'Designed recording rules and alerting policies. Integrated Datadog for APM traces. Created runbook documentation and on-call playbooks.',
-        NULL,
-        NULL,
-        '2023-06-01',
-        '2024-01-01',
-        0,
-        NULL,
-        3,  -- Stripe DevOps
-        3   -- Professional
-    ),
-    (
-        6,
-        'k8s-cost-exporter',
-        'Open-source Prometheus exporter that surfaces per-namespace AWS cost allocation data from Cost Explorer API.',
-        'Author',
-        'Built in Python with the official Prometheus client. Packaged as a Docker image with Helm chart. Featured in CNCF newsletter.',
-        'https://github.com/ethan-carter-dev/k8s-cost-exporter',
-        NULL,
-        '2023-09-01',
-        NULL,
-        0,
-        NULL,
-        NULL,  -- personal
-        5      -- OpenSource
-    ),
-    (
-        7,
-        'Legacy Portfolio Site',
-        'Old personal portfolio website built early in career, replaced by a newer version.',
-        'Author',
-        'Built a static portfolio site with HTML/CSS/jQuery, no longer maintained.',
-        NULL,
-        NULL,
-        '2018-03-01',
-        '2018-06-01',
-        0,
-        '2023-05-12 08:10:00',
-        NULL,
-        2
-    );
+SELECT
+    CAST("Id" AS INTEGER),
+    "Name",
+    NULLIF("Brief", ''),
+    NULLIF("Role", ''),
+    NULLIF("Responsibilities", ''),
+    NULLIF("RepositoryUrl", ''),
+    NULLIF("DemoUrl", ''),
+    NULLIF("StartDate", ''),
+    NULLIF("EndDate", ''),
+    CAST("HasGaps" AS INTEGER),
+    CASE
+        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
+        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
+            'now',
+            '-' || "DeletedAt" || ' days',
+            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
+            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
+            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
+        )
+        ELSE "DeletedAt"
+    END,
+    CAST(NULLIF("WorkExperienceId", '') AS INTEGER),
+    CAST("ProjectTypeId" AS INTEGER)
+FROM "stg_Project";
 
 -- =============================================================================
 -- PROJECT SKILLS
@@ -550,3 +553,5 @@ VALUES  (1,           1)   -- Go
      ,  (6,           14)  -- Helm
      ,  (6,           31)  -- AWS S3
 ;
+
+PRAGMA foreign_keys = ON;
