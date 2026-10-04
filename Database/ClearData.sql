@@ -4,6 +4,7 @@ BEGIN TRANSACTION;
 
 DELETE FROM "SkillCategory";
 DELETE FROM "ProjectType";
+DELETE FROM "Resume";
 DELETE FROM "Profile";
 DELETE FROM "PersonalSummary";
 DELETE FROM "WorkExperience";
@@ -12,11 +13,12 @@ DELETE FROM "Language";
 DELETE FROM "Certification";
 DELETE FROM "Project";
 DELETE FROM "Skill";
-DELETE FROM "ProfilePersonalSummary";
-DELETE FROM "ProfileWorkExperience";
-DELETE FROM "ProfileEducation";
-DELETE FROM "ProfileLanguage";
-DELETE FROM "ProfileCertification";
+DELETE FROM "ResumeProfile";
+DELETE FROM "ResumePersonalSummary";
+DELETE FROM "ResumeWorkExperience";
+DELETE FROM "ResumeEducation";
+DELETE FROM "ResumeLanguage";
+DELETE FROM "ResumeCertification";
 DELETE FROM "ProjectSkill";
 
 COMMIT;

@@ -45,12 +45,32 @@ STRICT;
 CREATE TABLE "Profile"
 (
     "Id"               INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    -- Not null: a profile must have a name to be usable on a Resume at all;
+    -- this is the one piece of identity info every generated document needs.
     "FullName"         TEXT    NOT NULL,
+
+    -- Nullable: not every user wants to expose an email on their Resume,
+    -- or they may not have filled in contact details yet.
     "Email"            TEXT,
+
+    -- Nullable: same reasoning as Email - optional contact channel,
+    -- some Resumes omit a phone number by choice (e.g. remote-only applications).
     "PhoneNumber"      TEXT,
+
+    -- Nullable: not every candidate has (or wants to share) a LinkedIn profile.
     "LinkedInUsername" TEXT,
+
+    -- Nullable: only relevant for candidates who maintain a public GitHub;
+    -- irrelevant for many non-developer roles or private-repo users.
     "GitHubUsername"   TEXT,
+
+    -- Nullable: a portfolio site is optional and not every profession has one.
     "PortfolioUrl"     TEXT,
+
+    -- Nullable: date of birth is optional/sensitive info; many Resume formats
+    -- (especially in countries with anti-age-discrimination norms)
+    -- omit it entirely.
     "DateOfBirth"      TEXT,
 
     "CreatedAt"        TEXT    NOT NULL DEFAULT (datetime('now')),
@@ -79,17 +99,36 @@ STRICT;
 CREATE TABLE "WorkExperience"
 (
     "Id"            INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    -- Not null: a work experience entry must be tied to a specific company;
+    -- without it the record is meaningless and would leave an invalid gap on
+    -- the Resume.
     "CompanyName"   TEXT    NOT NULL,
+
+    -- Not null: the position title is core information for a work experience
+    -- entry; employers always need to know what role the candidate held.
     "PositionTitle" TEXT    NOT NULL,
+
+    -- Nullable: job description is optional supplementary info;
+    -- users may skip it if they haven't written details yet.
     "Description"   TEXT,
+
+    -- Not null: the start date is required to
+    --   (1) order experiences chronologically (most recent first)
+    --   (2) compute duration for display on the Resume.
+    -- A "work experience" without a known start date doesn't make sense.
     "StartDate"     TEXT    NOT NULL,
+
+    -- Nullable: NULL represents an ongoing/current job (e.g. "Present").
+    -- Making this NOT NULL would make it impossible to represent a job still
+    -- in progress.
     "EndDate"       TEXT,
 
     "CreatedAt"     TEXT    NOT NULL DEFAULT (datetime('now')),
     "UpdatedAt"     TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt"     TEXT,
 
-    CHECK ("StartDate" IS NULL OR date("StartDate") = "StartDate"),
+    CHECK (date("StartDate") = "StartDate"),
     CHECK ("EndDate" IS NULL OR date("EndDate") = "EndDate"),
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
