@@ -9,4 +9,7 @@ public enum WorkExperienceSortField
 
     [Display(Name = "Company name")]
     CompanyName,
+
+    [Display(Name = "Position title")]
+    PositionTitle,
 }

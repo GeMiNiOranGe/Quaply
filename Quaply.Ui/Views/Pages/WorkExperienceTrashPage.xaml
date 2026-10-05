@@ -424,6 +424,7 @@
               AutoGenerateColumns="False"
               CanUserAddRows="False"
               CanUserDeleteRows="False"
+              CanUserSortColumns="False"
               HeadersVisibility="Column"
               IsReadOnly="True"
               ItemsSource="{Binding DeletedItems}"

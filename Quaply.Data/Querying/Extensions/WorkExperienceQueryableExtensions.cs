@@ -50,6 +50,9 @@ internal static class WorkExperienceQueryableExtensions
             WorkExperienceSortField.CompanyName => sort.Descending
                 ? query.OrderByDescending(e => e.CompanyName)
                 : query.OrderBy(e => e.CompanyName),
+            WorkExperienceSortField.PositionTitle => sort.Descending
+                ? query.OrderByDescending(e => e.PositionTitle)
+                : query.OrderBy(e => e.PositionTitle),
             _ => sort.Descending
                 ? query.OrderByDescending(e => e.DeletedAt)
                 : query.OrderBy(e => e.DeletedAt),
