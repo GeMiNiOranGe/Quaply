@@ -288,7 +288,7 @@
         Tag="{Binding ActualWidth, ElementName=statsItemsControl, Converter={converters:LessThanConverter}, ConverterParameter=840}">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
-            <UniformGrid Columns="{Binding ActualWidth, ElementName=statsItemsControl, Converter={converters:LinearInterpolationConverter}, ConverterParameter='SourceMin=640;SourceMax=1440;TargetMin=1;TargetMax=3'}" />
+            <UniformGrid Columns="{Binding ActualWidth, ElementName=statsItemsControl, Converter={converters:LinearInterpolationConverter}, ConverterParameter='SourceMin=640;SourceMax=1440;TargetMin=1;TargetMax=3;Round=true'}" />
           </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
 

@@ -35,10 +35,63 @@ public sealed class LinearInterpolationConverter
     : MarkupExtension,
         IValueConverter
 {
+    /// <summary>
+    /// The four interpolation bounds plus the optional rounding flag,
+    /// parsed from a <see cref="LinearInterpolationConverter"/>'s
+    /// <c>ConverterParameter</c>.
+    /// </summary>
+    /// <param name="SourceMin">Lower bound of the input range.</param>
+    /// <param name="SourceMax">Upper bound of the input range.</param>
+    /// <param name="TargetMin">Lower bound of the output range.</param>
+    /// <param name="TargetMax">Upper bound of the output range.</param>
+    /// <param name="Round">
+    /// Whether the interpolated result should be rounded to the nearest integer
+    /// (away from zero) before being returned.
+    /// </param>
+    private readonly record struct InterpolationRange(
+        double SourceMin,
+        double SourceMax,
+        double TargetMin,
+        double TargetMax,
+        bool Round
+    );
+
+    /// <summary>
+    /// Mutable accumulator used only while parsing a <c>ConverterParameter</c> string.
+    /// Exists so the static setter delegates below have something to write into
+    /// without capturing per-call local variables.
+    /// </summary>
+    private struct ParsedFields
+    {
+        public double? SourceMin;
+        public double? SourceMax;
+        public double? TargetMin;
+        public double? TargetMax;
+        public bool Round;
+    }
+
     private const string SourceMinKey = "SourceMin";
     private const string SourceMaxKey = "SourceMax";
     private const string TargetMinKey = "TargetMin";
     private const string TargetMaxKey = "TargetMax";
+    private const string RoundKey = "Round";
+
+    private delegate void DoubleSetter(ref ParsedFields fields, double value);
+    private delegate void BoolSetter(ref ParsedFields fields, bool value);
+
+    private static readonly Dictionary<string, DoubleSetter> DoubleSetters =
+        new()
+        {
+            [SourceMinKey] = (ref fields, value) => fields.SourceMin = value,
+            [SourceMaxKey] = (ref fields, value) => fields.SourceMax = value,
+            [TargetMinKey] = (ref fields, value) => fields.TargetMin = value,
+            [TargetMaxKey] = (ref fields, value) => fields.TargetMax = value,
+        };
+
+    private static readonly Dictionary<string, BoolSetter> BoolSetters = new()
+    {
+        [RoundKey] = (ref fields, value) => fields.Round = value,
+    };
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
@@ -59,29 +112,34 @@ public sealed class LinearInterpolationConverter
 
         if (
             parameter is not string paramString
-            || !TryParseRanges(paramString, out var ranges)
+            || !TryParseRanges(paramString, out InterpolationRange range)
         )
         {
             return Binding.DoNothing;
         }
 
-        if (ranges.SourceMax <= ranges.SourceMin)
+        // deconstruct the 'range' into local variables for clarity
+        (
+            double sourceMin,
+            double sourceMax,
+            double targetMin,
+            double targetMax,
+            bool round
+        ) = range;
+
+        if (sourceMax <= sourceMin)
         {
             // Degenerate source range: nothing meaningful to interpolate against.
-            return ranges.TargetMin;
+            return targetMin;
         }
 
-        var clampedInput = Math.Clamp(
-            input,
-            ranges.SourceMin,
-            ranges.SourceMax
-        );
-        var ratio =
-            (clampedInput - ranges.SourceMin)
-            / (ranges.SourceMax - ranges.SourceMin);
+        double clampedInput = Math.Clamp(input, sourceMin, sourceMax);
+        double ratio = (clampedInput - sourceMin) / (sourceMax - sourceMin);
+        double result = targetMin + (ratio * (targetMax - targetMin));
 
-        return ranges.TargetMin
-            + (ratio * (ranges.TargetMax - ranges.TargetMin));
+        return round
+            ? Math.Round(result, MidpointRounding.AwayFromZero)
+            : result;
     }
 
     public object ConvertBack(
@@ -98,20 +156,11 @@ public sealed class LinearInterpolationConverter
 
     private static bool TryParseRanges(
         string paramString,
-        out (
-            double SourceMin,
-            double SourceMax,
-            double TargetMin,
-            double TargetMax
-        ) ranges
+        out InterpolationRange range
     )
     {
-        ranges = default;
-
-        double? sourceMin = null;
-        double? sourceMax = null;
-        double? targetMin = null;
-        double? targetMax = null;
+        range = default;
+        ParsedFields fields = new();
 
         foreach (
             string pair in paramString.Split(
@@ -121,55 +170,65 @@ public sealed class LinearInterpolationConverter
             )
         )
         {
-            var keyValue = pair.Split('=', 2, StringSplitOptions.TrimEntries);
-            if (
-                keyValue.Length != 2
-                || !double.TryParse(
-                    keyValue[1],
-                    NumberStyles.Float,
-                    CultureInfo.InvariantCulture,
-                    out var numericValue
-                )
-            )
+            string[] keyValue = pair.Split(
+                '=',
+                2,
+                StringSplitOptions.TrimEntries
+            );
+            if (keyValue.Length != 2)
             {
                 return false;
             }
 
-            switch (keyValue[0])
+            string key = keyValue[0];
+            string rawValue = keyValue[1];
+
+            if (DoubleSetters.TryGetValue(key, out DoubleSetter? setDouble))
             {
-                case SourceMinKey:
-                    sourceMin = numericValue;
-                    break;
-                case SourceMaxKey:
-                    sourceMax = numericValue;
-                    break;
-                case TargetMinKey:
-                    targetMin = numericValue;
-                    break;
-                case TargetMaxKey:
-                    targetMax = numericValue;
-                    break;
-                default:
-                    // Unknown key: fail fast rather than silently ignoring a typo.
+                if (
+                    !double.TryParse(
+                        rawValue,
+                        NumberStyles.Float,
+                        CultureInfo.InvariantCulture,
+                        out double numericValue
+                    )
+                )
+                {
                     return false;
+                }
+                setDouble(ref fields, numericValue);
+            }
+            else if (BoolSetters.TryGetValue(key, out BoolSetter? setBool))
+            {
+                if (!bool.TryParse(rawValue, out bool booleanValue))
+                {
+                    return false;
+                }
+                setBool(ref fields, booleanValue);
+            }
+            else
+            {
+                // Unknown key: fail fast rather than silently ignoring a typo.
+                return false;
             }
         }
 
         if (
-            sourceMin is null
-            || sourceMax is null
-            || targetMin is null
-            || targetMax is null
+            fields.SourceMin is null
+            || fields.SourceMax is null
+            || fields.TargetMin is null
+            || fields.TargetMax is null
         )
         {
             return false;
         }
 
-        ranges = (
-            sourceMin.Value,
-            sourceMax.Value,
-            targetMin.Value,
-            targetMax.Value
+        range = new InterpolationRange(
+            fields.SourceMin.Value,
+            fields.SourceMax.Value,
+            fields.TargetMin.Value,
+            fields.TargetMax.Value,
+            fields.Round
         );
         return true;
     }
