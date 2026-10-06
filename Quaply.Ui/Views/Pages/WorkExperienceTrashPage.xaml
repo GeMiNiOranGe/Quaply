@@ -10,7 +10,8 @@
   xmlns:markup="clr-namespace:Quaply.Ui.MarkupHelpers"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:molecules="clr-namespace:Quaply.Ui.Views.Molecules"
-  xmlns:querying="clr-namespace:Quaply.Data.Querying;assembly=Quaply.Data"
+  xmlns:queryingBase="clr-namespace:Quaply.Data.Querying.Base;assembly=Quaply.Data"
+  xmlns:queryingWorkExperiences="clr-namespace:Quaply.Data.Querying.WorkExperiences;assembly=Quaply.Data"
   xmlns:system="clr-namespace:System;assembly=mscorlib"
   xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
   xmlns:viewModels="clr-namespace:Quaply.Ui.ViewModels"
@@ -26,7 +27,7 @@
     <ContextMenu
       x:Key="DeletedRangeMenu"
       x:Shared="False"
-      ItemsSource="{markup:EnumBindingSource {x:Type querying:RelativeDateRange}}"
+      ItemsSource="{markup:EnumBindingSource {x:Type queryingBase:RelativeDateRange}}"
       Placement="Bottom">
       <ContextMenu.ItemContainerStyle>
         <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
@@ -54,7 +55,7 @@
     <ContextMenu
       x:Key="SortFieldMenu"
       x:Shared="False"
-      ItemsSource="{markup:EnumBindingSource {x:Type querying:WorkExperienceSortField}}"
+      ItemsSource="{markup:EnumBindingSource {x:Type queryingWorkExperiences:WorkExperienceSortField}}"
       Placement="Bottom">
       <ContextMenu.ItemContainerStyle>
         <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
@@ -190,7 +191,7 @@
 
                         <molecules:SegmentedButton
                           Appearance="Transparent"
-                          ItemsSource="{markup:EnumBindingSource {x:Type querying:RelativeDateRange}}"
+                          ItemsSource="{markup:EnumBindingSource {x:Type queryingBase:RelativeDateRange}}"
                           SelectedAppearance="Secondary"
                           SelectedValue="{Binding SelectedDeletedRange}">
                           <molecules:SegmentedButton.ItemTemplate>
@@ -252,7 +253,7 @@
                           Margin="0,0,8,0"
                           Padding="8,6"
                           Background="Transparent"
-                          ItemsSource="{markup:EnumBindingSource {x:Type querying:WorkExperienceSortField}}"
+                          ItemsSource="{markup:EnumBindingSource {x:Type queryingWorkExperiences:WorkExperienceSortField}}"
                           SelectedItem="{Binding SortField}">
                           <ComboBox.ItemTemplate>
                             <DataTemplate>

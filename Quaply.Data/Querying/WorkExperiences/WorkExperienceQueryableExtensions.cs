@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Quaply.Data.Models;
+using Quaply.Data.Querying.Base;
 
-namespace Quaply.Data.Querying.Extensions;
+namespace Quaply.Data.Querying.WorkExperiences;
 
 internal static class WorkExperienceQueryableExtensions
 {

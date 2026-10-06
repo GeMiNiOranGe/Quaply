@@ -10,7 +10,7 @@ namespace Quaply.Ui.MarkupHelpers;
 /// <remarks>
 /// Usage:
 /// <code>
-/// ItemsSource="{markup:EnumBindingSource {x:Type querying:RelativeDateRange}}"
+/// ItemsSource="{markup:EnumBindingSource {x:Type local:RelativeDateRange}}"
 /// </code>
 /// </remarks>
 public class EnumBindingSourceExtension : MarkupExtension

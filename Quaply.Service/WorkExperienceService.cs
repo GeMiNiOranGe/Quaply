@@ -1,6 +1,6 @@
 using Quaply.Data.Interfaces;
 using Quaply.Data.Models;
-using Quaply.Data.Querying;
+using Quaply.Data.Querying.WorkExperiences;
 using Quaply.Service.Interfaces;
 
 namespace Quaply.Service;

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Quaply.Data.Querying;
+namespace Quaply.Data.Querying.Base;
 
 public enum RelativeDateRange
 {

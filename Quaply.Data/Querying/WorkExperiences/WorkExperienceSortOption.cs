@@ -1,6 +1,6 @@
 using Quaply.Data.Querying.Base;
 
-namespace Quaply.Data.Querying;
+namespace Quaply.Data.Querying.WorkExperiences;
 
 public readonly record struct WorkExperienceSortOption(
     WorkExperienceSortField Field,

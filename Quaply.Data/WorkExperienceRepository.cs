@@ -2,8 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Quaply.Data.Contexts;
 using Quaply.Data.Interfaces;
 using Quaply.Data.Models;
-using Quaply.Data.Querying;
-using Quaply.Data.Querying.Extensions;
+using Quaply.Data.Querying.WorkExperiences;
 
 namespace Quaply.Data;
 

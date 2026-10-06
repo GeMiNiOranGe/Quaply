@@ -1,5 +1,5 @@
 using Quaply.Data.Models;
-using Quaply.Data.Querying;
+using Quaply.Data.Querying.WorkExperiences;
 
 namespace Quaply.Data.Interfaces;
 
