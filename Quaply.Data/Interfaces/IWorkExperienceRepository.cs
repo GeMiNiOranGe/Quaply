@@ -1,4 +1,5 @@
 using Quaply.Data.Models;
+using Quaply.Data.Querying.Base;
 using Quaply.Data.Querying.WorkExperiences;
 
 namespace Quaply.Data.Interfaces;
@@ -18,6 +19,12 @@ public interface IWorkExperienceRepository
     IAsyncEnumerable<WorkExperience> GetManyDeletedAsync(
         WorkExperienceDeletedQuery query
     );
+
+    Task<PagedResult<WorkExperience>> GetManyDeletedPagedAsync(
+        WorkExperienceDeletedQuery query
+    );
+
+    Task<int> CountDeletedAsync();
 
     void Add(WorkExperience entity);
 

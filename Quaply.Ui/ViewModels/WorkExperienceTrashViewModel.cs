@@ -501,7 +501,8 @@ public partial class WorkExperienceTrashViewModel(
                 Sort: new WorkExperienceSortOption(
                     Field: SortField,
                     Descending: IsSortDescending
-                )
+                ),
+                Paging: new PageOption(1, 20)
             );
 
             IEnumerable<WorkExperience> deleted =

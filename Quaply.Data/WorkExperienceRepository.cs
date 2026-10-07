@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Quaply.Data.Contexts;
 using Quaply.Data.Interfaces;
 using Quaply.Data.Models;
+using Quaply.Data.Querying.Base;
 using Quaply.Data.Querying.WorkExperiences;
 
 namespace Quaply.Data;
@@ -55,6 +56,33 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
             .ApplyDeletedRange(query.DeletedRange)
             .ApplySort(query.Sort)
             .AsAsyncEnumerable();
+    }
+
+    public async Task<PagedResult<WorkExperience>> GetManyDeletedPagedAsync(
+        WorkExperienceDeletedQuery query
+    )
+    {
+        IQueryable<WorkExperience> filtered = _context
+            .WorkExperiences.IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(entity => entity.DeletedAt != null)
+            .ApplySearch(query.SearchText)
+            .ApplyDeletedRange(query.DeletedRange);
+
+        // Sequential on purpose: a DbContext is not thread-safe.
+        // Counting before sorting is more efficient.
+        int total = await filtered.CountAsync();
+
+        return await filtered
+            .ApplySort(query.Sort)
+            .ToPagedResultAsync(total, query.Paging);
+    }
+
+    public Task<int> CountDeletedAsync()
+    {
+        return _context
+            .WorkExperiences.IgnoreQueryFilters()
+            .CountAsync(entity => entity.DeletedAt != null);
     }
 
     public void Add(WorkExperience entity)
