@@ -41,12 +41,12 @@ internal static class WorkExperienceQueryableExtensions
             : query.Where(entity => entity.DeletedAt >= cutoff);
     }
 
-    public static IQueryable<WorkExperience> ApplySort(
+    public static IOrderedQueryable<WorkExperience> ApplySort(
         this IQueryable<WorkExperience> query,
         WorkExperienceSortOption sort
     )
     {
-        return sort.Field switch
+        IOrderedQueryable<WorkExperience> ordered = sort.Field switch
         {
             WorkExperienceSortField.CompanyName => sort.Descending
                 ? query.OrderByDescending(e => e.CompanyName)
@@ -58,5 +58,8 @@ internal static class WorkExperienceQueryableExtensions
                 ? query.OrderByDescending(e => e.DeletedAt)
                 : query.OrderBy(e => e.DeletedAt),
         };
+
+        // Tiebreaker for stable paging when the primary sort key has duplicates.
+        return ordered.ThenBy(e => e.Id);
     }
 }
