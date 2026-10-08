@@ -44,17 +44,11 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
             .AsAsyncEnumerable();
     }
 
-    public IAsyncEnumerable<WorkExperience> GetManyDeletedAsync(
-        WorkExperienceDeletedQuery query
-    )
+    public IAsyncEnumerable<WorkExperience> GetManyDeletedAsync()
     {
         return _context
             .WorkExperiences.IgnoreQueryFilters()
-            .AsNoTracking()
             .Where(entity => entity.DeletedAt != null)
-            .ApplySearch(query.SearchText)
-            .ApplyDeletedRange(query.DeletedRange)
-            .ApplySort(query.Sort)
             .AsAsyncEnumerable();
     }
 

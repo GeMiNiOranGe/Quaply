@@ -505,8 +505,8 @@ public partial class WorkExperienceTrashViewModel(
                 Paging: new PageOption(1, 20)
             );
 
-            IEnumerable<WorkExperience> deleted =
-                await _service.GetDeletedWorkExperiencesAsync(query);
+            PagedResult<WorkExperience> result =
+                await _service.GetDeletedWorkExperiencesPagedAsync(query);
 
             // To handle cases where the database query runs slowly
             // and a newer request intervenes while waiting for the result
@@ -517,7 +517,7 @@ public partial class WorkExperienceTrashViewModel(
             }
 
             DeletedItems = new(
-                deleted.Select(w => new DeletedWorkExperienceItem(w))
+                result.Items.Select(w => new DeletedWorkExperienceItem(w))
             );
 
             UpdateSelectAllState();

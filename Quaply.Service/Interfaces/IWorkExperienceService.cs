@@ -1,4 +1,5 @@
 using Quaply.Data.Models;
+using Quaply.Data.Querying.Base;
 using Quaply.Data.Querying.WorkExperiences;
 
 namespace Quaply.Service.Interfaces;
@@ -9,9 +10,11 @@ public interface IWorkExperienceService
 
     Task<IEnumerable<WorkExperience>> GetWorkExperiencesAsync();
 
-    Task<IEnumerable<WorkExperience>> GetDeletedWorkExperiencesAsync(
+    Task<PagedResult<WorkExperience>> GetDeletedWorkExperiencesPagedAsync(
         WorkExperienceDeletedQuery query
     );
+
+    Task<int> GetDeletedWorkExperienceCountAsync();
 
     Task CreateWorkExperienceAsync(WorkExperience workExperience);
 
@@ -22,6 +25,8 @@ public interface IWorkExperienceService
     Task PurgeWorkExperienceAsync(int id);
 
     Task PurgeRangeWorkExperiencesAsync(IEnumerable<int> ids);
+
+    Task PurgeDeletedWorkExperiencesAsync();
 
     Task RestoreWorkExperienceAsync(int id);
 

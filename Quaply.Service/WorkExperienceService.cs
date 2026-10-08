@@ -1,5 +1,6 @@
 using Quaply.Data.Interfaces;
 using Quaply.Data.Models;
+using Quaply.Data.Querying.Base;
 using Quaply.Data.Querying.WorkExperiences;
 using Quaply.Service.Interfaces;
 
@@ -21,12 +22,17 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
     }
 
     public async Task<
-        IEnumerable<WorkExperience>
-    > GetDeletedWorkExperiencesAsync(WorkExperienceDeletedQuery query)
+        PagedResult<WorkExperience>
+    > GetDeletedWorkExperiencesPagedAsync(WorkExperienceDeletedQuery query)
     {
-        return await _unitOfWork
-            .WorkExperiences.GetManyDeletedAsync(query)
-            .ToListAsync();
+        return await _unitOfWork.WorkExperiences.GetManyDeletedPagedAsync(
+            query
+        );
+    }
+
+    public Task<int> GetDeletedWorkExperienceCountAsync()
+    {
+        return _unitOfWork.WorkExperiences.CountDeletedAsync();
     }
 
     public async Task CreateWorkExperienceAsync(WorkExperience workExperience)
@@ -108,6 +114,21 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
             throw new InvalidOperationException(
                 "All work experiences must be soft-deleted before they can be permanently hard-deleted."
             );
+        }
+
+        _unitOfWork.WorkExperiences.PurgeRange(workExperiences);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task PurgeDeletedWorkExperiencesAsync()
+    {
+        List<WorkExperience> workExperiences = await _unitOfWork
+            .WorkExperiences.GetManyDeletedAsync()
+            .ToListAsync();
+
+        if (workExperiences.Count == 0)
+        {
+            return;
         }
 
         _unitOfWork.WorkExperiences.PurgeRange(workExperiences);
