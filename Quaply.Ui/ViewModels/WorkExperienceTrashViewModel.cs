@@ -26,6 +26,60 @@ public partial class WorkExperienceTrashViewModel(
 
     private int _loadRequestId;
 
+    public static IReadOnlyList<int> PageSizeOptions { get; } = [20, 50, 100];
+
+    [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
+    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+    [ObservableProperty]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+    [ObservableProperty]
+    public partial int TotalPages { get; set; } = 1;
+
+    [ObservableProperty]
+    public partial int PageSize { get; set; } = PageSizeOptions[0];
+
+    [ObservableProperty]
+    public partial int FilteredCount { get; set; }
+
+    [ObservableProperty]
+    public partial int TotalDeletedCount { get; set; }
+
+    public bool IsFiltering =>
+        !string.IsNullOrWhiteSpace(SearchText)
+        || SelectedDeletedRange != RelativeDateRange.All;
+
+    public bool HasTrashItems => TotalDeletedCount > 0;
+
+    public string PageIndicator => $"Page {CurrentPage} of {TotalPages}";
+
+    public string ResultSummary
+    {
+        get
+        {
+            if (DeletedItems.Count == 0)
+            {
+                return "No work experiences";
+            }
+
+            int first = (CurrentPage - 1) * PageSize + 1;
+            int last = first + DeletedItems.Count - 1;
+            return $"Showing {first}-{last} of {FilteredCount}";
+        }
+    }
+
+    public string EmptyStateTitle =>
+        HasTrashItems ? "No matching work experiences" : "Trash is empty";
+
+    public string EmptyStateMessage =>
+        HasTrashItems
+            ? "Try changing your search or filters."
+            : "Deleted work experiences will show up here.";
+
+    private bool CanGoToPreviousPage => CurrentPage > 1;
+    private bool CanGoToNextPage => CurrentPage < TotalPages;
+
     [ObservableProperty]
     public partial bool IsSearching { get; set; }
 
@@ -120,10 +174,15 @@ public partial class WorkExperienceTrashViewModel(
         await LoadDeletedWorkExperiencesAsync();
     }
 
+    partial void OnPageSizeChanged(int value)
+    {
+        ReloadFromFirstPage();
+    }
+
     partial void OnSearchTextChanged(string value)
     {
         IsSearching = true;
-        _ = LoadDeletedWorkExperiencesAsync(debounce: true);
+        ReloadFromFirstPage(debounce: true);
     }
 
     partial void OnIsAllSelectedChanged(bool? value)
@@ -170,17 +229,17 @@ public partial class WorkExperienceTrashViewModel(
 
     partial void OnSelectedDeletedRangeChanged(RelativeDateRange value)
     {
-        _ = LoadDeletedWorkExperiencesAsync();
+        ReloadFromFirstPage();
     }
 
     partial void OnSortFieldChanged(WorkExperienceSortField value)
     {
-        _ = LoadDeletedWorkExperiencesAsync();
+        ReloadFromFirstPage();
     }
 
     partial void OnIsSortDescendingChanged(bool value)
     {
-        _ = LoadDeletedWorkExperiencesAsync();
+        ReloadFromFirstPage();
     }
 
     [RelayCommand]
@@ -255,7 +314,7 @@ public partial class WorkExperienceTrashViewModel(
         }
 
         await _service.RestoreWorkExperienceAsync(item.WorkExperience.Id);
-        RemoveFromList(item);
+        await ReloadAfterRemovalAsync([item]);
     }
 
     [RelayCommand]
@@ -279,7 +338,7 @@ public partial class WorkExperienceTrashViewModel(
         }
 
         await _service.PurgeWorkExperienceAsync(item.WorkExperience.Id);
-        RemoveFromList(item);
+        await ReloadAfterRemovalAsync([item]);
     }
 
     // Called by the checkbox column's Checked/Unchecked so the bulk toolbar
@@ -313,7 +372,7 @@ public partial class WorkExperienceTrashViewModel(
             selected.Select(i => i.WorkExperience.Id)
         );
 
-        RemoveFromList(selected);
+        await ReloadAfterRemovalAsync(selected);
     }
 
     [RelayCommand(CanExecute = nameof(HasSelection))]
@@ -345,15 +404,15 @@ public partial class WorkExperienceTrashViewModel(
             selected.Select(i => i.WorkExperience.Id)
         );
 
-        RemoveFromList(selected);
+        await ReloadAfterRemovalAsync(selected);
     }
 
-    [RelayCommand(CanExecute = nameof(HasDeletedItems))]
+    [RelayCommand(CanExecute = nameof(HasTrashItems))]
     private async Task EmptyTrashAsync()
     {
         bool confirmed = await _dialogPresenter.ShowDangerConfirmationAsync(
             title: "Empty trash?",
-            message: BuildPurgeWarning([.. DeletedItems]),
+            message: $"This will permanently delete all {TotalDeletedCount} work experiences in the trash, including any hidden by your search or filters. This action cannot be undone.",
             primaryButtonText: "Empty trash",
             closeButtonText: "Cancel"
         );
@@ -363,17 +422,10 @@ public partial class WorkExperienceTrashViewModel(
             return;
         }
 
-        await _service.PurgeRangeWorkExperiencesAsync(
-            DeletedItems.Select(item => item.WorkExperience.Id)
-        );
+        await _service.PurgeDeletedWorkExperiencesAsync();
 
-        DeletedItems = [];
-
-        RestoreSelectedCommand.NotifyCanExecuteChanged();
-        PurgeSelectedCommand.NotifyCanExecuteChanged();
-        EmptyTrashCommand.NotifyCanExecuteChanged();
-
-        UpdateSelectAllState();
+        ClearPreviewIfRemoved([.. DeletedItems]);
+        await LoadDeletedWorkExperiencesAsync();
     }
 
     [RelayCommand]
@@ -391,6 +443,31 @@ public partial class WorkExperienceTrashViewModel(
         PurgeSelectedCommand.NotifyCanExecuteChanged();
 
         UpdateSelectAllState();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
+    private async Task GoToPreviousPageAsync()
+    {
+        CurrentPage--;
+        await LoadDeletedWorkExperiencesAsync();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
+    private async Task GoToNextPageAsync()
+    {
+        CurrentPage++;
+        await LoadDeletedWorkExperiencesAsync();
+    }
+
+    private void RaisePagingChanged()
+    {
+        OnPropertyChanged(nameof(ResultSummary));
+        OnPropertyChanged(nameof(PageIndicator));
+        OnPropertyChanged(nameof(IsFiltering));
+        OnPropertyChanged(nameof(HasTrashItems));
+        OnPropertyChanged(nameof(EmptyStateTitle));
+        OnPropertyChanged(nameof(EmptyStateMessage));
+        EmptyTrashCommand.NotifyCanExecuteChanged();
     }
 
     private void ClearPreviewIfRemoved(
@@ -439,41 +516,6 @@ public partial class WorkExperienceTrashViewModel(
         _isSyncingSelectAll = false;
     }
 
-    private void RemoveFromList(DeletedWorkExperienceItem item)
-    {
-        DeletedItems.Remove(item);
-
-        OnPropertyChanged(nameof(HasDeletedItems));
-        OnPropertyChanged(nameof(SelectedCount));
-        OnPropertyChanged(nameof(HasSelection));
-
-        RestoreSelectedCommand.NotifyCanExecuteChanged();
-        PurgeSelectedCommand.NotifyCanExecuteChanged();
-        EmptyTrashCommand.NotifyCanExecuteChanged();
-
-        UpdateSelectAllState();
-        ClearPreviewIfRemoved([item]);
-    }
-
-    private void RemoveFromList(IEnumerable<DeletedWorkExperienceItem> items)
-    {
-        foreach (DeletedWorkExperienceItem item in items.ToList())
-        {
-            DeletedItems.Remove(item);
-        }
-
-        OnPropertyChanged(nameof(HasDeletedItems));
-        OnPropertyChanged(nameof(SelectedCount));
-        OnPropertyChanged(nameof(HasSelection));
-
-        RestoreSelectedCommand.NotifyCanExecuteChanged();
-        PurgeSelectedCommand.NotifyCanExecuteChanged();
-        EmptyTrashCommand.NotifyCanExecuteChanged();
-
-        UpdateSelectAllState();
-        ClearPreviewIfRemoved(items);
-    }
-
     private async Task LoadDeletedWorkExperiencesAsync(bool debounce = false)
     {
         int requestId = ++_loadRequestId;
@@ -502,11 +544,16 @@ public partial class WorkExperienceTrashViewModel(
                     Field: SortField,
                     Descending: IsSortDescending
                 ),
-                Paging: new PageOption(1, 20)
+                Paging: new PageOption(CurrentPage, PageSize)
             );
 
             PagedResult<WorkExperience> result =
                 await _service.GetDeletedWorkExperiencesPagedAsync(query);
+
+            // When nothing is filtered, the filtered count IS the trash total.
+            int totalInTrash = IsFiltering
+                ? await _service.GetDeletedWorkExperienceCountAsync()
+                : result.TotalCount;
 
             // To handle cases where the database query runs slowly
             // and a newer request intervenes while waiting for the result
@@ -520,6 +567,11 @@ public partial class WorkExperienceTrashViewModel(
                 result.Items.Select(w => new DeletedWorkExperienceItem(w))
             );
 
+            CurrentPage = result.Page;
+            TotalPages = result.TotalPages;
+            FilteredCount = result.TotalCount;
+            TotalDeletedCount = totalInTrash;
+
             UpdateSelectAllState();
 
             OnPropertyChanged(nameof(SelectedCount));
@@ -527,6 +579,8 @@ public partial class WorkExperienceTrashViewModel(
 
             RestoreSelectedCommand.NotifyCanExecuteChanged();
             PurgeSelectedCommand.NotifyCanExecuteChanged();
+
+            RaisePagingChanged();
         }
         finally
         {
@@ -535,5 +589,19 @@ public partial class WorkExperienceTrashViewModel(
                 IsLoading = false;
             }
         }
+    }
+
+    private async Task ReloadAfterRemovalAsync(
+        IEnumerable<DeletedWorkExperienceItem> removed
+    )
+    {
+        ClearPreviewIfRemoved(removed);
+        await LoadDeletedWorkExperiencesAsync();
+    }
+
+    private void ReloadFromFirstPage(bool debounce = false)
+    {
+        CurrentPage = 1;
+        _ = LoadDeletedWorkExperiencesAsync(debounce);
     }
 }

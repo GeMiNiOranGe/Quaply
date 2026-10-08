@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
   x:Class="Quaply.Ui.Views.Pages.WorkExperienceTrashPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -142,6 +142,7 @@
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
           </Grid.RowDefinitions>
 
           <Border
@@ -335,7 +336,7 @@
                                 Command="{Binding EmptyTrashCommand}"
                                 Foreground="IndianRed"
                                 Header="Empty Trash"
-                                IsEnabled="{Binding HasDeletedItems}">
+                                IsEnabled="{Binding HasTrashItems}">
                                 <MenuItem.Icon>
                                   <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />
                                 </MenuItem.Icon>
@@ -369,7 +370,7 @@
                               Command="{Binding EmptyTrashCommand}"
                               Foreground="IndianRed"
                               Header="Empty Trash"
-                              IsEnabled="{Binding HasDeletedItems}">
+                              IsEnabled="{Binding HasTrashItems}">
                               <MenuItem.Icon>
                                 <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />
                               </MenuItem.Icon>
@@ -406,13 +407,13 @@
                 HorizontalAlignment="Center"
                 FontSize="16"
                 FontWeight="SemiBold"
-                Text="Trash is empty" />
+                Text="{Binding EmptyStateTitle}" />
 
               <TextBlock
                 Margin="0,4,0,0"
                 HorizontalAlignment="Center"
                 Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                Text="Deleted work experiences will show up here." />
+                Text="{Binding EmptyStateMessage}" />
             </StackPanel>
 
             <!--  Table  -->
@@ -607,6 +608,74 @@
               </Grid>
             </Border>
           </Grid>
+
+          <!--  Footer  -->
+          <Border
+            Grid.Row="2"
+            Padding="24,8"
+            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                <TextBlock Text="{Binding ResultSummary}" />
+
+                <TextBlock
+                  Margin="8,0,0,0"
+                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                  Text="{Binding TotalDeletedCount, StringFormat='({0} in trash)'}"
+                  Visibility="{Binding IsFiltering, Converter={converters:BooleanToVisibilityConverter}}" />
+              </StackPanel>
+
+              <StackPanel
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <TextBlock
+                  Margin="0,0,8,0"
+                  VerticalAlignment="Center"
+                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                  Text="Show" />
+
+                <ComboBox
+                  MinWidth="72"
+                  Padding="8,6"
+                  Background="Transparent"
+                  ItemsSource="{x:Static viewModels:WorkExperienceTrashViewModel.PageSizeOptions}"
+                  SelectedItem="{Binding PageSize}" />
+
+                <atoms:Divider Margin="12,8" Orientation="Vertical" />
+
+                <TextBlock
+                  MinWidth="72"
+                  Margin="0,0,16,0"
+                  VerticalAlignment="Center"
+                  FontWeight="SemiBold"
+                  Text="{Binding PageIndicator}" />
+
+                <ui:Button
+                  Margin="0,0,8,0"
+                  Padding="8"
+                  Appearance="Transparent"
+                  Command="{Binding GoToPreviousPageCommand}"
+                  ToolTip="Previous page">
+                  <ui:SymbolIcon Symbol="ChevronLeft24" />
+                </ui:Button>
+
+                <ui:Button
+                  Padding="8"
+                  Appearance="Transparent"
+                  Command="{Binding GoToNextPageCommand}"
+                  ToolTip="Next page">
+                  <ui:SymbolIcon Symbol="ChevronRight24" />
+                </ui:Button>
+              </StackPanel>
+            </Grid>
+          </Border>
         </Grid>
       </ui:Card>
 
