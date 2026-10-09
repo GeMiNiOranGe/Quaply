@@ -162,8 +162,8 @@ public partial class WorkExperienceTrashViewModel(
     public partial bool? IsAllSelected { get; set; } = false;
 
     [ObservableProperty]
-    public partial WorkExperienceSortField SortField { get; set; } =
-        WorkExperienceSortField.DeletedAt;
+    public partial DeletedWorkExperienceSortField SortField { get; set; } =
+        DeletedWorkExperienceSortField.DeletedAt;
 
     [NotifyPropertyChangedFor(nameof(SortDirectionTooltip))]
     [ObservableProperty]
@@ -232,7 +232,7 @@ public partial class WorkExperienceTrashViewModel(
         ReloadFromFirstPage();
     }
 
-    partial void OnSortFieldChanged(WorkExperienceSortField value)
+    partial void OnSortFieldChanged(DeletedWorkExperienceSortField value)
     {
         ReloadFromFirstPage();
     }
@@ -255,7 +255,7 @@ public partial class WorkExperienceTrashViewModel(
     }
 
     [RelayCommand]
-    private void SetSortField(WorkExperienceSortField field)
+    private void SetSortField(DeletedWorkExperienceSortField field)
     {
         SortField = field;
     }

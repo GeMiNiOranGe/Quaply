@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Quaply.Data.Querying.WorkExperiences;
 
-public enum WorkExperienceSortField
+public enum DeletedWorkExperienceSortField
 {
     [Display(Name = "Deleted date")]
     DeletedAt,

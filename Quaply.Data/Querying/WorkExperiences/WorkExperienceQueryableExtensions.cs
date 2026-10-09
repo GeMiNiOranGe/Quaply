@@ -48,10 +48,10 @@ internal static class WorkExperienceQueryableExtensions
     {
         IOrderedQueryable<WorkExperience> ordered = sort.Field switch
         {
-            WorkExperienceSortField.CompanyName => sort.Descending
+            DeletedWorkExperienceSortField.CompanyName => sort.Descending
                 ? query.OrderByDescending(e => e.CompanyName)
                 : query.OrderBy(e => e.CompanyName),
-            WorkExperienceSortField.PositionTitle => sort.Descending
+            DeletedWorkExperienceSortField.PositionTitle => sort.Descending
                 ? query.OrderByDescending(e => e.PositionTitle)
                 : query.OrderBy(e => e.PositionTitle),
             _ => sort.Descending

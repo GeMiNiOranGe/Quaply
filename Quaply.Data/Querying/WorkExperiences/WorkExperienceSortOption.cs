@@ -3,11 +3,11 @@ using Quaply.Data.Querying.Base;
 namespace Quaply.Data.Querying.WorkExperiences;
 
 public readonly record struct WorkExperienceSortOption(
-    WorkExperienceSortField Field,
+    DeletedWorkExperienceSortField Field,
     bool Descending
 )
 {
-    public static implicit operator SortOption<WorkExperienceSortField>(
+    public static implicit operator SortOption<DeletedWorkExperienceSortField>(
         WorkExperienceSortOption option
     )
     {
@@ -15,7 +15,7 @@ public readonly record struct WorkExperienceSortOption(
     }
 
     public static implicit operator WorkExperienceSortOption(
-        SortOption<WorkExperienceSortField> option
+        SortOption<DeletedWorkExperienceSortField> option
     )
     {
         return new(option.Field, option.Descending);
