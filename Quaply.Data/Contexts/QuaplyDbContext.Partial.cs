@@ -106,5 +106,40 @@ public partial class QuaplyDbContext
             entity.Property(e => e.UpdatedAt).HasUtcConversion();
             entity.Property(e => e.DeletedAt).HasUtcConversion();
         });
+
+        modelBuilder.Entity<ProjectSkill>(entity =>
+        {
+            entity.HasQueryFilter(e => e.Project.DeletedAt == null);
+        });
+
+        modelBuilder.Entity<ResumeCertification>(entity =>
+        {
+            entity.HasQueryFilter(e => e.Certification.DeletedAt == null);
+        });
+
+        modelBuilder.Entity<ResumeEducation>(entity =>
+        {
+            entity.HasQueryFilter(e => e.Education.DeletedAt == null);
+        });
+
+        modelBuilder.Entity<ResumeLanguage>(entity =>
+        {
+            entity.HasQueryFilter(e => e.Language.DeletedAt == null);
+        });
+
+        modelBuilder.Entity<ResumePersonalSummary>(entity =>
+        {
+            entity.HasQueryFilter(e => e.PersonalSummary.DeletedAt == null);
+        });
+
+        modelBuilder.Entity<ResumeProfile>(entity =>
+        {
+            entity.HasQueryFilter(e => e.Profile.DeletedAt == null);
+        });
+
+        modelBuilder.Entity<ResumeWorkExperience>(entity =>
+        {
+            entity.HasQueryFilter(e => e.WorkExperience.DeletedAt == null);
+        });
     }
 }
