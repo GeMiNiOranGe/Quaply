@@ -53,7 +53,7 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
     }
 
     public async Task<PagedResult<WorkExperience>> GetManyDeletedPagedAsync(
-        WorkExperienceDeletedQuery query
+        DeletedWorkExperienceQuery query
     )
     {
         IQueryable<WorkExperience> filtered = _context

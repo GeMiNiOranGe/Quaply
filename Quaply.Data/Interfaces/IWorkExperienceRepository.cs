@@ -19,7 +19,7 @@ public interface IWorkExperienceRepository
     IAsyncEnumerable<WorkExperience> GetManyDeletedAsync();
 
     Task<PagedResult<WorkExperience>> GetManyDeletedPagedAsync(
-        WorkExperienceDeletedQuery query
+        DeletedWorkExperienceQuery query
     );
 
     Task<int> CountDeletedAsync();

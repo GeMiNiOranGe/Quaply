@@ -2,7 +2,7 @@ using Quaply.Data.Querying.Base;
 
 namespace Quaply.Data.Querying.WorkExperiences;
 
-public readonly record struct WorkExperienceDeletedQuery(
+public readonly record struct DeletedWorkExperienceQuery(
     string? SearchText,
     RelativeDateRange DeletedRange,
     WorkExperienceSortOption Sort,

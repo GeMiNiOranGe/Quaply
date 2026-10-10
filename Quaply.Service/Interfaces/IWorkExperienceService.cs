@@ -11,7 +11,7 @@ public interface IWorkExperienceService
     Task<IEnumerable<WorkExperience>> GetWorkExperiencesAsync();
 
     Task<PagedResult<WorkExperience>> GetDeletedWorkExperiencesPagedAsync(
-        WorkExperienceDeletedQuery query
+        DeletedWorkExperienceQuery query
     );
 
     Task<int> GetDeletedWorkExperienceCountAsync();

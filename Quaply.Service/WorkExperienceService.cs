@@ -23,7 +23,7 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
 
     public async Task<
         PagedResult<WorkExperience>
-    > GetDeletedWorkExperiencesPagedAsync(WorkExperienceDeletedQuery query)
+    > GetDeletedWorkExperiencesPagedAsync(DeletedWorkExperienceQuery query)
     {
         return await _unitOfWork.WorkExperiences.GetManyDeletedPagedAsync(
             query
