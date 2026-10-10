@@ -5,6 +5,6 @@ namespace Quaply.Data.Querying.WorkExperiences;
 public readonly record struct DeletedWorkExperienceQuery(
     string? SearchText,
     RelativeDateRange DeletedRange,
-    WorkExperienceSortOption Sort,
+    DeletedWorkExperienceSortOption Sort,
     PageOption Paging
 );
