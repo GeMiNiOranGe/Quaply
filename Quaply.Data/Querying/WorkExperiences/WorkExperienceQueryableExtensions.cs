@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Quaply.Data.Models;
 using Quaply.Data.Querying.Base;
+using Quaply.Data.Utilities;
 
 namespace Quaply.Data.Querying.WorkExperiences;
 
@@ -50,9 +51,11 @@ internal static class WorkExperienceQueryableExtensions
                 ? query.OrderByDescending(e => e.PositionTitle)
                 : query.OrderBy(e => e.PositionTitle),
 
-            DeletedWorkExperienceSortField.DeletedAt or _ => sort.Descending
+            DeletedWorkExperienceSortField.DeletedAt => sort.Descending
                 ? query.OrderByDescending(e => e.DeletedAt)
                 : query.OrderBy(e => e.DeletedAt),
+
+            _ => throw ThrowHelper.InvalidEnumValue(sort.Field, nameof(sort)),
         };
 
         // Tiebreaker for stable paging when the primary sort key has duplicates.
