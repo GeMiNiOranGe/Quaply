@@ -24,18 +24,12 @@ internal static class WorkExperienceQueryableExtensions
         );
     }
 
-    public static IQueryable<WorkExperience> ApplyDeletedRange(
+    public static IQueryable<WorkExperience> ApplyDeletedAtRange(
         this IQueryable<WorkExperience> query,
         RelativeDateRange range
     )
     {
-        DateTime? cutoff = range switch
-        {
-            RelativeDateRange.Last7Days => DateTime.UtcNow.AddDays(-7),
-            RelativeDateRange.Last30Days => DateTime.UtcNow.AddDays(-30),
-            _ => null, // All time - unfiltered
-        };
-
+        DateTime? cutoff = ResolveCutoff(range);
         return cutoff is null
             ? query
             : query.Where(entity => entity.DeletedAt >= cutoff);
@@ -51,15 +45,27 @@ internal static class WorkExperienceQueryableExtensions
             DeletedWorkExperienceSortField.CompanyName => sort.Descending
                 ? query.OrderByDescending(e => e.CompanyName)
                 : query.OrderBy(e => e.CompanyName),
+
             DeletedWorkExperienceSortField.PositionTitle => sort.Descending
                 ? query.OrderByDescending(e => e.PositionTitle)
                 : query.OrderBy(e => e.PositionTitle),
-            _ => sort.Descending
+
+            DeletedWorkExperienceSortField.DeletedAt or _ => sort.Descending
                 ? query.OrderByDescending(e => e.DeletedAt)
                 : query.OrderBy(e => e.DeletedAt),
         };
 
         // Tiebreaker for stable paging when the primary sort key has duplicates.
         return ordered.ThenBy(e => e.Id);
+    }
+
+    private static DateTime? ResolveCutoff(RelativeDateRange range)
+    {
+        return range switch
+        {
+            RelativeDateRange.Last7Days => DateTime.UtcNow.AddDays(-7),
+            RelativeDateRange.Last30Days => DateTime.UtcNow.AddDays(-30),
+            _ => null,
+        };
     }
 }

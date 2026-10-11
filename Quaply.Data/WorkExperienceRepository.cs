@@ -61,7 +61,7 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
             .AsNoTracking()
             .Where(entity => entity.DeletedAt != null)
             .ApplySearch(query.SearchText)
-            .ApplyDeletedRange(query.DeletedRange);
+            .ApplyDeletedAtRange(query.DeletedRange);
 
         // Sequential on purpose: a DbContext is not thread-safe.
         // Counting before sorting is more efficient.
