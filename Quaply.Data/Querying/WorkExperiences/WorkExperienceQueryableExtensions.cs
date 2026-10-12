@@ -25,6 +25,17 @@ internal static class WorkExperienceQueryableExtensions
         );
     }
 
+    public static IQueryable<WorkExperience> ApplyUpdatedAtRange(
+        this IQueryable<WorkExperience> query,
+        RelativeDateRange range
+    )
+    {
+        DateTime? cutoff = ResolveCutoff(range);
+        return cutoff is null
+            ? query
+            : query.Where(entity => entity.UpdatedAt >= cutoff);
+    }
+
     public static IQueryable<WorkExperience> ApplyDeletedAtRange(
         this IQueryable<WorkExperience> query,
         RelativeDateRange range
@@ -34,6 +45,40 @@ internal static class WorkExperienceQueryableExtensions
         return cutoff is null
             ? query
             : query.Where(entity => entity.DeletedAt >= cutoff);
+    }
+
+    public static IOrderedQueryable<WorkExperience> ApplySort(
+        this IQueryable<WorkExperience> query,
+        WorkExperienceSortOption sort
+    )
+    {
+        IOrderedQueryable<WorkExperience> ordered = sort.Field switch
+        {
+            WorkExperienceSortField.CompanyName => sort.Descending
+                ? query.OrderByDescending(e => e.CompanyName)
+                : query.OrderBy(e => e.CompanyName),
+
+            WorkExperienceSortField.PositionTitle => sort.Descending
+                ? query.OrderByDescending(e => e.PositionTitle)
+                : query.OrderBy(e => e.PositionTitle),
+
+            WorkExperienceSortField.StartDate => sort.Descending
+                ? query.OrderByDescending(e => e.StartDate)
+                : query.OrderBy(e => e.StartDate),
+
+            WorkExperienceSortField.EndDate => sort.Descending
+                ? query.OrderByDescending(e => e.EndDate ?? DateOnly.MaxValue)
+                : query.OrderBy(e => e.EndDate ?? DateOnly.MaxValue),
+
+            WorkExperienceSortField.UpdatedAt => sort.Descending
+                ? query.OrderByDescending(e => e.UpdatedAt)
+                : query.OrderBy(e => e.UpdatedAt),
+
+            _ => throw ThrowHelper.InvalidEnumValue(sort.Field, nameof(sort)),
+        };
+
+        // Tiebreaker for stable paging when the primary sort key has duplicates.
+        return ordered.ThenBy(e => e.Id);
     }
 
     public static IOrderedQueryable<WorkExperience> ApplySort(
