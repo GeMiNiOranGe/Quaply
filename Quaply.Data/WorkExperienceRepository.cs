@@ -52,6 +52,25 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
             .AsAsyncEnumerable();
     }
 
+    public async Task<PagedResult<WorkExperience>> GetManyPagedAsync(
+        WorkExperienceQuery query
+    )
+    {
+        IQueryable<WorkExperience> filtered = _context
+            .WorkExperiences.AsNoTracking()
+            .Include(entity => entity.Projects)
+            .ApplySearch(query.SearchText)
+            .ApplyUpdatedAtRange(query.UpdatedRange);
+
+        // Sequential on purpose: a DbContext is not thread-safe.
+        // Counting before sorting is more efficient.
+        int total = await filtered.CountAsync();
+
+        return await filtered
+            .ApplySort(query.Sort)
+            .ToPagedResultAsync(total, query.Paging);
+    }
+
     public async Task<PagedResult<WorkExperience>> GetManyDeletedPagedAsync(
         DeletedWorkExperienceQuery query
     )

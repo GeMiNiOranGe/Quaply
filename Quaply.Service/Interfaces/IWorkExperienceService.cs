@@ -10,6 +10,10 @@ public interface IWorkExperienceService
 
     Task<IEnumerable<WorkExperience>> GetWorkExperiencesAsync();
 
+    Task<PagedResult<WorkExperience>> GetWorkExperiencesPagedAsync(
+        WorkExperienceQuery query
+    );
+
     Task<PagedResult<WorkExperience>> GetDeletedWorkExperiencesPagedAsync(
         DeletedWorkExperienceQuery query
     );

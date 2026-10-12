@@ -21,6 +21,13 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
         return await _unitOfWork.WorkExperiences.GetManyAsync().ToListAsync();
     }
 
+    public async Task<PagedResult<WorkExperience>> GetWorkExperiencesPagedAsync(
+        WorkExperienceQuery query
+    )
+    {
+        return await _unitOfWork.WorkExperiences.GetManyPagedAsync(query);
+    }
+
     public async Task<
         PagedResult<WorkExperience>
     > GetDeletedWorkExperiencesPagedAsync(DeletedWorkExperienceQuery query)

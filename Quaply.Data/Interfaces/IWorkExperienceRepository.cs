@@ -18,6 +18,10 @@ public interface IWorkExperienceRepository
 
     IAsyncEnumerable<WorkExperience> GetManyDeletedAsync();
 
+    Task<PagedResult<WorkExperience>> GetManyPagedAsync(
+        WorkExperienceQuery query
+    );
+
     Task<PagedResult<WorkExperience>> GetManyDeletedPagedAsync(
         DeletedWorkExperienceQuery query
     );
