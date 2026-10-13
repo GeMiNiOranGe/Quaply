@@ -36,13 +36,12 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
             .AsAsyncEnumerable();
     }
 
+    /*
     public IAsyncEnumerable<WorkExperience> GetManyAsync()
     {
-        return _context
-            .WorkExperiences.AsNoTracking()
-            .Include(entity => entity.Projects)
-            .AsAsyncEnumerable();
+        return _context.WorkExperiences.AsAsyncEnumerable();
     }
+    */
 
     public IAsyncEnumerable<WorkExperience> GetManyDeletedAsync()
     {

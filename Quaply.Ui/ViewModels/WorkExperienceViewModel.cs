@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quaply.Data.Models;
+using Quaply.Data.Querying.Base;
+using Quaply.Data.Querying.WorkExperiences;
 using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
 using Quaply.Ui.Models;
@@ -140,8 +142,23 @@ public partial class WorkExperienceViewModel(
 
     private async Task LoadWorkExperiencesAsync()
     {
-        IEnumerable<WorkExperience> items =
-            await _service.GetWorkExperiencesAsync();
-        WorkExperiences = new(items.OrderByDescending(w => w.StartDate));
+        try
+        {
+            WorkExperienceQuery query = new(
+                SearchText: "",
+                UpdatedRange: RelativeDateRange.All,
+                Sort: new WorkExperienceSortOption(
+                    Field: WorkExperienceSortField.EndDate,
+                    Descending: true
+                ),
+                Paging: new PageOption(1, 20)
+            );
+
+            PagedResult<WorkExperience> result =
+                await _service.GetWorkExperiencesPagedAsync(query);
+
+            WorkExperiences = new(result.Items);
+        }
+        finally { }
     }
 }

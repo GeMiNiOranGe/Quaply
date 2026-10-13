@@ -14,7 +14,7 @@ public interface IWorkExperienceRepository
         IEnumerable<int> ids
     );
 
-    IAsyncEnumerable<WorkExperience> GetManyAsync();
+    // IAsyncEnumerable<WorkExperience> GetManyAsync();
 
     IAsyncEnumerable<WorkExperience> GetManyDeletedAsync();
 

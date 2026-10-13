@@ -8,8 +8,6 @@ public interface IWorkExperienceService
 {
     Task<WorkExperience?> GetWorkExperienceByIdAsync(int id);
 
-    Task<IEnumerable<WorkExperience>> GetWorkExperiencesAsync();
-
     Task<PagedResult<WorkExperience>> GetWorkExperiencesPagedAsync(
         WorkExperienceQuery query
     );

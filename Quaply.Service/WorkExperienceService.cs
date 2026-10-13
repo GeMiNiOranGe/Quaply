@@ -16,11 +16,6 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
         return _unitOfWork.WorkExperiences.GetByIdAsync(id);
     }
 
-    public async Task<IEnumerable<WorkExperience>> GetWorkExperiencesAsync()
-    {
-        return await _unitOfWork.WorkExperiences.GetManyAsync().ToListAsync();
-    }
-
     public async Task<PagedResult<WorkExperience>> GetWorkExperiencesPagedAsync(
         WorkExperienceQuery query
     )
