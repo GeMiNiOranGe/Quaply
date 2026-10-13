@@ -32,6 +32,11 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
         );
     }
 
+    public Task<int> GetWorkExperienceCountAsync()
+    {
+        return _unitOfWork.WorkExperiences.CountAsync();
+    }
+
     public Task<int> GetDeletedWorkExperienceCountAsync()
     {
         return _unitOfWork.WorkExperiences.CountDeletedAsync();

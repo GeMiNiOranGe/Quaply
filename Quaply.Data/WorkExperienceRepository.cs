@@ -90,6 +90,11 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
             .ToPagedResultAsync(total, query.Paging);
     }
 
+    public Task<int> CountAsync()
+    {
+        return _context.WorkExperiences.CountAsync();
+    }
+
     public Task<int> CountDeletedAsync()
     {
         return _context

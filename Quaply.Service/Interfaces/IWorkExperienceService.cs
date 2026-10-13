@@ -16,6 +16,8 @@ public interface IWorkExperienceService
         DeletedWorkExperienceQuery query
     );
 
+    Task<int> GetWorkExperienceCountAsync();
+
     Task<int> GetDeletedWorkExperienceCountAsync();
 
     Task CreateWorkExperienceAsync(WorkExperience workExperience);

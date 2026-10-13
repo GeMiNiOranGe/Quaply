@@ -26,6 +26,8 @@ public interface IWorkExperienceRepository
         DeletedWorkExperienceQuery query
     );
 
+    Task<int> CountAsync();
+
     Task<int> CountDeletedAsync();
 
     void Add(WorkExperience entity);
