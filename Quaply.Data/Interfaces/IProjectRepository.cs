@@ -8,6 +8,10 @@ public interface IProjectRepository
         int workExperienceId
     );
 
+    IAsyncEnumerable<Project> GetManyByWorkExperienceIdsAsync(
+        IEnumerable<int> ids
+    );
+
     void Update(Project entity);
 
     void Remove(Project entity);

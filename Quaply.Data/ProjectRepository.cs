@@ -20,6 +20,18 @@ internal class ProjectRepository(QuaplyDbContext context) : IProjectRepository
             .AsAsyncEnumerable();
     }
 
+    public IAsyncEnumerable<Project> GetManyByWorkExperienceIdsAsync(
+        IEnumerable<int> ids
+    )
+    {
+        return _context
+            .Projects.Where(entity =>
+                entity.WorkExperienceId.HasValue
+                && ids.Contains(entity.WorkExperienceId.Value)
+            )
+            .AsAsyncEnumerable();
+    }
+
     public void Update(Project entity)
     {
         entity.UpdatedAt = DateTime.UtcNow;
