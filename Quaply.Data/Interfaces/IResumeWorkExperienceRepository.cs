@@ -8,5 +8,9 @@ public interface IResumeWorkExperienceRepository
         int workExperienceId
     );
 
+    IAsyncEnumerable<ResumeWorkExperience> GetManyByWorkExperienceIdsAsync(
+        IEnumerable<int> ids
+    );
+
     void RemoveRange(IEnumerable<ResumeWorkExperience> entities);
 }

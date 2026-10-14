@@ -21,6 +21,17 @@ internal class ResumeWorkExperienceRepository(QuaplyDbContext context)
             .AsAsyncEnumerable();
     }
 
+    public IAsyncEnumerable<ResumeWorkExperience> GetManyByWorkExperienceIdsAsync(
+        IEnumerable<int> ids
+    )
+    {
+        return _context
+            .ResumeWorkExperiences.Where(entity =>
+                ids.Contains(entity.WorkExperienceId)
+            )
+            .AsAsyncEnumerable();
+    }
+
     public void RemoveRange(IEnumerable<ResumeWorkExperience> entities)
     {
         _context.ResumeWorkExperiences.RemoveRange(entities);
