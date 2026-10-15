@@ -85,6 +85,44 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
         await _unitOfWork.SaveChangesAsync();
     }
 
+    public async Task DeleteRangeWorkExperiencesAsync(IEnumerable<int> ids)
+    {
+        if (!ids.Any())
+        {
+            return;
+        }
+
+        List<WorkExperience> workExperiences = await _unitOfWork
+            .WorkExperiences.GetManyByIdsAsync(ids)
+            .ToListAsync();
+
+        if (workExperiences.Count == 0)
+        {
+            return;
+        }
+
+        // Remove links to ResumeWorkExperience
+        List<ResumeWorkExperience> links = await _unitOfWork
+            .ResumeWorkExperiences.GetManyByWorkExperienceIdsAsync(ids)
+            .ToListAsync();
+        _unitOfWork.ResumeWorkExperiences.RemoveRange(links);
+
+        // and set WorkExperienceId to null for Projects
+        List<Project> projects = await _unitOfWork
+            .Projects.GetManyByWorkExperienceIdsAsync(ids)
+            .ToListAsync();
+        foreach (Project project in projects)
+        {
+            project.WorkExperienceId = null;
+            _unitOfWork.Projects.Update(project);
+            // TODO: Consider using the Remove (aka Delete) method via ProjectService.
+            _unitOfWork.Projects.Remove(project);
+        }
+
+        _unitOfWork.WorkExperiences.RemoveRange(workExperiences);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
     public async Task PurgeWorkExperienceAsync(int id)
     {
         WorkExperience? workExperience =
