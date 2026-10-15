@@ -107,9 +107,9 @@
           CanUserDeleteRows="False"
           HeadersVisibility="Column"
           IsReadOnly="True"
-          ItemsSource="{Binding WorkExperiences}"
+          ItemsSource="{Binding WorkExperienceItems}"
           RowHeight="52"
-          SelectedItem="{Binding SelectedWorkExperience}"
+          SelectedItem="{Binding SelectedWorkExperienceItem}"
           SelectionMode="Extended">
           <DataGrid.Columns>
             <!--  Checkbox  -->
@@ -235,7 +235,7 @@
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock VerticalAlignment="Center" Text="{Binding WorkExperiences.Count, StringFormat='Showing {0} work experiences'}" />
+            <TextBlock VerticalAlignment="Center" Text="{Binding WorkExperienceItems.Count, StringFormat='Showing {0} work experiences'}" />
 
             <StackPanel
               Grid.Column="1"

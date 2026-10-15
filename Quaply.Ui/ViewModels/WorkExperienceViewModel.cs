@@ -20,9 +20,9 @@ public partial class WorkExperienceViewModel(
     private readonly IWorkExperienceService _service = service;
 
     [ObservableProperty]
-    public partial WorkExperience? SelectedWorkExperience { get; set; }
+    public partial WorkExperienceItem? SelectedWorkExperienceItem { get; set; }
 
-    public ObservableCollection<WorkExperience> WorkExperiences
+    public ObservableCollection<WorkExperienceItem> WorkExperienceItems
     {
         get;
         private set
@@ -33,6 +33,102 @@ public partial class WorkExperienceViewModel(
     } = [];
 
     public ObservableCollection<StatItem> Stats { get; } = [];
+
+    public async Task OnNavigatedToAsync()
+    {
+        await LoadWorkExperiencesAsync();
+        LoadStats();
+    }
+
+    [RelayCommand]
+    private async Task NavigateToProfileAsync()
+    {
+        await Navigator.NavigateToAsync<ProfileViewModel>();
+    }
+
+    [RelayCommand]
+    private async Task NavigateToWorkExperienceTrashAsync()
+    {
+        await Navigator.NavigateToAsync<WorkExperienceTrashViewModel>();
+    }
+
+    [RelayCommand]
+    private async Task AddWorkExperienceAsync()
+    {
+        await Navigator.NavigateToAsync<
+            WorkExperienceEditorViewModel,
+            WorkExperienceEditorParameter
+        >(WorkExperienceEditorParameter.ForAdd());
+    }
+
+    [RelayCommand]
+    private async Task EditWorkExperienceAsync(WorkExperienceItem? item)
+    {
+        if (item is null)
+        {
+            return;
+        }
+
+        await Navigator.NavigateToAsync<
+            WorkExperienceEditorViewModel,
+            WorkExperienceEditorParameter
+        >(WorkExperienceEditorParameter.ForEdit(item.Id));
+    }
+
+    [RelayCommand]
+    private async Task DuplicateWorkExperienceAsync(WorkExperienceItem? item)
+    {
+        if (item is null)
+        {
+            return;
+        }
+
+        await Navigator.NavigateToAsync<
+            WorkExperienceEditorViewModel,
+            WorkExperienceEditorParameter
+        >(WorkExperienceEditorParameter.ForDuplicate(item.Id));
+    }
+
+    [RelayCommand]
+    private async Task DeleteWorkExperienceAsync(WorkExperienceItem? item)
+    {
+        if (item is null)
+        {
+            return;
+        }
+
+        await _service.DeleteWorkExperienceAsync(item.Id);
+        WorkExperienceItems.Remove(item);
+
+        if (SelectedWorkExperienceItem == item)
+        {
+            SelectedWorkExperienceItem = null;
+        }
+    }
+
+    private async Task LoadWorkExperiencesAsync()
+    {
+        try
+        {
+            WorkExperienceQuery query = new(
+                SearchText: "",
+                UpdatedRange: RelativeDateRange.All,
+                Sort: new WorkExperienceSortOption(
+                    Field: WorkExperienceSortField.EndDate,
+                    Descending: true
+                ),
+                Paging: new PageOption(1, 20)
+            );
+
+            PagedResult<WorkExperience> result =
+                await _service.GetWorkExperiencesPagedAsync(query);
+
+            WorkExperienceItems = new(
+                result.Items.Select(w => new WorkExperienceItem(w))
+            );
+        }
+        finally { }
+    }
 
     private void LoadStats()
     {
@@ -64,101 +160,5 @@ public partial class WorkExperienceViewModel(
                 SubLabel: "Linked data and skills will be reactivated immediately upon restoration"
             )
         );
-    }
-
-    public async Task OnNavigatedToAsync()
-    {
-        await LoadWorkExperiencesAsync();
-        LoadStats();
-    }
-
-    [RelayCommand]
-    private async Task NavigateToProfileAsync()
-    {
-        await Navigator.NavigateToAsync<ProfileViewModel>();
-    }
-
-    [RelayCommand]
-    private async Task NavigateToWorkExperienceTrashAsync()
-    {
-        await Navigator.NavigateToAsync<WorkExperienceTrashViewModel>();
-    }
-
-    [RelayCommand]
-    private async Task AddWorkExperienceAsync()
-    {
-        await Navigator.NavigateToAsync<
-            WorkExperienceEditorViewModel,
-            WorkExperienceEditorParameter
-        >(WorkExperienceEditorParameter.ForAdd());
-    }
-
-    [RelayCommand]
-    private async Task EditWorkExperienceAsync(WorkExperience? workExperience)
-    {
-        if (workExperience is null)
-        {
-            return;
-        }
-
-        await Navigator.NavigateToAsync<
-            WorkExperienceEditorViewModel,
-            WorkExperienceEditorParameter
-        >(WorkExperienceEditorParameter.ForEdit(workExperience.Id));
-    }
-
-    [RelayCommand]
-    private async Task DuplicateWorkExperienceAsync(
-        WorkExperience? workExperience
-    )
-    {
-        if (workExperience is null)
-        {
-            return;
-        }
-
-        await Navigator.NavigateToAsync<
-            WorkExperienceEditorViewModel,
-            WorkExperienceEditorParameter
-        >(WorkExperienceEditorParameter.ForDuplicate(workExperience.Id));
-    }
-
-    [RelayCommand]
-    private async Task DeleteWorkExperienceAsync(WorkExperience? workExperience)
-    {
-        if (workExperience is null)
-        {
-            return;
-        }
-
-        await _service.DeleteWorkExperienceAsync(workExperience.Id);
-        WorkExperiences.Remove(workExperience);
-
-        if (SelectedWorkExperience == workExperience)
-        {
-            SelectedWorkExperience = null;
-        }
-    }
-
-    private async Task LoadWorkExperiencesAsync()
-    {
-        try
-        {
-            WorkExperienceQuery query = new(
-                SearchText: "",
-                UpdatedRange: RelativeDateRange.All,
-                Sort: new WorkExperienceSortOption(
-                    Field: WorkExperienceSortField.EndDate,
-                    Descending: true
-                ),
-                Paging: new PageOption(1, 20)
-            );
-
-            PagedResult<WorkExperience> result =
-                await _service.GetWorkExperiencesPagedAsync(query);
-
-            WorkExperiences = new(result.Items);
-        }
-        finally { }
     }
 }
