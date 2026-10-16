@@ -34,7 +34,17 @@ public static class DataGridStarColumnRefreshBehavior
             return;
         }
 
-        // Wait for the layout pass triggered by the Visibility binding
+        RefreshStarColumns(grid);
+    }
+
+    /// <summary>
+    /// Forces every Star-width column to re-measure. Shared by
+    /// <see cref="RefreshTriggerProperty"/> and by <see cref="AdaptiveColumn"/>,
+    /// which calls this automatically after it changes a column's Visibility.
+    /// </summary>
+    public static void RefreshStarColumns(DataGrid grid)
+    {
+        // Wait for the layout pass triggered by the Visibility change(s)
         // to complete before forcing a recalculation of the Star width.
         grid.Dispatcher.BeginInvoke(
             DispatcherPriority.Loaded,

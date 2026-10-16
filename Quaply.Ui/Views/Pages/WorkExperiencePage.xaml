@@ -404,12 +404,11 @@
             </StackPanel>
 
             <!--  Table  -->
-            <DataGrid
+            <atoms:AdaptiveDataGrid
               x:Name="workExperienceDataGrid"
               Padding="{Binding SelectedCount, Converter={converters:ConditionalBottomInsetConverter}, ConverterParameter='0,0,0,0|72'}"
               layout:DataGridMultiSelectBehavior.AfterSyncCommand="{Binding ToggleSelectionCommand}"
               layout:DataGridMultiSelectBehavior.IsEnabled="True"
-              layout:DataGridStarColumnRefreshBehavior.RefreshTrigger="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data}"
               AutoGenerateColumns="False"
               CanUserAddRows="False"
               CanUserDeleteRows="False"
@@ -417,12 +416,40 @@
               HeadersVisibility="Column"
               IsReadOnly="True"
               ItemsSource="{Binding WorkExperienceItems}"
+              ReferenceWidth="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data}"
               RowHeight="52"
               RowStyle="{StaticResource SelectableDataGridRowStyle}"
-              SelectedItem="{Binding SelectedWorkExperienceItem}"
+              SelectedItem="{Binding SelectedItem}"
               SelectionMode="Extended"
               Visibility="{Binding HasWorkExperienceItems, Converter={converters:BooleanToVisibilityConverter}}">
-              <DataGrid.Columns>
+              <atoms:AdaptiveDataGrid.Resources>
+                <DataGridTemplateColumn
+                  x:Key="DurationColumn"
+                  Width="*"
+                  Header="Duration">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                        <TextBlock Text="{Binding WorkExperience, Converter={converters:WorkExperienceDurationConverter}}" />
+
+                        <Border
+                          Margin="8,0,0,0"
+                          Padding="6,2"
+                          Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}"
+                          CornerRadius="4"
+                          Visibility="{Binding EndDate, Converter={converters:InverseNullToVisibilityConverter}}">
+                          <TextBlock
+                            FontSize="11"
+                            Foreground="{DynamicResource SystemFillColorSuccessBrush}"
+                            Text="Current" />
+                        </Border>
+                      </StackPanel>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+              </atoms:AdaptiveDataGrid.Resources>
+
+              <atoms:AdaptiveDataGrid.Layout>
                 <!--  Bulk select checkbox  -->
                 <DataGridTemplateColumn Width="Auto">
                   <DataGridTemplateColumn.HeaderTemplate>
@@ -447,149 +474,126 @@
                   </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <!--  Company / Position  -->
-                <DataGridTemplateColumn
-                  Width="*"
-                  Header="Company / Position"
-                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='0;960'}">
-                  <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                      <StackPanel VerticalAlignment="Center">
-                        <TextBlock FontWeight="SemiBold" Text="{Binding CompanyName}" />
+                <atoms:AdaptiveColumn Breakpoints="0;960">
+                  <atoms:AdaptiveColumn.Compact>
+                    <!--  Company + Position  -->
+                    <DataGridTemplateColumn Width="*" Header="Company / Position">
+                      <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                          <StackPanel VerticalAlignment="Center">
+                            <TextBlock FontWeight="SemiBold" Text="{Binding CompanyName}" />
 
-                        <TextBlock
-                          FontSize="12"
-                          Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                          Text="{Binding PositionTitle}" />
-                      </StackPanel>
-                    </DataTemplate>
-                  </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                            <TextBlock
+                              FontSize="12"
+                              Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                              Text="{Binding PositionTitle}" />
+                          </StackPanel>
+                        </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                  </atoms:AdaptiveColumn.Compact>
 
-                <!--  Company  -->
-                <DataGridTextColumn
-                  Width="*"
-                  Binding="{Binding CompanyName}"
-                  Header="Company"
-                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='960;'}" />
+                  <atoms:AdaptiveColumn.Medium>
+                    <!--  Company  -->
+                    <DataGridTextColumn
+                      Width="*"
+                      Binding="{Binding CompanyName}"
+                      Header="Company" />
 
-                <!--  Position  -->
-                <DataGridTextColumn
-                  Width="*"
-                  Binding="{Binding PositionTitle}"
-                  Header="Position"
-                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='960;'}" />
+                    <!--  Position  -->
+                    <DataGridTextColumn
+                      Width="*"
+                      Binding="{Binding PositionTitle}"
+                      Header="Position" />
+                  </atoms:AdaptiveColumn.Medium>
+                </atoms:AdaptiveColumn>
 
-                <!--  Details  -->
-                <DataGridTemplateColumn
-                  Width="*"
-                  Header="Details"
-                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='0;800'}">
-                  <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                      <StackPanel VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal">
-                          <TextBlock FontSize="12" Text="{Binding WorkExperience, Converter={converters:WorkExperienceDurationConverter}}" />
+                <atoms:AdaptiveColumn Breakpoints="0;800;1040">
+                  <atoms:AdaptiveColumn.Compact>
+                    <!--  Details  -->
+                    <DataGridTemplateColumn Width="*" Header="Details">
+                      <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                          <StackPanel VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                              <TextBlock FontSize="12" Text="{Binding WorkExperience, Converter={converters:WorkExperienceDurationConverter}}" />
 
+                              <TextBlock
+                                Margin="6,0,0,0"
+                                FontSize="12"
+                                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                Text="•" />
+
+                              <TextBlock
+                                Margin="6,0,0,0"
+                                FontSize="12"
+                                Text="{Binding Projects.Count, StringFormat='{}{0} projects'}" />
+                            </StackPanel>
+
+                            <TextBlock
+                              FontSize="11"
+                              Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                              Text="{Binding UpdatedAt, Converter={converters:RelativeDateTimeConverter}}" />
+                          </StackPanel>
+                        </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                  </atoms:AdaptiveColumn.Compact>
+
+                  <atoms:AdaptiveColumn.Medium>
+                    <!--  Duration + "Current" badge  -->
+                    <StaticResource ResourceKey="DurationColumn" />
+
+                    <!--  Projects + Last Modified  -->
+                    <DataGridTemplateColumn Width="Auto" Header="Projects / Modified">
+                      <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                          <StackPanel VerticalAlignment="Center">
+                            <TextBlock FontSize="12" Text="{Binding Projects.Count, StringFormat='{}{0} projects'}" />
+                            <TextBlock
+                              FontSize="11"
+                              Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                              Text="{Binding UpdatedAt, Converter={converters:RelativeDateTimeConverter}}" />
+                          </StackPanel>
+                        </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                  </atoms:AdaptiveColumn.Medium>
+
+                  <atoms:AdaptiveColumn.Expanded>
+                    <!--  Duration + "Current" badge  -->
+                    <StaticResource ResourceKey="DurationColumn" />
+
+                    <!--  Projects count  -->
+                    <DataGridTemplateColumn Width="Auto" Header="Projects">
+                      <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
                           <TextBlock
-                            Margin="6,0,0,0"
-                            FontSize="12"
-                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                            Text="•" />
+                            Margin="0,0,16,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Text="{Binding Projects.Count}" />
+                        </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                          <TextBlock
-                            Margin="6,0,0,0"
-                            FontSize="12"
-                            Text="{Binding Projects.Count, StringFormat='{}{0} projects'}" />
-                        </StackPanel>
-
-                        <TextBlock
-                          FontSize="11"
-                          Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                          Text="{Binding UpdatedAt, Converter={converters:RelativeDateTimeConverter}}" />
-                      </StackPanel>
-                    </DataTemplate>
-                  </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!--  Duration + "Current" badge  -->
-                <DataGridTemplateColumn
-                  Width="*"
-                  Header="Duration"
-                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='800;'}">
-                  <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                      <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                        <TextBlock Text="{Binding WorkExperience, Converter={converters:WorkExperienceDurationConverter}}" />
-
-                        <Border
-                          Margin="8,0,0,0"
-                          Padding="6,2"
-                          Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}"
-                          CornerRadius="4"
-                          Visibility="{Binding EndDate, Converter={converters:InverseNullToVisibilityConverter}}">
-                          <TextBlock
-                            FontSize="11"
-                            Foreground="{DynamicResource SystemFillColorSuccessBrush}"
-                            Text="Current" />
-                        </Border>
-                      </StackPanel>
-                    </DataTemplate>
-                  </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!--  Projects + Last Modified  -->
-                <DataGridTemplateColumn
-                  Width="Auto"
-                  Header="Projects / Modified"
-                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='800;1040'}">
-                  <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                      <StackPanel VerticalAlignment="Center">
-                        <TextBlock FontSize="12" Text="{Binding Projects.Count, StringFormat='{}{0} projects'}" />
-                        <TextBlock
-                          FontSize="11"
-                          Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                          Text="{Binding UpdatedAt, Converter={converters:RelativeDateTimeConverter}}" />
-                      </StackPanel>
-                    </DataTemplate>
-                  </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!--  Projects count  -->
-                <DataGridTemplateColumn
-                  Width="Auto"
-                  Header="Projects"
-                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='1040;'}">
-                  <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                      <TextBlock
-                        Margin="0,0,16,0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Text="{Binding Projects.Count}" />
-                    </DataTemplate>
-                  </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!--  Last Modified  -->
-                <DataGridTextColumn
-                  Width="Auto"
-                  Header="Last Modified"
-                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='1040;'}">
-                  <DataGridTextColumn.ElementStyle>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Text" Value="{Binding UpdatedAt, Converter={converters:RelativeDateTimeConverter}}" />
-                      <Setter Property="ToolTip">
-                        <Setter.Value>
-                          <ToolTip MaxWidth="{x:Static system:Double.PositiveInfinity}">
-                            <TextBlock Text="{Binding UpdatedAt, Converter={converters:FullLocalDateTimeConverter}}" TextWrapping="NoWrap" />
-                          </ToolTip>
-                        </Setter.Value>
-                      </Setter>
-                    </Style>
-                  </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+                    <!--  Last Modified  -->
+                    <DataGridTextColumn Width="Auto" Header="Last Modified">
+                      <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Text" Value="{Binding UpdatedAt, Converter={converters:RelativeDateTimeConverter}}" />
+                          <Setter Property="ToolTip">
+                            <Setter.Value>
+                              <ToolTip MaxWidth="{x:Static system:Double.PositiveInfinity}">
+                                <TextBlock Text="{Binding UpdatedAt, Converter={converters:FullLocalDateTimeConverter}}" TextWrapping="NoWrap" />
+                              </ToolTip>
+                            </Setter.Value>
+                          </Setter>
+                        </Style>
+                      </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                  </atoms:AdaptiveColumn.Expanded>
+                </atoms:AdaptiveColumn>
 
                 <!--  Actions  -->
                 <DataGridTemplateColumn
@@ -638,8 +642,8 @@
                     </DataTemplate>
                   </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-              </DataGrid.Columns>
-            </DataGrid>
+              </atoms:AdaptiveDataGrid.Layout>
+            </atoms:AdaptiveDataGrid>
 
             <!--
               Floating bulk-action bar - only appears once something is checked,
