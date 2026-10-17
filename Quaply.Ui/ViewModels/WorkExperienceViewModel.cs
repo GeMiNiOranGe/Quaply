@@ -353,6 +353,18 @@ public partial class WorkExperienceViewModel(
             return;
         }
 
+        bool confirmed = await _dialogPresenter.ShowDangerConfirmationAsync(
+            title: "Delete item?",
+            message: BuildDeleteWarning([item]),
+            primaryButtonText: "Delete",
+            closeButtonText: "Cancel"
+        );
+
+        if (!confirmed)
+        {
+            return;
+        }
+
         await _service.DeleteWorkExperienceAsync(item.Id);
         await ReloadAfterRemovalAsync([item]);
     }
@@ -474,7 +486,13 @@ public partial class WorkExperienceViewModel(
                 ? $"'{items[0].CompanyName}'"
                 : $"{items.Count} work experiences";
 
-        return $"This will move {subject} to the trash. You can restore them from there anytime.";
+        string pronoun = items.Count == 1 ? "it" : "them";
+
+        return $"This will move {subject} to the trash, "
+            + $"along with all projects belonging to {pronoun}.\n\n"
+            + $"Any other items linked to {pronoun} will be unlinked. "
+            + "You can restore them from the trash later, "
+            + "but those links will not be restored.";
     }
 
     private void UpdateSelectAllState()
