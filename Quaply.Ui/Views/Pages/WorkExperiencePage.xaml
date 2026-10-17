@@ -419,7 +419,7 @@
               ReferenceWidth="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data}"
               RowHeight="52"
               RowStyle="{StaticResource SelectableDataGridRowStyle}"
-              SelectedItem="{Binding SelectedItem}"
+              SelectedItem="{Binding SelectedWorkExperienceItem}"
               SelectionMode="Extended"
               Visibility="{Binding HasWorkExperienceItems, Converter={converters:BooleanToVisibilityConverter}}">
               <atoms:AdaptiveDataGrid.Resources>
@@ -628,7 +628,7 @@
                           CommandParameter="{Binding}"
                           Style="{StaticResource IconOnlyButtonStyle}"
                           ToolTip="Duplicate">
-                          <ui:SymbolIcon Symbol="Copy24" />
+                          <ui:SymbolIcon Symbol="SaveCopy24" />
                         </ui:Button>
 
                         <ui:Button
