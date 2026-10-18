@@ -23,6 +23,8 @@
   Style="{StaticResource FadeInSlideUpPage}"
   mc:Ignorable="d">
   <UserControl.Resources>
+    <markup:BindingProxy x:Key="ViewModelProxy" Data="{Binding}" />
+
     <ContextMenu
       x:Key="UpdatedRangeMenu"
       x:Shared="False"
@@ -596,52 +598,114 @@
                 </atoms:AdaptiveColumn>
 
                 <!--  Actions  -->
-                <DataGridTemplateColumn
-                  Width="Auto"
-                  CellStyle="{StaticResource CenteredDataGridCellStyle}"
-                  Header="Actions"
-                  HeaderStyle="{StaticResource CenteredDataGridColumnHeaderStyle}">
-                  <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                      <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                        <ui:Button
-                          Margin="0,0,8,0"
-                          Command="{Binding DataContext.ViewDetailWorkExperienceCommand, ElementName=workExperiencePage}"
-                          CommandParameter="{Binding}"
-                          Style="{StaticResource IconOnlyButtonStyle}"
-                          ToolTip="View Detail">
-                          <ui:SymbolIcon Symbol="Eye24" />
-                        </ui:Button>
+                <atoms:AdaptiveColumn Breakpoints="0;800">
+                  <atoms:AdaptiveColumn.Compact>
+                    <DataGridTemplateColumn
+                      Width="Auto"
+                      CellStyle="{StaticResource CenteredDataGridCellStyle}"
+                      Header="Actions"
+                      HeaderStyle="{StaticResource CenteredDataGridColumnHeaderStyle}">
+                      <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                          <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                            <ui:Button
+                              Margin="0,0,8,0"
+                              Command="{Binding DataContext.ViewDetailWorkExperienceCommand, ElementName=workExperiencePage}"
+                              CommandParameter="{Binding}"
+                              Style="{StaticResource IconOnlyButtonStyle}"
+                              ToolTip="View Detail">
+                              <ui:SymbolIcon Symbol="Eye24" />
+                            </ui:Button>
 
-                        <ui:Button
-                          Margin="0,0,8,0"
-                          Command="{Binding DataContext.EditWorkExperienceCommand, ElementName=workExperiencePage}"
-                          CommandParameter="{Binding}"
-                          Style="{StaticResource IconOnlyButtonStyle}"
-                          ToolTip="Edit">
-                          <ui:SymbolIcon Symbol="Edit24" />
-                        </ui:Button>
+                            <ui:Button
+                              Margin="0,0,8,0"
+                              Command="{Binding DataContext.EditWorkExperienceCommand, ElementName=workExperiencePage}"
+                              CommandParameter="{Binding}"
+                              Style="{StaticResource IconOnlyButtonStyle}"
+                              ToolTip="Edit">
+                              <ui:SymbolIcon Symbol="Edit24" />
+                            </ui:Button>
 
-                        <ui:Button
-                          Margin="0,0,8,0"
-                          Command="{Binding DataContext.DuplicateWorkExperienceCommand, ElementName=workExperiencePage}"
-                          CommandParameter="{Binding}"
-                          Style="{StaticResource IconOnlyButtonStyle}"
-                          ToolTip="Duplicate">
-                          <ui:SymbolIcon Symbol="SaveCopy24" />
-                        </ui:Button>
+                            <ui:Button
+                              layout:ContextMenuBehavior.OpenOnClick="True"
+                              Icon="{ui:SymbolIcon MoreVertical24}"
+                              Style="{StaticResource IconOnlyButtonStyle}"
+                              ToolTip="More">
+                              <ui:Button.ContextMenu>
+                                <ContextMenu Placement="Bottom">
+                                  <MenuItem
+                                    Command="{Binding Data.DuplicateWorkExperienceCommand, Source={StaticResource ViewModelProxy}}"
+                                    CommandParameter="{Binding}"
+                                    Header="Duplicate"
+                                    Icon="{ui:SymbolIcon SaveCopy24}" />
 
-                        <ui:Button
-                          Command="{Binding DataContext.DeleteWorkExperienceCommand, ElementName=workExperiencePage}"
-                          CommandParameter="{Binding}"
-                          Style="{StaticResource IconOnlyButtonStyle}"
-                          ToolTip="Delete">
-                          <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />
-                        </ui:Button>
-                      </StackPanel>
-                    </DataTemplate>
-                  </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                                  <Separator />
+
+                                  <MenuItem
+                                    Command="{Binding Data.DeleteWorkExperienceCommand, Source={StaticResource ViewModelProxy}}"
+                                    CommandParameter="{Binding}"
+                                    Foreground="IndianRed"
+                                    Header="Delete"
+                                    Icon="{ui:SymbolIcon Delete24}" />
+                                </ContextMenu>
+                              </ui:Button.ContextMenu>
+                            </ui:Button>
+                          </StackPanel>
+                        </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                  </atoms:AdaptiveColumn.Compact>
+
+                  <atoms:AdaptiveColumn.Medium>
+                    <DataGridTemplateColumn
+                      Width="Auto"
+                      CellStyle="{StaticResource CenteredDataGridCellStyle}"
+                      Header="Actions"
+                      HeaderStyle="{StaticResource CenteredDataGridColumnHeaderStyle}">
+                      <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                          <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                            <ui:Button
+                              Margin="0,0,8,0"
+                              Command="{Binding DataContext.ViewDetailWorkExperienceCommand, ElementName=workExperiencePage}"
+                              CommandParameter="{Binding}"
+                              Style="{StaticResource IconOnlyButtonStyle}"
+                              ToolTip="View Detail">
+                              <ui:SymbolIcon Symbol="Eye24" />
+                            </ui:Button>
+
+                            <ui:Button
+                              Margin="0,0,8,0"
+                              Command="{Binding DataContext.EditWorkExperienceCommand, ElementName=workExperiencePage}"
+                              CommandParameter="{Binding}"
+                              Style="{StaticResource IconOnlyButtonStyle}"
+                              ToolTip="Edit">
+                              <ui:SymbolIcon Symbol="Edit24" />
+                            </ui:Button>
+
+                            <ui:Button
+                              Command="{Binding DataContext.DuplicateWorkExperienceCommand, ElementName=workExperiencePage}"
+                              CommandParameter="{Binding}"
+                              Style="{StaticResource IconOnlyButtonStyle}"
+                              ToolTip="Duplicate">
+                              <ui:SymbolIcon Symbol="SaveCopy24" />
+                            </ui:Button>
+
+                            <atoms:Divider Margin="12,8" Orientation="Vertical" />
+
+                            <ui:Button
+                              Command="{Binding DataContext.DeleteWorkExperienceCommand, ElementName=workExperiencePage}"
+                              CommandParameter="{Binding}"
+                              Style="{StaticResource IconOnlyButtonStyle}"
+                              ToolTip="Delete">
+                              <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />
+                            </ui:Button>
+                          </StackPanel>
+                        </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                  </atoms:AdaptiveColumn.Medium>
+                </atoms:AdaptiveColumn>
               </atoms:AdaptiveDataGrid.Layout>
             </atoms:AdaptiveDataGrid>
 
