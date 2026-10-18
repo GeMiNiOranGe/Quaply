@@ -510,7 +510,7 @@
                   </atoms:AdaptiveColumn.Medium>
                 </atoms:AdaptiveColumn>
 
-                <atoms:AdaptiveColumn Breakpoints="0;800;1040">
+                <atoms:AdaptiveColumn Breakpoints="0;800;1120">
                   <atoms:AdaptiveColumn.Compact>
                     <!--  Details  -->
                     <DataGridTemplateColumn Width="*" Header="Details">
@@ -598,7 +598,7 @@
                 </atoms:AdaptiveColumn>
 
                 <!--  Actions  -->
-                <atoms:AdaptiveColumn Breakpoints="0;800">
+                <atoms:AdaptiveColumn Breakpoints="0;1120">
                   <atoms:AdaptiveColumn.Compact>
                     <DataGridTemplateColumn
                       Width="Auto"
