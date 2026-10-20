@@ -1,3 +1,6 @@
+-- Timestamp semantics (CreatedAt/UpdatedAt/DeletedAt/ExportedAt):
+-- see Docs/DATABASE.md#timestamps
+
 PRAGMA foreign_keys = ON;
 
 -- have no key -----------------------------------------------------------------
