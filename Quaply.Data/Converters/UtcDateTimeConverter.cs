@@ -18,7 +18,7 @@ public class UtcDateTimeConverter : ValueConverter<DateTime, string>
         }
 
         return v.ToString(
-            Constants.Iso8601Format,
+            Constants.SqliteDateTimeFormat,
             CultureInfo.InvariantCulture
         );
     }
@@ -28,7 +28,7 @@ public class UtcDateTimeConverter : ValueConverter<DateTime, string>
         return DateTime.SpecifyKind(
             DateTime.ParseExact(
                 v,
-                Constants.Iso8601Format,
+                Constants.SqliteDateTimeFormat,
                 CultureInfo.InvariantCulture
             ),
             DateTimeKind.Utc

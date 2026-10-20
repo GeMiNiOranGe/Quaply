@@ -21,7 +21,7 @@ public class NullableUtcDateTimeConverter()
         }
 
         return v.Value.ToString(
-            Constants.Iso8601Format,
+            Constants.SqliteDateTimeFormat,
             CultureInfo.InvariantCulture
         );
     }
@@ -36,7 +36,7 @@ public class NullableUtcDateTimeConverter()
         return DateTime.SpecifyKind(
             DateTime.ParseExact(
                 v,
-                Constants.Iso8601Format,
+                Constants.SqliteDateTimeFormat,
                 CultureInfo.InvariantCulture
             ),
             DateTimeKind.Utc
