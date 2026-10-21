@@ -151,7 +151,6 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
     public void Restore(WorkExperience entity)
     {
         entity.DeletedAt = null;
-        entity.UpdatedAt = DateTime.UtcNow;
         _context.WorkExperiences.Update(entity);
     }
 
@@ -160,7 +159,6 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
         foreach (WorkExperience entity in entities)
         {
             entity.DeletedAt = null;
-            entity.UpdatedAt = DateTime.UtcNow;
         }
 
         _context.WorkExperiences.UpdateRange(entities);
