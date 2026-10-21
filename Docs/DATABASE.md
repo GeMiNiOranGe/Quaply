@@ -86,9 +86,10 @@ Every entity table has `CreatedAt`, `UpdatedAt` and `DeletedAt` (junction tables
 have none). `Resume` also has `ExportedAt`.
 
 - **Format**: UTC, `YYYY-MM-DD HH:MM:SS`, exactly what SQLite's `datetime('now')`
-  returns. The CHECK on `DeletedAt` and `ExportedAt` rejects a `T` separator or
-  a timezone offset. `CreatedAt` and `UpdatedAt` have no CHECK but must use the
-  same format, otherwise string comparison no longer matches time order.
+  returns. A CHECK on every timestamp column (`CreatedAt`, `UpdatedAt`,
+  `DeletedAt`, and `Resume.ExportedAt`) rejects anything else: a `T` separator,
+  fractional seconds, or a timezone offset. The fixed format is what lets
+  timestamps be compared as plain strings.
 - **`CreatedAt`**: set once, on insert (`DEFAULT datetime('now')`).
 - **`UpdatedAt`**: the last time the user edited the row's *content*. On insert
   it equals `CreatedAt`.

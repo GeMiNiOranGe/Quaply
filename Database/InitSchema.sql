@@ -13,6 +13,8 @@ CREATE TABLE "SkillCategory"
     "UpdatedAt" TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt" TEXT,
 
+    CHECK (datetime("CreatedAt") = "CreatedAt"),
+    CHECK (datetime("UpdatedAt") = "UpdatedAt"),
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
@@ -26,6 +28,8 @@ CREATE TABLE "ProjectType"
     "UpdatedAt" TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt" TEXT,
 
+    CHECK (datetime("CreatedAt") = "CreatedAt"),
+    CHECK (datetime("UpdatedAt") = "UpdatedAt"),
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
@@ -41,6 +45,8 @@ CREATE TABLE "Resume"
     "DeletedAt"  TEXT,
 
     CHECK ("ExportedAt" IS NULL OR datetime("ExportedAt") = "ExportedAt"),
+    CHECK (datetime("CreatedAt") = "CreatedAt"),
+    CHECK (datetime("UpdatedAt") = "UpdatedAt"),
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
@@ -81,6 +87,8 @@ CREATE TABLE "Profile"
     "DeletedAt"        TEXT,
 
     CHECK ("DateOfBirth" IS NULL OR date("DateOfBirth") = "DateOfBirth"),
+    CHECK (datetime("CreatedAt") = "CreatedAt"),
+    CHECK (datetime("UpdatedAt") = "UpdatedAt"),
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
@@ -95,6 +103,8 @@ CREATE TABLE "PersonalSummary"
     "UpdatedAt"           TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt"           TEXT,
 
+    CHECK (datetime("CreatedAt") = "CreatedAt"),
+    CHECK (datetime("UpdatedAt") = "UpdatedAt"),
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
@@ -133,6 +143,8 @@ CREATE TABLE "WorkExperience"
 
     CHECK (date("StartDate") = "StartDate"),
     CHECK ("EndDate" IS NULL OR date("EndDate") = "EndDate"),
+    CHECK (datetime("CreatedAt") = "CreatedAt"),
+    CHECK (datetime("UpdatedAt") = "UpdatedAt"),
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
@@ -152,6 +164,8 @@ CREATE TABLE "Education"
 
     CHECK ("StartDate" IS NULL OR date("StartDate") = "StartDate"),
     CHECK ("EndDate" IS NULL OR date("EndDate") = "EndDate"),
+    CHECK (datetime("CreatedAt") = "CreatedAt"),
+    CHECK (datetime("UpdatedAt") = "UpdatedAt"),
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
@@ -166,6 +180,8 @@ CREATE TABLE "Language"
     "UpdatedAt"        TEXT    NOT NULL DEFAULT (datetime('now')),
     "DeletedAt"        TEXT,
 
+    CHECK (datetime("CreatedAt") = "CreatedAt"),
+    CHECK (datetime("UpdatedAt") = "UpdatedAt"),
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
@@ -184,6 +200,8 @@ CREATE TABLE "Certification"
 
     CHECK ("IssueDate" IS NULL OR date("IssueDate") = "IssueDate"),
     CHECK ("ExpirationDate" IS NULL OR date("ExpirationDate") = "ExpirationDate"),
+    CHECK (datetime("CreatedAt") = "CreatedAt"),
+    CHECK (datetime("UpdatedAt") = "UpdatedAt"),
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
@@ -215,6 +233,8 @@ CREATE TABLE "Project"
     CHECK ("HasGaps" IN (0, 1)),
     CHECK ("StartDate" IS NULL OR date("StartDate") = "StartDate"),
     CHECK ("EndDate" IS NULL OR date("EndDate") = "EndDate"),
+    CHECK (datetime("CreatedAt") = "CreatedAt"),
+    CHECK (datetime("UpdatedAt") = "UpdatedAt"),
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
@@ -234,6 +254,8 @@ CREATE TABLE "Skill"
     FOREIGN KEY ("SkillCategoryId") REFERENCES "SkillCategory"("Id"),
 
     CHECK ("IsHighlight" IN (0, 1)),
+    CHECK (datetime("CreatedAt") = "CreatedAt"),
+    CHECK (datetime("UpdatedAt") = "UpdatedAt"),
     CHECK ("DeletedAt" IS NULL OR datetime("DeletedAt") = "DeletedAt")
 )
 STRICT;
