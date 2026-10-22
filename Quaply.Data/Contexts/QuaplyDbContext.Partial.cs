@@ -6,6 +6,32 @@ namespace Quaply.Data.Contexts;
 
 public partial class QuaplyDbContext
 {
+    // See Docs/DATABASE.md#timestamps
+    private static readonly HashSet<string> LifecycleOnly =
+    [
+        "UpdatedAt",
+        "ExportedAt",
+        "DeletedAt",
+    ];
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        ApplyUpdatedAt();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default
+    )
+    {
+        ApplyUpdatedAt();
+        return base.SaveChangesAsync(
+            acceptAllChangesOnSuccess,
+            cancellationToken
+        );
+    }
+
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<WorkExperience>(entity =>
@@ -56,6 +82,8 @@ public partial class QuaplyDbContext
         modelBuilder.Entity<Resume>(entity =>
         {
             entity.HasQueryFilter(e => e.DeletedAt == null);
+
+            entity.Property(e => e.ExportedAt).HasUtcConversion();
 
             entity.Property(e => e.CreatedAt).HasUtcConversion();
             entity.Property(e => e.UpdatedAt).HasUtcConversion();
@@ -141,5 +169,34 @@ public partial class QuaplyDbContext
         {
             entity.HasQueryFilter(e => e.WorkExperience.DeletedAt == null);
         });
+    }
+
+    private void ApplyUpdatedAt()
+    {
+        DateTime now = DateTime.UtcNow;
+
+        foreach (
+            var entry in ChangeTracker
+                .Entries()
+                .Where(e => e.State == EntityState.Modified)
+        )
+        {
+            if (entry.Metadata.FindProperty("UpdatedAt") is null)
+            {
+                // junction tables
+                continue;
+            }
+
+            bool contentChanged = entry.Properties.Any(p =>
+                p.IsModified
+                && !LifecycleOnly.Contains(p.Metadata.Name)
+                && !Equals(p.OriginalValue, p.CurrentValue)
+            );
+
+            if (contentChanged)
+            {
+                entry.Property("UpdatedAt").CurrentValue = now;
+            }
+        }
     }
 }

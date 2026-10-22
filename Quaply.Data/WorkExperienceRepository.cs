@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Quaply.Data.Contexts;
 using Quaply.Data.Interfaces;
@@ -118,7 +119,14 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
 
     public void Update(WorkExperience entity)
     {
-        entity.UpdatedAt = DateTime.UtcNow;
+        // Must be a tracked entity (loaded via GetByIdAsync). A detached entity
+        // has Original == Current, so ApplyUpdatedAt would silently skip
+        // UpdatedAt.
+        Debug.Assert(
+            _context.Entry(entity).State != EntityState.Detached,
+            "Update() requires a tracked entity."
+        );
+
         _context.WorkExperiences.Update(entity);
     }
 
