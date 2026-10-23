@@ -23,6 +23,12 @@
   Style="{StaticResource FadeInSlideUpPage}"
   mc:Ignorable="d">
   <UserControl.Resources>
+    <!--
+      PROXY-BINDING: Bridge to this page's ViewModel for elements OUTSIDE
+      the visual tree (ContextMenu, Popup, DataGridColumn.Header/Visibility).
+      Usage: {Binding Data.XxxCommand, Source={StaticResource WorkExperiencePageProxy}}
+      CommandParameter still uses a plain {Binding}.
+    -->
     <markup:BindingProxy x:Key="WorkExperiencePageProxy" Data="{Binding}" />
 
     <ContextMenu
