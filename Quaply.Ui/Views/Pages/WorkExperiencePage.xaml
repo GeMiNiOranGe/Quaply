@@ -23,7 +23,7 @@
   Style="{StaticResource FadeInSlideUpPage}"
   mc:Ignorable="d">
   <UserControl.Resources>
-    <markup:BindingProxy x:Key="ViewModelProxy" Data="{Binding}" />
+    <markup:BindingProxy x:Key="WorkExperiencePageProxy" Data="{Binding}" />
 
     <ContextMenu
       x:Key="UpdatedRangeMenu"
@@ -376,10 +376,6 @@
 
           <!--  Table row hosts BOTH the DataGrid and the floating bulk-action bar  -->
           <Grid Grid.Row="1">
-            <Grid.Resources>
-              <markup:BindingProxy x:Key="DataGridWidthProxy" Data="{Binding ActualWidth, ElementName=listCardGrid}" />
-            </Grid.Resources>
-
             <!--  Empty state  -->
             <StackPanel
               HorizontalAlignment="Center"
@@ -418,7 +414,7 @@
               HeadersVisibility="Column"
               IsReadOnly="True"
               ItemsSource="{Binding WorkExperienceItems}"
-              ReferenceWidth="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data}"
+              ReferenceWidth="{Binding ActualWidth, ElementName=listCardGrid}"
               RowHeight="52"
               RowStyle="{StaticResource SelectableDataGridRowStyle}"
               SelectedItem="{Binding SelectedWorkExperienceItem}"
@@ -634,7 +630,7 @@
                               <ui:Button.ContextMenu>
                                 <ContextMenu Placement="Bottom">
                                   <MenuItem
-                                    Command="{Binding Data.DuplicateWorkExperienceCommand, Source={StaticResource ViewModelProxy}}"
+                                    Command="{Binding Data.DuplicateWorkExperienceCommand, Source={StaticResource WorkExperiencePageProxy}}"
                                     CommandParameter="{Binding}"
                                     Header="Duplicate"
                                     Icon="{ui:SymbolIcon SaveCopy24}" />
@@ -642,7 +638,7 @@
                                   <Separator />
 
                                   <MenuItem
-                                    Command="{Binding Data.DeleteWorkExperienceCommand, Source={StaticResource ViewModelProxy}}"
+                                    Command="{Binding Data.DeleteWorkExperienceCommand, Source={StaticResource WorkExperiencePageProxy}}"
                                     CommandParameter="{Binding}"
                                     Foreground="IndianRed"
                                     Header="Delete"
