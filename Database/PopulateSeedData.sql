@@ -1,101 +1,45 @@
 -- =============================================================================
--- HOW TO RUN (this file uses sqlite3 CLI dot-commands, e.g. ".import" -
--- it must be run through the sqlite3.exe command-line shell, not through a
--- generic "execute SQL" box in a GUI tool that only understands plain SQL):
+-- Seed data for Quaply. Full conventions (CSV format, UpdatedAt/DeletedAt
+-- values, sanity check): Docs/DATABASE.md#seed-data - read it before editing CSVs.
 --
---   sqlite3 Database/Quaply.db
---   sqlite> .read Database/PopulateMasterData.sql
---   sqlite> .read Database/PopulateSeedData.sql
---
--- or, from PowerShell / a build script, in one shot:
+-- RUN
+--   This file uses sqlite3 CLI dot-commands (.import), so it must go through
+--   sqlite3.exe, NOT a GUI "execute SQL" box. Run from the repo root (CSV paths
+--   are relative: Database/SampleData/<TableName>.csv), after the schema and
+--   PopulateMasterData.sql (ProjectType, SkillCategory) have been applied:
 --
 --   sqlite3.exe Database/Quaply.db ".read Database/PopulateMasterData.sql" ".read Database/PopulateSeedData.sql"
 --
--- Assumes the schema (CREATE TABLE ...) and PopulateMasterData.sql
--- (ProjectType, SkillCategory) have already been applied to the target db.
--- CSV files are expected at Database/SampleData/<TableName>.csv relative to the
--- working directory .import is run from - adjust the paths below if needed.
+-- WHY IT IS BUILT THIS WAY (easy to break later)
+--   * Timestamps are relative to "now" and recomputed on every run, so the
+--     app's "modified in 7d / 30d / all time" filters can be tested any day.
+--   * CreatedAt is not in the CSV. It is generated from the row's own dates:
+--     anchor (UpdatedAt, else DeletedAt, else now) - (35..89 days) - jitter.
+--     The 35-day minimum is deliberately larger than the 30-day filter, so
+--     "never modified" rows always fall outside the 7d and 30d filters.
+--   * INVARIANT CreatedAt <= UpdatedAt <= DeletedAt is NOT enforced by the
+--     schema; the seed data must satisfy it. Soft delete does not touch
+--     UpdatedAt in this app, so never set UpdatedAt = DeletedAt.
+--   * Avoid exactly 7 and 30 days in the CSV. Jitter adds up to ~24h and
+--     datetime('now') is UTC while the app compares in local time (UTC+7),
+--     so the boundary is unstable. Probe it with 6/9 and 28/32 instead.
+--   * Per table: (1) INSERT..SELECT from staging, (2) UPDATE CreatedAt,
+--     (3) UPDATE UpdatedAt for rows left empty in the CSV. Step 3 must run
+--     after step 2 (it reads the generated CreatedAt), and both read
+--     temp."stg_<Table>", so they must run before staging is dropped.
+--   * Jitter multipliers are coprime with 24 / 60 so values spread evenly:
+--     UpdatedAt/DeletedAt add Id*7 h, Id*13 min, Id*19 s; CreatedAt subtracts
+--     Id*5 h, Id*17 min, Id*23 s, and the day offset is 35 + (Id*11) % 55.
+--     The exact numbers mean nothing; any small coprime multipliers work.
+--   * Do NOT create an AFTER UPDATE trigger that sets UpdatedAt until AFTER this
+--     seed has run, otherwise it overwrites the timestamps generated here.
 --
--- -----------------------------------------------------------------------------
---
--- TIMESTAMP COLUMN CONVENTION (applies to every table below that has
--- CreatedAt / UpdatedAt / DeletedAt - all except the junction tables)
---
--- CSV columns, placed in this order at the end of each file: UpdatedAt, DeletedAt
--- Both columns share the same 3-way value convention:
---   - empty               -> UpdatedAt: never modified (UpdatedAt = CreatedAt)
---                            DeletedAt: not deleted (NULL)
---   - a plain integer,    -> dynamic: datetime('now', '-7 days') plus a
---     e.g. 7                 per-Id hour/minute/second jitter
---                            (recomputed on every run, relative to "now")
---   - a literal timestamp -> used as-is (static/historical), must be
---                            'YYYY-MM-DD HH:MM:SS' (DeletedAt has a CHECK)
---
--- CreatedAt is NOT in the CSV. It is generated, anchored to the row's own dates:
---   anchor = UpdatedAt if given, else DeletedAt if present, else now
---   CreatedAt = anchor - (35..89 days) - jitter
--- The 35-day minimum is deliberate: it is larger than the 30-day filter, so
--- "never modified" rows always fall outside the 7-day and 30-day filters.
---
--- INVARIANT (the schema does NOT enforce it, the seed data must):
---   CreatedAt <= UpdatedAt <= DeletedAt
--- Consequences for CSV authors:
---   * if both are integers, UpdatedAt must be STRICTLY GREATER than DeletedAt
---     (bigger N = further in the past), or leave UpdatedAt empty.
---   * if either one is a literal timestamp, check the order by hand.
---   * UpdatedAt is independent of DeletedAt: soft-delete does not touch
---     UpdatedAt in this app, so do not set UpdatedAt = DeletedAt.
---
--- Picking UpdatedAt values for the "modified date" filter (7d / 30d / all time):
---   inside 7d: 1-6 | 7d-30d: 9-28 | outside 30d: 32+ | never modified: empty
---   Avoid exactly 7 and 30. The jitter adds up to ~24h, and datetime('now') is
---   UTC while the app may compare in local time (UTC+7), so the exact boundary
---   is unstable. Probe the boundary with 6/9 and 28/32 instead.
---
--- Per-table pattern (repeat for each table, in this order):
---   1. INSERT ... SELECT  UpdatedAt/DeletedAt are converted by the CASE blocks.
---                         UpdatedAt is NOT NULL, so empty gets datetime('now')
---                         as a placeholder; CreatedAt stays at its DEFAULT.
---   2. UPDATE CreatedAt   generated from the anchor above.
---   3. UPDATE UpdatedAt   empty-in-CSV rows: UpdatedAt = CreatedAt.
---   Step 3 must run after step 2 (it reads the generated CreatedAt).
---   Steps 2-3 read temp."stg_<Table>", so they must run before staging is dropped.
---   Inside the subquery, "Id"/"UpdatedAt" resolve to the staging table's
---   columns (innermost scope), not the real table's.
---
--- Jitter multipliers (must be coprime with 24 / 60 to spread values evenly):
---   UpdatedAt / DeletedAt: Id*7 % 24 h, Id*13 % 60 min, Id*19 % 60 s (added)
---   CreatedAt:             Id*5 % 24 h, Id*17 % 60 min, Id*23 % 60 s (subtracted)
---   The 35..89 day offset is 35 + (Id*11) % 55.
---
--- If an AFTER UPDATE trigger that auto-sets UpdatedAt is added later, create it
--- AFTER this seed runs, otherwise it overwrites the timestamps generated here.
---
--- Sanity check after seeding (must return zero rows for every table):
+-- CHECK AFTER SEEDING (must return zero rows for every table; what to do
+-- when it does not: Docs/DATABASE.md#seed-data)
 --   SELECT "Id"
 --   FROM "<Table>"
 --   WHERE "CreatedAt" > "UpdatedAt"
 --       OR ("DeletedAt" IS NOT NULL AND "UpdatedAt" > "DeletedAt");
---
---   Example output:
---     * Data is fine: Zero rows (nothing printed by sqlite3 .read). This is
---       the result you want.
---     * Data has an error: The offending rows are listed. For instance,
---       if the CSV row for WorkExperience Id 21 is changed to UpdatedAt = 5
---       and DeletedAt = 7, then UpdatedAt = now - 5 days is NEWER than
---       DeletedAt = now - 7 days, which breaks the invariant:
---
---         Table           Id
---         --------------  --
---         WorkExperience  21
---
---   How to fix: open the CSV of the reported table, go to that Id, and either
---   set UpdatedAt to a number greater than DeletedAt (e.g. 10) or leave
---   UpdatedAt empty.
---
---   Limits: this only catches ordering errors. It cannot tell whether a row
---   landed in the intended filter bucket (7d / 30d / all time); a typo such as
---   60 instead of 6 is still a valid ordering and will not be reported.
 -- =============================================================================
 
 -- re-enabled at the end, after all data is in
@@ -233,17 +177,9 @@ CREATE TEMP TABLE "stg_Project" (
 -- Insertion order respects FK dependencies (WorkExperience/Skill before
 -- Project; ProjectType/SkillCategory must already exist via master data).
 --
--- Hour/minute/second jitter on dynamic DeletedAt values: '+' || ((Id * 7) % 24) || ' hours',
--- '+' || ((Id * 13) % 60) || ' minutes', '+' || ((Id * 19) % 60) || ' seconds' below.
--- 7 and 24 are coprime (gcd = 1), so as Id increases by 1, (Id * 7) % 24 cycles
--- through all 24 possible hour values before repeating - same idea for 13/60
--- (minutes) and 19/60 (seconds). All three multipliers (7, 13, 19) are also
--- different from each other, so hours/minutes/seconds don't drift in lockstep.
--- Picking a non-coprime multiplier (e.g. Id * 12 % 24) would collapse the result
--- to only a couple of values ({0, 12}), making consecutive rows land on visibly
--- repeating/clustered timestamps instead of a spread-out, natural-looking one.
--- The exact numbers 7/13/19 have no other significance - any small multipliers
--- coprime with 24 (hours) or 60 (minutes/seconds) work the same.
+-- Jitter on dynamic UpdatedAt/DeletedAt values: '+' || ((Id * 7) % 24) || ' hours',
+-- '+' || ((Id * 13) % 60) || ' minutes', '+' || ((Id * 19) % 60) || ' seconds'.
+-- Why these multipliers: see the header.
 -- -----------------------------------------------------------------------------
 
 INSERT INTO "Resume"
