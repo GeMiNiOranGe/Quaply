@@ -23,16 +23,14 @@
 --   * Avoid exactly 7 and 30 days in the CSV. Jitter adds up to ~24h and
 --     datetime('now') is UTC while the app compares in local time (UTC+7),
 --     so the boundary is unstable. Probe it with 6/9 and 28/32 instead.
---   * Per table: (1) INSERT..SELECT from staging, (2) UPDATE CreatedAt,
---     (3) UPDATE UpdatedAt for rows left empty in the CSV. Step 3 must run
---     after step 2 (it reads the generated CreatedAt), and both read
---     temp."stg_<Table>", so they must run before staging is dropped.
+--   * Timestamps are resolved once, in temp."seed_ts", and each table's INSERT
+--     just JOINs it (no per-table UPDATE steps). seed_ts reads the staging
+--     tables, so it is built after the .import lines and before the first INSERT.
+--     A new table with timestamps needs one UNION ALL line there plus the JOIN.
 --   * Jitter multipliers are coprime with 24 / 60 so values spread evenly:
 --     UpdatedAt/DeletedAt add Id*7 h, Id*13 min, Id*19 s; CreatedAt subtracts
 --     Id*5 h, Id*17 min, Id*23 s, and the day offset is 35 + (Id*11) % 55.
 --     The exact numbers mean nothing; any small coprime multipliers work.
---   * Do NOT create an AFTER UPDATE trigger that sets UpdatedAt until AFTER this
---     seed has run, otherwise it overwrites the timestamps generated here.
 --
 -- CHECK AFTER SEEDING (must return zero rows for every table; what to do
 -- when it does not: Docs/DATABASE.md#seed-data)
@@ -42,7 +40,7 @@
 --       OR ("DeletedAt" IS NOT NULL AND "UpdatedAt" > "DeletedAt");
 -- =============================================================================
 
--- re-enabled at the end, after all data is in
+-- Foreign keys are off while loading; re-enabled at the end, after all data is in.
 PRAGMA foreign_keys = OFF;
 
 -- -----------------------------------------------------------------------------
@@ -171,15 +169,107 @@ CREATE TEMP TABLE "stg_Project" (
 .import --skip 1 Database/SampleData/Project.csv stg_Project
 
 -- -----------------------------------------------------------------------------
+-- RESOLVE TIMESTAMPS (once, for every table)
+-- CreatedAt / UpdatedAt / DeletedAt are computed here and joined into each
+-- INSERT below, instead of being repeated per table. Reads the staging tables,
+-- so it must run after the .import lines and before the first INSERT.
+-- To add a table with timestamps: one UNION ALL line here + the JOIN in its INSERT.
+--
+-- Stage 1 (resolved): UpdatedAt/DeletedAt from the 3-way CSV convention
+--         (empty / integer days ago / literal timestamp), see Docs/DATABASE.md#seed-data.
+--         Jitter: (Id * 7) % 24 hours, (Id * 13) % 60 minutes, (Id * 19) % 60 seconds.
+-- Stage 2 (created): CreatedAt = anchor - (35..89 days) - jitter, where the anchor is
+--         UpdatedAt, else DeletedAt, else now. Approximately 35-89 days, intentionally
+--         greater than 30 so that rows that have never been edited always remain
+--         outside the 30-day filter.
+-- Final:  a row left empty in the CSV is "never modified", so UpdatedAt = CreatedAt.
+-- Why these multipliers: see the header.
+-- -----------------------------------------------------------------------------
+
+DROP TABLE IF EXISTS temp."seed_ts";
+CREATE TEMP TABLE "seed_ts" AS
+WITH "raw"("SeedTable", "SeedId", "U", "D") AS (
+    SELECT 'Resume', CAST("Id" AS INTEGER), "UpdatedAt", "DeletedAt"
+    FROM temp."stg_Resume"
+    UNION ALL
+    SELECT 'Profile', CAST("Id" AS INTEGER), "UpdatedAt", "DeletedAt"
+    FROM temp."stg_Profile"
+    UNION ALL
+    SELECT 'PersonalSummary', CAST("Id" AS INTEGER), "UpdatedAt", "DeletedAt"
+    FROM temp."stg_PersonalSummary"
+    UNION ALL
+    SELECT 'WorkExperience', CAST("Id" AS INTEGER), "UpdatedAt", "DeletedAt"
+    FROM temp."stg_WorkExperience"
+    UNION ALL
+    SELECT 'Education', CAST("Id" AS INTEGER), "UpdatedAt", "DeletedAt"
+    FROM temp."stg_Education"
+    UNION ALL
+    SELECT 'Language', CAST("Id" AS INTEGER), "UpdatedAt", "DeletedAt"
+    FROM temp."stg_Language"
+    UNION ALL
+    SELECT 'Certification', CAST("Id" AS INTEGER), "UpdatedAt", "DeletedAt"
+    FROM temp."stg_Certification"
+    UNION ALL
+    SELECT 'Skill', CAST("Id" AS INTEGER), "UpdatedAt", "DeletedAt"
+    FROM temp."stg_Skill"
+    UNION ALL
+    SELECT 'Project', CAST("Id" AS INTEGER), "UpdatedAt", "DeletedAt"
+    FROM temp."stg_Project"
+),
+"resolved" AS (
+    SELECT
+        "SeedTable",
+        "SeedId",
+        CASE
+            WHEN COALESCE("U", '') = '' THEN NULL
+            WHEN "U" = CAST(CAST("U" AS INTEGER) AS TEXT) THEN datetime(
+                'now',
+                '-' || "U" || ' days',
+                '+' || (("SeedId" * 7)  % 24) || ' hours',
+                '+' || (("SeedId" * 13) % 60) || ' minutes',
+                '+' || (("SeedId" * 19) % 60) || ' seconds'
+            )
+            ELSE "U"
+        END AS "Upd",
+        CASE
+            WHEN COALESCE("D", '') = '' THEN NULL
+            WHEN "D" = CAST(CAST("D" AS INTEGER) AS TEXT) THEN datetime(
+                'now',
+                '-' || "D" || ' days',
+                '+' || (("SeedId" * 7)  % 24) || ' hours',
+                '+' || (("SeedId" * 13) % 60) || ' minutes',
+                '+' || (("SeedId" * 19) % 60) || ' seconds'
+            )
+            ELSE "D"
+        END AS "Del"
+    FROM "raw"
+),
+"created" AS (
+    SELECT
+        *,
+        datetime(
+            COALESCE("Upd", "Del", 'now'),
+            '-' || (35 + ("SeedId" * 11) % 55) || ' days',
+            '-' || (("SeedId" * 5)  % 24) || ' hours',
+            '-' || (("SeedId" * 17) % 60) || ' minutes',
+            '-' || (("SeedId" * 23) % 60) || ' seconds'
+        ) AS "Cr"
+    FROM "resolved"
+)
+SELECT
+    "SeedTable",
+    "SeedId",
+    "Cr"                    AS "ResolvedCreatedAt",
+    COALESCE("Upd", "Cr")   AS "ResolvedUpdatedAt",
+    "Del"                   AS "ResolvedDeletedAt"
+FROM "created";
+
+-- -----------------------------------------------------------------------------
 -- STAGING -> REAL TABLES
 -- NULLIF('', '') turns blank text into NULL for nullable text columns.
--- The DeletedAt CASE handles the 3-way convention described at the top.
+-- Timestamps come from seed_ts (see above) via the JOIN on each table.
 -- Insertion order respects FK dependencies (WorkExperience/Skill before
 -- Project; ProjectType/SkillCategory must already exist via master data).
---
--- Jitter on dynamic UpdatedAt/DeletedAt values: '+' || ((Id * 7) % 24) || ' hours',
--- '+' || ((Id * 13) % 60) || ' minutes', '+' || ((Id * 19) % 60) || ' seconds'.
--- Why these multipliers: see the header.
 -- -----------------------------------------------------------------------------
 
 INSERT INTO "Resume"
@@ -187,6 +277,7 @@ INSERT INTO "Resume"
         "Id",
         "Name",
         "ExportedAt",
+        "CreatedAt",
         "UpdatedAt",
         "DeletedAt"
     )
@@ -194,55 +285,13 @@ SELECT
     CAST("Id" AS INTEGER),
     "Name",
     NULLIF("ExportedAt", ''),
-    CASE
-        WHEN "UpdatedAt" IS NULL OR "UpdatedAt" = '' THEN datetime('now')
-        WHEN "UpdatedAt" = CAST(CAST("UpdatedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "UpdatedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "UpdatedAt"
-    END,
-    CASE
-        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
-        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "DeletedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "DeletedAt"
-    END
-FROM "stg_Resume";
-
-UPDATE "Resume"
-SET "CreatedAt" = datetime(
-    CASE
-        WHEN "Id" IN (
-            SELECT CAST("Id" AS INTEGER)
-            FROM temp."stg_Resume"
-            WHERE COALESCE("UpdatedAt", '') = ''
-        ) THEN COALESCE("DeletedAt", 'now')
-        ELSE "UpdatedAt"
-    END,
-    -- Approximately 35-89 days, intentionally greater than 30 so that
-    -- rows that have never been edited always remain outside the 30-day filter.
-    '-' || (35 + ("Id" * 11) % 55) || ' days',
-    '-' || (("Id" * 5)  % 24) || ' hours',
-    '-' || (("Id" * 17) % 60) || ' minutes',
-    '-' || (("Id" * 23) % 60) || ' seconds'
-);
-
-UPDATE "Resume"
-SET "UpdatedAt" = "CreatedAt"
-WHERE "Id" IN (
-    SELECT CAST("Id" AS INTEGER)
-    FROM temp."stg_Resume"
-    WHERE COALESCE("UpdatedAt", '') = ''
-);
+    "ResolvedCreatedAt",
+    "ResolvedUpdatedAt",
+    "ResolvedDeletedAt"
+FROM "stg_Resume"
+JOIN temp."seed_ts"
+    ON "SeedTable" = 'Resume'
+   AND "SeedId" = CAST("Id" AS INTEGER);
 
 -- =============================================================================
 -- PROFILE
@@ -258,6 +307,7 @@ INSERT INTO "Profile"
         "GitHubUsername",
         "PortfolioUrl",
         "DateOfBirth",
+        "CreatedAt",
         "UpdatedAt",
         "DeletedAt"
     )
@@ -270,55 +320,13 @@ SELECT
     NULLIF("GitHubUsername", ''),
     NULLIF("PortfolioUrl", ''),
     NULLIF("DateOfBirth", ''),
-    CASE
-        WHEN "UpdatedAt" IS NULL OR "UpdatedAt" = '' THEN datetime('now')
-        WHEN "UpdatedAt" = CAST(CAST("UpdatedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "UpdatedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "UpdatedAt"
-    END,
-    CASE
-        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
-        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "DeletedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "DeletedAt"
-    END
-FROM "stg_Profile";
-
-UPDATE "Profile"
-SET "CreatedAt" = datetime(
-    CASE
-        WHEN "Id" IN (
-            SELECT CAST("Id" AS INTEGER)
-            FROM temp."stg_Profile"
-            WHERE COALESCE("UpdatedAt", '') = ''
-        ) THEN COALESCE("DeletedAt", 'now')
-        ELSE "UpdatedAt"
-    END,
-    -- Approximately 35-89 days, intentionally greater than 30 so that
-    -- rows that have never been edited always remain outside the 30-day filter.
-    '-' || (35 + ("Id" * 11) % 55) || ' days',
-    '-' || (("Id" * 5)  % 24) || ' hours',
-    '-' || (("Id" * 17) % 60) || ' minutes',
-    '-' || (("Id" * 23) % 60) || ' seconds'
-);
-
-UPDATE "Profile"
-SET "UpdatedAt" = "CreatedAt"
-WHERE "Id" IN (
-    SELECT CAST("Id" AS INTEGER)
-    FROM temp."stg_Profile"
-    WHERE COALESCE("UpdatedAt", '') = ''
-);
+    "ResolvedCreatedAt",
+    "ResolvedUpdatedAt",
+    "ResolvedDeletedAt"
+FROM "stg_Profile"
+JOIN temp."seed_ts"
+    ON "SeedTable" = 'Profile'
+   AND "SeedId" = CAST("Id" AS INTEGER);
 
 INSERT INTO "ResumeProfile"
         ("ResumeId", "ProfileId")
@@ -335,6 +343,7 @@ INSERT INTO "PersonalSummary"
         "Id",
         "TargetPositionTitle",
         "Summary",
+        "CreatedAt",
         "UpdatedAt",
         "DeletedAt"
     )
@@ -342,55 +351,13 @@ SELECT
     CAST("Id" AS INTEGER),
     "TargetPositionTitle",
     NULLIF("Summary", ''),
-    CASE
-        WHEN "UpdatedAt" IS NULL OR "UpdatedAt" = '' THEN datetime('now')
-        WHEN "UpdatedAt" = CAST(CAST("UpdatedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "UpdatedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "UpdatedAt"
-    END,
-    CASE
-        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
-        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "DeletedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "DeletedAt"
-    END
-FROM "stg_PersonalSummary";
-
-UPDATE "PersonalSummary"
-SET "CreatedAt" = datetime(
-    CASE
-        WHEN "Id" IN (
-            SELECT CAST("Id" AS INTEGER)
-            FROM temp."stg_PersonalSummary"
-            WHERE COALESCE("UpdatedAt", '') = ''
-        ) THEN COALESCE("DeletedAt", 'now')
-        ELSE "UpdatedAt"
-    END,
-    -- Approximately 35-89 days, intentionally greater than 30 so that
-    -- rows that have never been edited always remain outside the 30-day filter.
-    '-' || (35 + ("Id" * 11) % 55) || ' days',
-    '-' || (("Id" * 5)  % 24) || ' hours',
-    '-' || (("Id" * 17) % 60) || ' minutes',
-    '-' || (("Id" * 23) % 60) || ' seconds'
-);
-
-UPDATE "PersonalSummary"
-SET "UpdatedAt" = "CreatedAt"
-WHERE "Id" IN (
-    SELECT CAST("Id" AS INTEGER)
-    FROM temp."stg_PersonalSummary"
-    WHERE COALESCE("UpdatedAt", '') = ''
-);
+    "ResolvedCreatedAt",
+    "ResolvedUpdatedAt",
+    "ResolvedDeletedAt"
+FROM "stg_PersonalSummary"
+JOIN temp."seed_ts"
+    ON "SeedTable" = 'PersonalSummary'
+   AND "SeedId" = CAST("Id" AS INTEGER);
 
 INSERT INTO "ResumePersonalSummary"
         ("ResumeId", "PersonalSummaryId")
@@ -410,6 +377,7 @@ INSERT INTO "WorkExperience"
         "Description",
         "StartDate",
         "EndDate",
+        "CreatedAt",
         "UpdatedAt",
         "DeletedAt"
     )
@@ -420,55 +388,13 @@ SELECT
     NULLIF("Description", ''),
     "StartDate",
     NULLIF("EndDate", ''),
-    CASE
-        WHEN "UpdatedAt" IS NULL OR "UpdatedAt" = '' THEN datetime('now')
-        WHEN "UpdatedAt" = CAST(CAST("UpdatedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "UpdatedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "UpdatedAt"
-    END,
-    CASE
-        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
-        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "DeletedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "DeletedAt"
-    END
-FROM "stg_WorkExperience";
-
-UPDATE "WorkExperience"
-SET "CreatedAt" = datetime(
-    CASE
-        WHEN "Id" IN (
-            SELECT CAST("Id" AS INTEGER)
-            FROM temp."stg_WorkExperience"
-            WHERE COALESCE("UpdatedAt", '') = ''
-        ) THEN COALESCE("DeletedAt", 'now')
-        ELSE "UpdatedAt"
-    END,
-    -- Approximately 35-89 days, intentionally greater than 30 so that
-    -- rows that have never been edited always remain outside the 30-day filter.
-    '-' || (35 + ("Id" * 11) % 55) || ' days',
-    '-' || (("Id" * 5)  % 24) || ' hours',
-    '-' || (("Id" * 17) % 60) || ' minutes',
-    '-' || (("Id" * 23) % 60) || ' seconds'
-);
-
-UPDATE "WorkExperience"
-SET "UpdatedAt" = "CreatedAt"
-WHERE "Id" IN (
-    SELECT CAST("Id" AS INTEGER)
-    FROM temp."stg_WorkExperience"
-    WHERE COALESCE("UpdatedAt", '') = ''
-);
+    "ResolvedCreatedAt",
+    "ResolvedUpdatedAt",
+    "ResolvedDeletedAt"
+FROM "stg_WorkExperience"
+JOIN temp."seed_ts"
+    ON "SeedTable" = 'WorkExperience'
+   AND "SeedId" = CAST("Id" AS INTEGER);
 
 INSERT INTO "ResumeWorkExperience"
         ("ResumeId", "WorkExperienceId")
@@ -492,6 +418,7 @@ INSERT INTO "Education"
         "Major",
         "StartDate",
         "EndDate",
+        "CreatedAt",
         "UpdatedAt",
         "DeletedAt"
     )
@@ -502,55 +429,13 @@ SELECT
     NULLIF("Major", ''),
     NULLIF("StartDate", ''),
     NULLIF("EndDate", ''),
-    CASE
-        WHEN "UpdatedAt" IS NULL OR "UpdatedAt" = '' THEN datetime('now')
-        WHEN "UpdatedAt" = CAST(CAST("UpdatedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "UpdatedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "UpdatedAt"
-    END,
-    CASE
-        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
-        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "DeletedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "DeletedAt"
-    END
-FROM "stg_Education";
-
-UPDATE "Education"
-SET "CreatedAt" = datetime(
-    CASE
-        WHEN "Id" IN (
-            SELECT CAST("Id" AS INTEGER)
-            FROM temp."stg_Education"
-            WHERE COALESCE("UpdatedAt", '') = ''
-        ) THEN COALESCE("DeletedAt", 'now')
-        ELSE "UpdatedAt"
-    END,
-    -- Approximately 35-89 days, intentionally greater than 30 so that
-    -- rows that have never been edited always remain outside the 30-day filter.
-    '-' || (35 + ("Id" * 11) % 55) || ' days',
-    '-' || (("Id" * 5)  % 24) || ' hours',
-    '-' || (("Id" * 17) % 60) || ' minutes',
-    '-' || (("Id" * 23) % 60) || ' seconds'
-);
-
-UPDATE "Education"
-SET "UpdatedAt" = "CreatedAt"
-WHERE "Id" IN (
-    SELECT CAST("Id" AS INTEGER)
-    FROM temp."stg_Education"
-    WHERE COALESCE("UpdatedAt", '') = ''
-);
+    "ResolvedCreatedAt",
+    "ResolvedUpdatedAt",
+    "ResolvedDeletedAt"
+FROM "stg_Education"
+JOIN temp."seed_ts"
+    ON "SeedTable" = 'Education'
+   AND "SeedId" = CAST("Id" AS INTEGER);
 
 -- Both resumes share the same education
 INSERT INTO "ResumeEducation"
@@ -568,6 +453,7 @@ INSERT INTO "Language"
         "Id",
         "Name",
         "ProficiencyLevel",
+        "CreatedAt",
         "UpdatedAt",
         "DeletedAt"
     )
@@ -575,55 +461,13 @@ SELECT
     CAST("Id" AS INTEGER),
     "Name",
     "ProficiencyLevel",
-    CASE
-        WHEN "UpdatedAt" IS NULL OR "UpdatedAt" = '' THEN datetime('now')
-        WHEN "UpdatedAt" = CAST(CAST("UpdatedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "UpdatedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "UpdatedAt"
-    END,
-    CASE
-        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
-        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "DeletedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "DeletedAt"
-    END
-FROM "stg_Language";
-
-UPDATE "Language"
-SET "CreatedAt" = datetime(
-    CASE
-        WHEN "Id" IN (
-            SELECT CAST("Id" AS INTEGER)
-            FROM temp."stg_Language"
-            WHERE COALESCE("UpdatedAt", '') = ''
-        ) THEN COALESCE("DeletedAt", 'now')
-        ELSE "UpdatedAt"
-    END,
-    -- Approximately 35-89 days, intentionally greater than 30 so that
-    -- rows that have never been edited always remain outside the 30-day filter.
-    '-' || (35 + ("Id" * 11) % 55) || ' days',
-    '-' || (("Id" * 5)  % 24) || ' hours',
-    '-' || (("Id" * 17) % 60) || ' minutes',
-    '-' || (("Id" * 23) % 60) || ' seconds'
-);
-
-UPDATE "Language"
-SET "UpdatedAt" = "CreatedAt"
-WHERE "Id" IN (
-    SELECT CAST("Id" AS INTEGER)
-    FROM temp."stg_Language"
-    WHERE COALESCE("UpdatedAt", '') = ''
-);
+    "ResolvedCreatedAt",
+    "ResolvedUpdatedAt",
+    "ResolvedDeletedAt"
+FROM "stg_Language"
+JOIN temp."seed_ts"
+    ON "SeedTable" = 'Language'
+   AND "SeedId" = CAST("Id" AS INTEGER);
 
 -- Both resumes share languages
 INSERT INTO "ResumeLanguage"
@@ -647,6 +491,7 @@ INSERT INTO "Certification"
         "Issuer",
         "IssueDate",
         "ExpirationDate",
+        "CreatedAt",
         "UpdatedAt",
         "DeletedAt"
     )
@@ -656,55 +501,13 @@ SELECT
     NULLIF("Issuer", ''),
     NULLIF("IssueDate", ''),
     NULLIF("ExpirationDate", ''),
-    CASE
-        WHEN "UpdatedAt" IS NULL OR "UpdatedAt" = '' THEN datetime('now')
-        WHEN "UpdatedAt" = CAST(CAST("UpdatedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "UpdatedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "UpdatedAt"
-    END,
-    CASE
-        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
-        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "DeletedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "DeletedAt"
-    END
-FROM "stg_Certification";
-
-UPDATE "Certification"
-SET "CreatedAt" = datetime(
-    CASE
-        WHEN "Id" IN (
-            SELECT CAST("Id" AS INTEGER)
-            FROM temp."stg_Certification"
-            WHERE COALESCE("UpdatedAt", '') = ''
-        ) THEN COALESCE("DeletedAt", 'now')
-        ELSE "UpdatedAt"
-    END,
-    -- Approximately 35-89 days, intentionally greater than 30 so that
-    -- rows that have never been edited always remain outside the 30-day filter.
-    '-' || (35 + ("Id" * 11) % 55) || ' days',
-    '-' || (("Id" * 5)  % 24) || ' hours',
-    '-' || (("Id" * 17) % 60) || ' minutes',
-    '-' || (("Id" * 23) % 60) || ' seconds'
-);
-
-UPDATE "Certification"
-SET "UpdatedAt" = "CreatedAt"
-WHERE "Id" IN (
-    SELECT CAST("Id" AS INTEGER)
-    FROM temp."stg_Certification"
-    WHERE COALESCE("UpdatedAt", '') = ''
-);
+    "ResolvedCreatedAt",
+    "ResolvedUpdatedAt",
+    "ResolvedDeletedAt"
+FROM "stg_Certification"
+JOIN temp."seed_ts"
+    ON "SeedTable" = 'Certification'
+   AND "SeedId" = CAST("Id" AS INTEGER);
 
 INSERT INTO "ResumeCertification"
         ("ResumeId", "CertificationId")
@@ -722,6 +525,7 @@ INSERT INTO "Skill"
         "Id",
         "Name",
         "IsHighlight",
+        "CreatedAt",
         "UpdatedAt",
         "DeletedAt",
         "SkillCategoryId"
@@ -730,56 +534,14 @@ SELECT
     CAST("Id" AS INTEGER),
     "Name",
     CAST("IsHighlight" AS INTEGER),
-    CASE
-        WHEN "UpdatedAt" IS NULL OR "UpdatedAt" = '' THEN datetime('now')
-        WHEN "UpdatedAt" = CAST(CAST("UpdatedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "UpdatedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "UpdatedAt"
-    END,
-    CASE
-        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
-        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "DeletedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "DeletedAt"
-    END,
+    "ResolvedCreatedAt",
+    "ResolvedUpdatedAt",
+    "ResolvedDeletedAt",
     CAST("SkillCategoryId" AS INTEGER)
-FROM "stg_Skill";
-
-UPDATE "Skill"
-SET "CreatedAt" = datetime(
-    CASE
-        WHEN "Id" IN (
-            SELECT CAST("Id" AS INTEGER)
-            FROM temp."stg_Skill"
-            WHERE COALESCE("UpdatedAt", '') = ''
-        ) THEN COALESCE("DeletedAt", 'now')
-        ELSE "UpdatedAt"
-    END,
-    -- Approximately 35-89 days, intentionally greater than 30 so that
-    -- rows that have never been edited always remain outside the 30-day filter.
-    '-' || (35 + ("Id" * 11) % 55) || ' days',
-    '-' || (("Id" * 5)  % 24) || ' hours',
-    '-' || (("Id" * 17) % 60) || ' minutes',
-    '-' || (("Id" * 23) % 60) || ' seconds'
-);
-
-UPDATE "Skill"
-SET "UpdatedAt" = "CreatedAt"
-WHERE "Id" IN (
-    SELECT CAST("Id" AS INTEGER)
-    FROM temp."stg_Skill"
-    WHERE COALESCE("UpdatedAt", '') = ''
-);
+FROM "stg_Skill"
+JOIN temp."seed_ts"
+    ON "SeedTable" = 'Skill'
+   AND "SeedId" = CAST("Id" AS INTEGER);
 
 -- =============================================================================
 -- PROJECTS
@@ -797,6 +559,7 @@ INSERT INTO "Project"
         "StartDate",
         "EndDate",
         "HasGaps",
+        "CreatedAt",
         "UpdatedAt",
         "DeletedAt",
         "WorkExperienceId",
@@ -813,57 +576,15 @@ SELECT
     NULLIF("StartDate", ''),
     NULLIF("EndDate", ''),
     CAST("HasGaps" AS INTEGER),
-    CASE
-        WHEN "UpdatedAt" IS NULL OR "UpdatedAt" = '' THEN datetime('now')
-        WHEN "UpdatedAt" = CAST(CAST("UpdatedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "UpdatedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "UpdatedAt"
-    END,
-    CASE
-        WHEN "DeletedAt" IS NULL OR "DeletedAt" = '' THEN NULL
-        WHEN "DeletedAt" = CAST(CAST("DeletedAt" AS INTEGER) AS TEXT) THEN datetime(
-            'now',
-            '-' || "DeletedAt" || ' days',
-            '+' || ((CAST("Id" AS INTEGER) * 7) % 24) || ' hours',
-            '+' || ((CAST("Id" AS INTEGER) * 13) % 60) || ' minutes',
-            '+' || ((CAST("Id" AS INTEGER) * 19) % 60) || ' seconds'
-        )
-        ELSE "DeletedAt"
-    END,
+    "ResolvedCreatedAt",
+    "ResolvedUpdatedAt",
+    "ResolvedDeletedAt",
     CAST(NULLIF("WorkExperienceId", '') AS INTEGER),
     CAST("ProjectTypeId" AS INTEGER)
-FROM "stg_Project";
-
-UPDATE "Project"
-SET "CreatedAt" = datetime(
-    CASE
-        WHEN "Id" IN (
-            SELECT CAST("Id" AS INTEGER)
-            FROM temp."stg_Project"
-            WHERE COALESCE("UpdatedAt", '') = ''
-        ) THEN COALESCE("DeletedAt", 'now')
-        ELSE "UpdatedAt"
-    END,
-    -- Approximately 35-89 days, intentionally greater than 30 so that
-    -- rows that have never been edited always remain outside the 30-day filter.
-    '-' || (35 + ("Id" * 11) % 55) || ' days',
-    '-' || (("Id" * 5)  % 24) || ' hours',
-    '-' || (("Id" * 17) % 60) || ' minutes',
-    '-' || (("Id" * 23) % 60) || ' seconds'
-);
-
-UPDATE "Project"
-SET "UpdatedAt" = "CreatedAt"
-WHERE "Id" IN (
-    SELECT CAST("Id" AS INTEGER)
-    FROM temp."stg_Project"
-    WHERE COALESCE("UpdatedAt", '') = ''
-);
+FROM "stg_Project"
+JOIN temp."seed_ts"
+    ON "SeedTable" = 'Project'
+   AND "SeedId" = CAST("Id" AS INTEGER);
 
 -- =============================================================================
 -- PROJECT SKILLS
