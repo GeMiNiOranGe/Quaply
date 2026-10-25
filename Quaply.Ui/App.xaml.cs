@@ -5,7 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quaply.Data;
 using Quaply.Service;
+#if DEBUG
 using Quaply.Ui.Diagnostics;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+#endif
 
 namespace Quaply.Ui;
 
@@ -14,6 +18,34 @@ namespace Quaply.Ui;
 /// </summary>
 public partial class App : Application
 {
+#if DEBUG
+    private const int ATTACH_PARENT_PROCESS = -1;
+
+    [LibraryImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool AllocConsole();
+
+    [LibraryImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool AttachConsole(int dwProcessId);
+
+    static App()
+    {
+        if (Debugger.IsAttached)
+        {
+            // Run with Visual Studio: skip
+            return;
+        }
+
+        // attach to the parent terminal
+        if (!AttachConsole(ATTACH_PARENT_PROCESS))
+        {
+            // if there is no parent terminal, open a new window
+            AllocConsole();
+        }
+    }
+#endif
+
     private const string MutexName =
         "Quaply_SingleInstance_Mutex_2E0AF992-357D-4B7B-87E5-C6DC203AEA56";
     private const string PipeName =
