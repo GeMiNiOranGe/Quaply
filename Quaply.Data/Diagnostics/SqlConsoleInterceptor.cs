@@ -46,6 +46,14 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
     )]
     private static partial Regex SelectLineRegex();
 
+    // Matches: UPDATE "Table" SET <assignments>
+    // or (EF may already place SET on its own line): "SET <assignments>"
+    [GeneratedRegex(@"^(UPDATE\s+.+?)\s+SET\s+(.+)$", RegexOptions.IgnoreCase)]
+    private static partial Regex UpdateSetInlineRegex();
+
+    [GeneratedRegex(@"^SET\s+(.+)$", RegexOptions.IgnoreCase)]
+    private static partial Regex SetLineRegex();
+
     // --- Reader ---
 
     public override DbDataReader ReaderExecuted(
@@ -187,7 +195,7 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
         string sql = InlineParameterValues
             ? InlineParameters(command)
             : command.CommandText;
-        sb.Append(FormatSelect(sql));
+        sb.Append(FormatUpdate(FormatSelect(sql)));
 
         if (note is not null)
         {
@@ -253,6 +261,90 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
             else
             {
                 sb.Append(line);
+            }
+
+            if (i < lines.Length - 1)
+            {
+                sb.Append('\n');
+            }
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Formats UPDATE statements:
+    /// <list type="bullet">
+    ///   <item>SET is always on a new line.</item>
+    ///   <item>
+    ///   One assignment per line when there is more than one column;
+    ///   a single assignment stays on the SET line.
+    ///   </item>
+    /// </list>
+    /// </summary>
+    private static string FormatUpdate(string sql)
+    {
+        StringBuilder sb = new();
+        string[] lines = sql.ReplaceLineEndings("\n").Split('\n');
+
+        for (int i = 0; i < lines.Length; i++)
+        {
+            string line = lines[i];
+            string trimmed = line.TrimStart();
+            string indent = line[..(line.Length - trimmed.Length)];
+
+            string? header = null; // "UPDATE ..." part when SET is on the same line
+            string? assignments = null;
+
+            Match inline = UpdateSetInlineRegex().Match(trimmed);
+            if (inline.Success)
+            {
+                header = inline.Groups[1].Value;
+                assignments = inline.Groups[2].Value;
+            }
+            else
+            {
+                Match setOnly = SetLineRegex().Match(trimmed);
+                if (setOnly.Success)
+                {
+                    assignments = setOnly.Groups[1].Value;
+                }
+            }
+
+            if (assignments is null)
+            {
+                sb.Append(line);
+            }
+            else
+            {
+                if (header is not null)
+                {
+                    sb.Append(indent).Append(header).Append('\n');
+                }
+
+                List<string> columns = SplitTopLevel(assignments);
+
+                if (columns.Count > 1)
+                {
+                    // First assignment shares the line with SET,
+                    // the rest are aligned underneath it.
+                    string pad = new(' ', "SET ".Length);
+
+                    for (int c = 0; c < columns.Count; c++)
+                    {
+                        sb.Append(indent);
+                        sb.Append(c == 0 ? "SET " : pad);
+                        sb.Append(columns[c]);
+                        if (c < columns.Count - 1)
+                        {
+                            sb.Append(",\n");
+                        }
+                    }
+                }
+                else
+                {
+                    sb.Append(indent).Append("SET ").Append(assignments.Trim());
+                }
             }
 
             if (i < lines.Length - 1)
