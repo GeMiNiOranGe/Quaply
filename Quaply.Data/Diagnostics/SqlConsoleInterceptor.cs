@@ -69,6 +69,9 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
     [GeneratedRegex(@"^SET\s+(.+)$", RegexOptions.IgnoreCase)]
     private static partial Regex SetLineRegex();
 
+    [GeneratedRegex(@"[@:$]\w+")]
+    private static partial Regex ParameterRegex();
+
     // --- Reader ---
 
     public override DbDataReader ReaderExecuted(
@@ -166,6 +169,11 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
         string? note = null
     )
     {
+        if (!_logger.IsEnabled(LogLevel.Information))
+        {
+            return;
+        }
+
         string message = BuildMessage(
             "Executed DbCommand",
             command,
@@ -177,6 +185,11 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
 
     private void LogFailed(DbCommand command, CommandErrorEventData e)
     {
+        if (!_logger.IsEnabled(LogLevel.Error))
+        {
+            return;
+        }
+
         string message = BuildMessage(
             "Failed executing DbCommand",
             command,
@@ -548,24 +561,21 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
 
     private static string InlineParameters(DbCommand command)
     {
-        string sql = command.CommandText;
-
-        // Prevent @p1 from matching @p10
-        foreach (
-            DbParameter p in command
-                .Parameters.Cast<DbParameter>()
-                .OrderByDescending(p => p.ParameterName.Length)
-        )
-        {
-            string literal = ToLiteral(p.Value);
-            sql = Regex.Replace(
-                sql,
-                Regex.Escape(NormalizeName(p.ParameterName)) + @"\b",
-                _ => literal
+        Dictionary<string, string> literals = command
+            .Parameters.Cast<DbParameter>()
+            .ToDictionary(
+                p => NormalizeName(p.ParameterName),
+                p => ToLiteral(p.Value)
             );
-        }
 
-        return sql;
+        return ParameterRegex()
+            .Replace(
+                command.CommandText,
+                m =>
+                    literals.TryGetValue(m.Value, out string? literal)
+                        ? literal
+                        : m.Value
+            );
     }
 
     private static string ToLiteral(object? value)
