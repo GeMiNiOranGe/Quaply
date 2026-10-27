@@ -46,6 +46,21 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
     )]
     private static partial Regex SelectLineRegex();
 
+    // Matches: INSERT INTO "Table" ("A", "B", ...)
+    [GeneratedRegex(
+        @"^INSERT\s+INTO\s+(.+?)\s*\((.+)\)$",
+        RegexOptions.IgnoreCase
+    )]
+    private static partial Regex InsertIntoRegex();
+
+    // Matches: VALUES (v1, v2, ...)  (optional trailing semicolon)
+    [GeneratedRegex(@"^VALUES\s*\((.+)\)(;?)$", RegexOptions.IgnoreCase)]
+    private static partial Regex ValuesRegex();
+
+    // Matches: RETURNING "A", "B"  (optional trailing semicolon)
+    [GeneratedRegex(@"^RETURNING\s+(.+?)(;?)$", RegexOptions.IgnoreCase)]
+    private static partial Regex ReturningRegex();
+
     // Matches: UPDATE "Table" SET <assignments>
     // or (EF may already place SET on its own line): "SET <assignments>"
     [GeneratedRegex(@"^(UPDATE\s+.+?)\s+SET\s+(.+)$", RegexOptions.IgnoreCase)]
@@ -195,7 +210,7 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
         string sql = InlineParameterValues
             ? InlineParameters(command)
             : command.CommandText;
-        sb.Append(FormatUpdate(FormatSelect(sql)));
+        sb.Append(FormatInsert(FormatUpdate(FormatSelect(sql))));
 
         if (note is not null)
         {
@@ -256,6 +271,116 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
                     {
                         sb.Append(',');
                     }
+                }
+            }
+            else
+            {
+                sb.Append(line);
+            }
+
+            if (i < lines.Length - 1)
+            {
+                sb.Append('\n');
+            }
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Formats INSERT statements:
+    /// <list type="bullet">
+    ///   <item>
+    ///   More than one column: INSERT columns, VALUES and RETURNING are each
+    ///   written one item per line, wrapped in parentheses (except RETURNING).
+    ///   </item>
+    ///   <item>
+    ///   A single column: the statement stays in EF's original compact form.
+    ///   </item>
+    /// </list>
+    /// </summary>
+    private static string FormatInsert(string sql)
+    {
+        StringBuilder sb = new();
+        string[] lines = sql.ReplaceLineEndings("\n").Split('\n');
+
+        // VALUES follows INSERT, so it uses the same decision as the INSERT line.
+        bool multiColumnInsert = false;
+
+        for (int i = 0; i < lines.Length; i++)
+        {
+            string line = lines[i];
+            string trimmed = line.TrimStart();
+            string indent = line[..(line.Length - trimmed.Length)];
+            string itemIndent = indent + Indent;
+
+            Match insert = InsertIntoRegex().Match(trimmed);
+            Match values = ValuesRegex().Match(trimmed);
+            Match returning = ReturningRegex().Match(trimmed);
+
+            if (insert.Success)
+            {
+                List<string> columns = SplitTopLevel(insert.Groups[2].Value);
+                multiColumnInsert = columns.Count > 1;
+
+                if (multiColumnInsert)
+                {
+                    sb.Append(indent)
+                        .Append("INSERT INTO ")
+                        .Append(insert.Groups[1].Value)
+                        .Append('\n')
+                        .Append(indent)
+                        .Append("(\n")
+                        .Append(
+                            string.Join(
+                                ",\n",
+                                columns.Select(c => itemIndent + c)
+                            )
+                        )
+                        .Append('\n')
+                        .Append(indent)
+                        .Append(')');
+                }
+                else
+                {
+                    sb.Append(line);
+                }
+            }
+            else if (values.Success && multiColumnInsert)
+            {
+                List<string> items = SplitTopLevel(values.Groups[1].Value);
+
+                sb.Append(indent)
+                    .Append("VALUES\n")
+                    .Append(indent)
+                    .Append("(\n")
+                    .Append(
+                        string.Join(",\n", items.Select(v => itemIndent + v))
+                    )
+                    .Append('\n')
+                    .Append(indent)
+                    .Append(')')
+                    .Append(values.Groups[2].Value);
+            }
+            else if (returning.Success)
+            {
+                List<string> columns = SplitTopLevel(returning.Groups[1].Value);
+
+                if (columns.Count > 1)
+                {
+                    sb.Append(indent)
+                        .Append("RETURNING\n")
+                        .Append(
+                            string.Join(
+                                ",\n",
+                                columns.Select(c => itemIndent + c)
+                            )
+                        )
+                        .Append(returning.Groups[2].Value);
+                }
+                else
+                {
+                    sb.Append(line);
                 }
             }
             else
