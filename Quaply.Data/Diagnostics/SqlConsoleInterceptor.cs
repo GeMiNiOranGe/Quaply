@@ -34,7 +34,22 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
 
     private const string Indent = "    ";
 
+    // bright blue
+    private const string KeywordColor = "\e[94m";
+
+    // bright green
+    private const string StringColor = "\e[92m";
+
+    // bright yellow
+    private const string NumberColor = "\e[93m";
+
+    private const string Reset = "\e[0m";
+
     private readonly ILogger _logger = loggerFactory.CreateLogger(EfCategory);
+
+    private static readonly bool UseColor =
+        !Console.IsOutputRedirected
+        && Environment.GetEnvironmentVariable("NO_COLOR") is null;
 
     private static readonly EventId ExecutedId = new(20101, "CommandExecuted");
 
@@ -68,6 +83,21 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
 
     [GeneratedRegex(@"^SET\s+(.+)$", RegexOptions.IgnoreCase)]
     private static partial Regex SetLineRegex();
+
+    // The alternation order is important: strings/identifiers must be matched first
+    // so that keywords contained within them are not incorrectly highlighted.
+    [GeneratedRegex(
+        @"(?<str>'(?:[^']|'')*')" // string literal -> skip
+            + @"|""[^""]*""" // "Identifier"   -> skip
+            + @"|\b(?<kw>SELECT|DISTINCT|FROM|WHERE|AND|OR|NOT|IN|IS|NULL|LIKE"
+            + @"|INNER|LEFT|RIGHT|CROSS|OUTER|JOIN|ON|AS|ORDER|GROUP|BY|HAVING"
+            + @"|LIMIT|OFFSET|INSERT|INTO|VALUES|UPDATE|SET|DELETE|RETURNING"
+            + @"|CASE|WHEN|THEN|ELSE|END|EXISTS|UNION|ALL|ASC|DESC"
+            + @"|BEGIN|COMMIT|ROLLBACK|PRAGMA)\b"
+            + @"|(?<num>\b\d+(?:\.\d+)?\b)",
+        RegexOptions.IgnoreCase
+    )]
+    private static partial Regex SqlTokenRegex();
 
     [GeneratedRegex(@"[@:$]\w+")]
     private static partial Regex ParameterRegex();
@@ -223,7 +253,7 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
         string sql = InlineParameterValues
             ? InlineParameters(command)
             : command.CommandText;
-        sb.Append(FormatSql(sql));
+        sb.Append(Highlight(FormatSql(sql)));
 
         if (note is not null)
         {
@@ -559,6 +589,26 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
         }
 
         return parts;
+    }
+
+    // --- Highlight ---
+
+    private static string Highlight(string sql)
+    {
+        if (!UseColor)
+        {
+            return sql;
+        }
+
+        return SqlTokenRegex()
+            .Replace(
+                sql,
+                m =>
+                    m.Groups["kw"].Success ? $"{KeywordColor}{m.Value}{Reset}"
+                    : m.Groups["str"].Success ? $"{StringColor}{m.Value}{Reset}"
+                    : m.Groups["num"].Success ? $"{NumberColor}{m.Value}{Reset}"
+                    : m.Value
+            );
     }
 
     // --- Parameters ---
