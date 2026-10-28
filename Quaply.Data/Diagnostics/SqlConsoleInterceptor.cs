@@ -223,7 +223,7 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
         string sql = InlineParameterValues
             ? InlineParameters(command)
             : command.CommandText;
-        sb.Append(FormatInsert(FormatUpdate(FormatSelect(sql))));
+        sb.Append(FormatSql(sql));
 
         if (note is not null)
         {
@@ -251,73 +251,16 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
     }
 
     /// <summary>
-    /// EF always places the SELECT column list on a single line (with FROM
-    /// on the next line), including inside subqueries (with indentation).
-    /// Process each line individually.
+    /// Formats SELECT, INSERT and UPDATE statements in a single pass over the
+    /// lines. Each line is offered to the statement-specific handlers in turn;
+    /// the first handler that recognises it writes the formatted output.
     /// </summary>
-    private static string FormatSelect(string sql)
+    private static string FormatSql(string sql)
     {
-        StringBuilder sb = new();
         string[] lines = sql.ReplaceLineEndings("\n").Split('\n');
+        StringBuilder sb = new(sql.Length + 128);
 
-        for (int i = 0; i < lines.Length; i++)
-        {
-            string line = lines[i];
-            string trimmed = line.TrimStart();
-            string indent = line[..(line.Length - trimmed.Length)];
-
-            Match match = SelectLineRegex().Match(trimmed);
-            List<string> columns = match.Success
-                ? SplitTopLevel(match.Groups[2].Value)
-                : [];
-
-            if (columns.Count > 1)
-            {
-                sb.Append(indent).Append(match.Groups[1].Value);
-                foreach (string column in columns)
-                {
-                    sb.Append('\n')
-                        .Append(indent)
-                        .Append(Indent)
-                        .Append(column);
-                    if (!ReferenceEquals(column, columns[^1]))
-                    {
-                        sb.Append(',');
-                    }
-                }
-            }
-            else
-            {
-                sb.Append(line);
-            }
-
-            if (i < lines.Length - 1)
-            {
-                sb.Append('\n');
-            }
-        }
-
-        return sb.ToString();
-    }
-
-    /// <summary>
-    /// Formats INSERT statements:
-    /// <list type="bullet">
-    ///   <item>
-    ///   More than one column: INSERT columns, VALUES and RETURNING are each
-    ///   written one item per line, wrapped in parentheses (except RETURNING).
-    ///   </item>
-    ///   <item>
-    ///   A single column: the statement stays in EF's original compact form.
-    ///   </item>
-    /// </list>
-    /// </summary>
-    private static string FormatInsert(string sql)
-    {
-        StringBuilder sb = new();
-        string[] lines = sql.ReplaceLineEndings("\n").Split('\n');
-
-        // VALUES follows INSERT, so it uses the same decision as the INSERT line.
+        // VALUES follows INSERT, so it reuses the decision made on the INSERT line.
         bool multiColumnInsert = false;
 
         for (int i = 0; i < lines.Length; i++)
@@ -325,78 +268,21 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
             string line = lines[i];
             string trimmed = line.TrimStart();
             string indent = line[..(line.Length - trimmed.Length)];
-            string itemIndent = indent + Indent;
 
-            Match insert = InsertIntoRegex().Match(trimmed);
-            Match values = ValuesRegex().Match(trimmed);
-            Match returning = ReturningRegex().Match(trimmed);
+            bool handled =
+                TryFormatSelect(sb, trimmed, indent)
+                || TryFormatInsertInto(
+                    sb,
+                    line,
+                    trimmed,
+                    indent,
+                    ref multiColumnInsert
+                )
+                || (multiColumnInsert && TryFormatValues(sb, trimmed, indent))
+                || TryFormatReturning(sb, trimmed, indent)
+                || TryFormatUpdate(sb, trimmed, indent);
 
-            if (insert.Success)
-            {
-                List<string> columns = SplitTopLevel(insert.Groups[2].Value);
-                multiColumnInsert = columns.Count > 1;
-
-                if (multiColumnInsert)
-                {
-                    sb.Append(indent)
-                        .Append("INSERT INTO ")
-                        .Append(insert.Groups[1].Value)
-                        .Append('\n')
-                        .Append(indent)
-                        .Append("(\n")
-                        .Append(
-                            string.Join(
-                                ",\n",
-                                columns.Select(c => itemIndent + c)
-                            )
-                        )
-                        .Append('\n')
-                        .Append(indent)
-                        .Append(')');
-                }
-                else
-                {
-                    sb.Append(line);
-                }
-            }
-            else if (values.Success && multiColumnInsert)
-            {
-                List<string> items = SplitTopLevel(values.Groups[1].Value);
-
-                sb.Append(indent)
-                    .Append("VALUES\n")
-                    .Append(indent)
-                    .Append("(\n")
-                    .Append(
-                        string.Join(",\n", items.Select(v => itemIndent + v))
-                    )
-                    .Append('\n')
-                    .Append(indent)
-                    .Append(')')
-                    .Append(values.Groups[2].Value);
-            }
-            else if (returning.Success)
-            {
-                List<string> columns = SplitTopLevel(returning.Groups[1].Value);
-
-                if (columns.Count > 1)
-                {
-                    sb.Append(indent)
-                        .Append("RETURNING\n")
-                        .Append(
-                            string.Join(
-                                ",\n",
-                                columns.Select(c => itemIndent + c)
-                            )
-                        )
-                        .Append(returning.Groups[2].Value);
-                }
-                else
-                {
-                    sb.Append(line);
-                }
-            }
-            else
+            if (!handled)
             {
                 sb.Append(line);
             }
@@ -410,88 +296,213 @@ public sealed partial class SqlConsoleInterceptor(ILoggerFactory loggerFactory)
         return sb.ToString();
     }
 
+    // --- Line handlers: return true when they wrote the line to `sb` ---
+
     /// <summary>
-    /// Formats UPDATE statements:
-    /// <list type="bullet">
-    ///   <item>SET is always on a new line.</item>
-    ///   <item>
-    ///   One assignment per line when there is more than one column;
-    ///   a single assignment stays on the SET line.
-    ///   </item>
-    /// </list>
+    /// EF always places the SELECT column list on a single line (with FROM
+    /// on the next line), including inside subqueries (with indentation).
+    /// A column list with more than one column is split one per line.
     /// </summary>
-    private static string FormatUpdate(string sql)
+    private static bool TryFormatSelect(
+        StringBuilder sb,
+        string trimmed,
+        string indent
+    )
     {
-        StringBuilder sb = new();
-        string[] lines = sql.ReplaceLineEndings("\n").Split('\n');
-
-        for (int i = 0; i < lines.Length; i++)
+        Match match = SelectLineRegex().Match(trimmed);
+        if (!match.Success)
         {
-            string line = lines[i];
-            string trimmed = line.TrimStart();
-            string indent = line[..(line.Length - trimmed.Length)];
+            return false;
+        }
 
-            string? header = null; // "UPDATE ..." part when SET is on the same line
-            string? assignments = null;
+        List<string> columns = SplitTopLevel(match.Groups[2].Value);
+        if (columns.Count <= 1)
+        {
+            return false;
+        }
 
-            Match inline = UpdateSetInlineRegex().Match(trimmed);
-            if (inline.Success)
+        sb.Append(indent).Append(match.Groups[1].Value);
+        for (int c = 0; c < columns.Count; c++)
+        {
+            sb.Append('\n').Append(indent).Append(Indent).Append(columns[c]);
+            if (c < columns.Count - 1)
             {
-                header = inline.Groups[1].Value;
-                assignments = inline.Groups[2].Value;
-            }
-            else
-            {
-                Match setOnly = SetLineRegex().Match(trimmed);
-                if (setOnly.Success)
-                {
-                    assignments = setOnly.Groups[1].Value;
-                }
-            }
-
-            if (assignments is null)
-            {
-                sb.Append(line);
-            }
-            else
-            {
-                if (header is not null)
-                {
-                    sb.Append(indent).Append(header).Append('\n');
-                }
-
-                List<string> columns = SplitTopLevel(assignments);
-
-                if (columns.Count > 1)
-                {
-                    // First assignment shares the line with SET,
-                    // the rest are aligned underneath it.
-                    string pad = new(' ', "SET ".Length);
-
-                    for (int c = 0; c < columns.Count; c++)
-                    {
-                        sb.Append(indent);
-                        sb.Append(c == 0 ? "SET " : pad);
-                        sb.Append(columns[c]);
-                        if (c < columns.Count - 1)
-                        {
-                            sb.Append(",\n");
-                        }
-                    }
-                }
-                else
-                {
-                    sb.Append(indent).Append("SET ").Append(assignments.Trim());
-                }
-            }
-
-            if (i < lines.Length - 1)
-            {
-                sb.Append('\n');
+                sb.Append(',');
             }
         }
 
-        return sb.ToString();
+        return true;
+    }
+
+    /// <summary>
+    /// INSERT INTO "Table" ("A", "B") becomes one column per line wrapped in
+    /// parentheses. A single column keeps EF's compact form.
+    /// </summary>
+    private static bool TryFormatInsertInto(
+        StringBuilder sb,
+        string line,
+        string trimmed,
+        string indent,
+        ref bool multiColumnInsert
+    )
+    {
+        Match match = InsertIntoRegex().Match(trimmed);
+        if (!match.Success)
+        {
+            return false;
+        }
+
+        List<string> columns = SplitTopLevel(match.Groups[2].Value);
+        multiColumnInsert = columns.Count > 1;
+
+        if (!multiColumnInsert)
+        {
+            sb.Append(line);
+            return true;
+        }
+
+        sb.Append(indent)
+            .Append("INSERT INTO ")
+            .Append(match.Groups[1].Value)
+            .Append('\n')
+            .Append(indent)
+            .Append("(\n");
+        AppendItems(sb, columns, indent + Indent);
+        sb.Append('\n').Append(indent).Append(')');
+
+        return true;
+    }
+
+    private static bool TryFormatValues(
+        StringBuilder sb,
+        string trimmed,
+        string indent
+    )
+    {
+        Match match = ValuesRegex().Match(trimmed);
+        if (!match.Success)
+        {
+            return false;
+        }
+
+        List<string> items = SplitTopLevel(match.Groups[1].Value);
+
+        sb.Append(indent).Append("VALUES\n").Append(indent).Append("(\n");
+        AppendItems(sb, items, indent + Indent);
+        sb.Append('\n')
+            .Append(indent)
+            .Append(')')
+            .Append(match.Groups[2].Value);
+
+        return true;
+    }
+
+    private static bool TryFormatReturning(
+        StringBuilder sb,
+        string trimmed,
+        string indent
+    )
+    {
+        Match match = ReturningRegex().Match(trimmed);
+        if (!match.Success)
+        {
+            return false;
+        }
+
+        List<string> columns = SplitTopLevel(match.Groups[1].Value);
+        if (columns.Count <= 1)
+        {
+            return false;
+        }
+
+        sb.Append(indent).Append("RETURNING\n");
+        AppendItems(sb, columns, indent + Indent);
+        sb.Append(match.Groups[2].Value);
+
+        return true;
+    }
+
+    /// <summary>
+    /// SET is always on a new line. One assignment per line when there is more
+    /// than one; a single assignment stays on the SET line.
+    /// </summary>
+    private static bool TryFormatUpdate(
+        StringBuilder sb,
+        string trimmed,
+        string indent
+    )
+    {
+        // "UPDATE ..." part when SET is on the same line
+        string? header = null;
+        string assignments;
+
+        Match inline = UpdateSetInlineRegex().Match(trimmed);
+        if (inline.Success)
+        {
+            header = inline.Groups[1].Value;
+            assignments = inline.Groups[2].Value;
+        }
+        else
+        {
+            Match setOnly = SetLineRegex().Match(trimmed);
+            if (!setOnly.Success)
+            {
+                return false;
+            }
+
+            assignments = setOnly.Groups[1].Value;
+        }
+
+        if (header is not null)
+        {
+            sb.Append(indent).Append(header).Append('\n');
+        }
+
+        List<string> columns = SplitTopLevel(assignments);
+
+        if (columns.Count > 1)
+        {
+            // First assignment shares the line with SET,
+            // the rest are aligned underneath it.
+            string pad = new(' ', "SET ".Length);
+
+            for (int c = 0; c < columns.Count; c++)
+            {
+                sb.Append(indent)
+                    .Append(c == 0 ? "SET " : pad)
+                    .Append(columns[c]);
+                if (c < columns.Count - 1)
+                {
+                    sb.Append(",\n");
+                }
+            }
+        }
+        else
+        {
+            sb.Append(indent).Append("SET ").Append(assignments.Trim());
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Appends items one per line, separated by ",\n".
+    /// </summary>
+    private static void AppendItems(
+        StringBuilder sb,
+        List<string> items,
+        string itemIndent
+    )
+    {
+        for (int c = 0; c < items.Count; c++)
+        {
+            if (c > 0)
+            {
+                sb.Append(",\n");
+            }
+
+            sb.Append(itemIndent).Append(items[c]);
+        }
     }
 
     /// <summary>
