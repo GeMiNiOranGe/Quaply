@@ -51,7 +51,7 @@ public partial class WorkExperienceViewModel(
         !string.IsNullOrWhiteSpace(SearchText)
         || SelectedUpdatedRange != RelativeDateRange.All;
 
-    public bool HasWorkExperienceItems => TotalCount > 0;
+    public bool HasAnyItems => TotalCount > 0;
 
     public string PageIndicator => $"Page {CurrentPage} of {TotalPages}";
 
@@ -59,24 +59,24 @@ public partial class WorkExperienceViewModel(
     {
         get
         {
-            if (WorkExperienceItems.Count == 0)
+            if (Items.Count == 0)
             {
                 return "No work experiences";
             }
 
             int first = (CurrentPage - 1) * PageSize + 1;
-            int last = first + WorkExperienceItems.Count - 1;
+            int last = first + Items.Count - 1;
             return $"Showing {first}-{last} of {FilteredCount}";
         }
     }
 
     public string EmptyStateTitle =>
-        HasWorkExperienceItems
+        HasAnyItems
             ? "No matching work experiences"
             : "No work experiences yet";
 
     public string EmptyStateMessage =>
-        HasWorkExperienceItems
+        HasAnyItems
             ? "Try changing your search or filters."
             : "Add your first work experience to get started.";
 
@@ -130,16 +130,16 @@ public partial class WorkExperienceViewModel(
         IsPreviewInlineVisible || IsPreviewOverlayVisible;
 
     [ObservableProperty]
-    public partial WorkExperienceItem? SelectedWorkExperienceItem { get; set; }
+    public partial WorkExperienceItem? SelectedItem { get; set; }
 
-    public ObservableCollection<WorkExperienceItem> WorkExperienceItems
+    public ObservableCollection<WorkExperienceItem> Items
     {
         get;
         private set
         {
             field = value;
             OnPropertyChanged();
-            OnPropertyChanged(nameof(HasWorkExperienceItems));
+            OnPropertyChanged(nameof(HasVisibleItems));
         }
     } = [];
 
@@ -151,9 +151,9 @@ public partial class WorkExperienceViewModel(
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
-    public bool HasWorkExperiences => WorkExperienceItems.Count > 0;
+    public bool HasVisibleItems => Items.Count > 0;
 
-    public int SelectedCount => WorkExperienceItems.Count(i => i.IsSelected);
+    public int SelectedCount => Items.Count(i => i.IsSelected);
 
     public bool HasSelection => SelectedCount > 0;
 
@@ -216,7 +216,7 @@ public partial class WorkExperienceViewModel(
             return;
         }
 
-        foreach (WorkExperienceItem item in WorkExperienceItems)
+        foreach (WorkExperienceItem item in Items)
         {
             item.IsSelected = value.Value;
         }
@@ -405,10 +405,7 @@ public partial class WorkExperienceViewModel(
     [RelayCommand(CanExecute = nameof(HasSelection))]
     private async Task DeleteSelectedAsync()
     {
-        List<WorkExperienceItem> selected =
-        [
-            .. WorkExperienceItems.Where(i => i.IsSelected),
-        ];
+        List<WorkExperienceItem> selected = [.. Items.Where(i => i.IsSelected)];
 
         if (selected.Count == 0)
         {
@@ -437,7 +434,7 @@ public partial class WorkExperienceViewModel(
     [RelayCommand]
     private void ClearSelection()
     {
-        foreach (WorkExperienceItem item in WorkExperienceItems)
+        foreach (WorkExperienceItem item in Items)
         {
             item.IsSelected = false;
         }
@@ -455,7 +452,7 @@ public partial class WorkExperienceViewModel(
         OnPropertyChanged(nameof(ResultSummary));
         OnPropertyChanged(nameof(PageIndicator));
         OnPropertyChanged(nameof(IsFiltering));
-        OnPropertyChanged(nameof(HasWorkExperienceItems));
+        OnPropertyChanged(nameof(HasAnyItems));
         OnPropertyChanged(nameof(EmptyStateTitle));
         OnPropertyChanged(nameof(EmptyStateMessage));
     }
@@ -499,11 +496,11 @@ public partial class WorkExperienceViewModel(
     {
         _isSyncingSelectAll = true;
 
-        IsAllSelected = WorkExperienceItems.Count switch
+        IsAllSelected = Items.Count switch
         {
             0 => false,
-            _ when WorkExperienceItems.All(i => i.IsSelected) => true,
-            _ when WorkExperienceItems.All(i => !i.IsSelected) => false,
+            _ when Items.All(i => i.IsSelected) => true,
+            _ when Items.All(i => !i.IsSelected) => false,
             _ => null, // Indeterminate: select only a portion
         };
 
@@ -557,9 +554,7 @@ public partial class WorkExperienceViewModel(
                 return;
             }
 
-            WorkExperienceItems = new(
-                result.Items.Select(w => new WorkExperienceItem(w))
-            );
+            Items = new(result.Items.Select(w => new WorkExperienceItem(w)));
 
             CurrentPage = result.Page;
             TotalPages = result.TotalPages;
@@ -622,12 +617,9 @@ public partial class WorkExperienceViewModel(
     {
         ClearPreviewIfRemoved(removed);
 
-        if (
-            SelectedWorkExperienceItem is not null
-            && removed.Contains(SelectedWorkExperienceItem)
-        )
+        if (SelectedItem is not null && removed.Contains(SelectedItem))
         {
-            SelectedWorkExperienceItem = null;
+            SelectedItem = null;
         }
 
         await LoadWorkExperiencesAsync();

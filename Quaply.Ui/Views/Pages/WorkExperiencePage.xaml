@@ -385,7 +385,7 @@
             <StackPanel
               HorizontalAlignment="Center"
               VerticalAlignment="Center"
-              Visibility="{Binding HasWorkExperienceItems, Converter={converters:InverseBooleanToVisibilityConverter}}">
+              Visibility="{Binding HasVisibleItems, Converter={converters:InverseBooleanToVisibilityConverter}}">
               <ui:SymbolIcon
                 HorizontalAlignment="Center"
                 FontSize="48"
@@ -418,13 +418,13 @@
               CanUserSortColumns="False"
               HeadersVisibility="Column"
               IsReadOnly="True"
-              ItemsSource="{Binding WorkExperienceItems}"
+              ItemsSource="{Binding Items}"
               ReferenceWidth="{Binding ActualWidth, ElementName=listCardGrid}"
               RowHeight="52"
               RowStyle="{StaticResource SelectableDataGridRowStyle}"
-              SelectedItem="{Binding SelectedWorkExperienceItem}"
+              SelectedItem="{Binding SelectedItem}"
               SelectionMode="Extended"
-              Visibility="{Binding HasWorkExperienceItems, Converter={converters:BooleanToVisibilityConverter}}">
+              Visibility="{Binding HasVisibleItems, Converter={converters:BooleanToVisibilityConverter}}">
               <atoms:AdaptiveDataGrid.Resources>
                 <DataGridTemplateColumn
                   x:Key="DurationColumn"
