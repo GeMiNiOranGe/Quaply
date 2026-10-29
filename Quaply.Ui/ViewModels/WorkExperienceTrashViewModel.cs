@@ -126,6 +126,9 @@ public partial class WorkExperienceTrashViewModel(
     public bool IsPreviewPanelVisible =>
         IsPreviewInlineVisible || IsPreviewOverlayVisible;
 
+    [ObservableProperty]
+    public partial DeletedWorkExperienceItem? SelectedItem { get; set; }
+
     public ObservableCollection<DeletedWorkExperienceItem> Items
     {
         get;
@@ -136,9 +139,6 @@ public partial class WorkExperienceTrashViewModel(
             OnPropertyChanged(nameof(HasVisibleItems));
         }
     } = [];
-
-    [ObservableProperty]
-    public partial DeletedWorkExperienceItem? SelectedItem { get; set; }
 
     [NotifyPropertyChangedFor(nameof(IsPreviewOverlayVisible))]
     [NotifyPropertyChangedFor(nameof(IsPreviewPanelVisible))]
@@ -185,6 +185,21 @@ public partial class WorkExperienceTrashViewModel(
         ReloadFromFirstPage(debounce: true);
     }
 
+    partial void OnSelectedDeletedRangeChanged(RelativeDateRange value)
+    {
+        ReloadFromFirstPage();
+    }
+
+    partial void OnSortFieldChanged(DeletedWorkExperienceSortField value)
+    {
+        ReloadFromFirstPage();
+    }
+
+    partial void OnIsSortDescendingChanged(bool value)
+    {
+        ReloadFromFirstPage();
+    }
+
     partial void OnIsAllSelectedChanged(bool? value)
     {
         // Skip when we're the ones setting this value programmatically
@@ -227,21 +242,6 @@ public partial class WorkExperienceTrashViewModel(
         }
     }
 
-    partial void OnSelectedDeletedRangeChanged(RelativeDateRange value)
-    {
-        ReloadFromFirstPage();
-    }
-
-    partial void OnSortFieldChanged(DeletedWorkExperienceSortField value)
-    {
-        ReloadFromFirstPage();
-    }
-
-    partial void OnIsSortDescendingChanged(bool value)
-    {
-        ReloadFromFirstPage();
-    }
-
     [RelayCommand]
     private async Task BackToWorkExperiencesAsync()
     {
@@ -272,23 +272,39 @@ public partial class WorkExperienceTrashViewModel(
         await LoadDeletedWorkExperiencesAsync();
     }
 
-    [RelayCommand]
-    private void TogglePreviewPanelPin()
+    [RelayCommand(CanExecute = nameof(HasAnyItems))]
+    private async Task EmptyTrashAsync()
     {
-        IsPreviewPanelPinned = !IsPreviewPanelPinned;
+        bool confirmed = await _dialogPresenter.ShowDangerConfirmationAsync(
+            title: "Empty trash?",
+            message: $"This will permanently delete all {TotalCount} work experiences in the trash, including any hidden by your search or filters. This action cannot be undone.",
+            primaryButtonText: "Empty trash",
+            closeButtonText: "Cancel"
+        );
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        await _service.PurgeDeletedWorkExperiencesAsync();
+
+        ClearPreviewIfRemoved([.. Items]);
+        await LoadDeletedWorkExperiencesAsync();
     }
 
+    // Called by the checkbox column's Checked/Unchecked so the bulk toolbar
+    // and "N selected" count stay in sync.
     [RelayCommand]
-    private void ClosePreviewPanel()
+    private void ToggleSelection()
     {
-        IsPreviewPanelOpen = false;
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
 
-        // Pinning is only relevant in inline mode. Temporarily closing
-        // the overlay should not clear the user's pinning selection.
-        if (!IsPreviewOverlayMode)
-        {
-            IsPreviewPanelPinned = false;
-        }
+        RestoreSelectedCommand.NotifyCanExecuteChanged();
+        PurgeSelectedCommand.NotifyCanExecuteChanged();
+
+        UpdateSelectAllState();
     }
 
     [RelayCommand]
@@ -341,18 +357,37 @@ public partial class WorkExperienceTrashViewModel(
         await ReloadAfterRemovalAsync([item]);
     }
 
-    // Called by the checkbox column's Checked/Unchecked so the bulk toolbar
-    // and "N selected" count stay in sync.
-    [RelayCommand]
-    private void ToggleSelection()
+    [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
+    private async Task GoToPreviousPageAsync()
     {
-        OnPropertyChanged(nameof(SelectedCount));
-        OnPropertyChanged(nameof(HasSelection));
+        CurrentPage--;
+        await LoadDeletedWorkExperiencesAsync();
+    }
 
-        RestoreSelectedCommand.NotifyCanExecuteChanged();
-        PurgeSelectedCommand.NotifyCanExecuteChanged();
+    [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
+    private async Task GoToNextPageAsync()
+    {
+        CurrentPage++;
+        await LoadDeletedWorkExperiencesAsync();
+    }
 
-        UpdateSelectAllState();
+    [RelayCommand]
+    private void TogglePreviewPanelPin()
+    {
+        IsPreviewPanelPinned = !IsPreviewPanelPinned;
+    }
+
+    [RelayCommand]
+    private void ClosePreviewPanel()
+    {
+        IsPreviewPanelOpen = false;
+
+        // Pinning is only relevant in inline mode. Temporarily closing
+        // the overlay should not clear the user's pinning selection.
+        if (!IsPreviewOverlayMode)
+        {
+            IsPreviewPanelPinned = false;
+        }
     }
 
     [RelayCommand(CanExecute = nameof(HasSelection))]
@@ -407,27 +442,6 @@ public partial class WorkExperienceTrashViewModel(
         await ReloadAfterRemovalAsync(selected);
     }
 
-    [RelayCommand(CanExecute = nameof(HasAnyItems))]
-    private async Task EmptyTrashAsync()
-    {
-        bool confirmed = await _dialogPresenter.ShowDangerConfirmationAsync(
-            title: "Empty trash?",
-            message: $"This will permanently delete all {TotalCount} work experiences in the trash, including any hidden by your search or filters. This action cannot be undone.",
-            primaryButtonText: "Empty trash",
-            closeButtonText: "Cancel"
-        );
-
-        if (!confirmed)
-        {
-            return;
-        }
-
-        await _service.PurgeDeletedWorkExperiencesAsync();
-
-        ClearPreviewIfRemoved([.. Items]);
-        await LoadDeletedWorkExperiencesAsync();
-    }
-
     [RelayCommand]
     private void ClearSelection()
     {
@@ -443,20 +457,6 @@ public partial class WorkExperienceTrashViewModel(
         PurgeSelectedCommand.NotifyCanExecuteChanged();
 
         UpdateSelectAllState();
-    }
-
-    [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
-    private async Task GoToPreviousPageAsync()
-    {
-        CurrentPage--;
-        await LoadDeletedWorkExperiencesAsync();
-    }
-
-    [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
-    private async Task GoToNextPageAsync()
-    {
-        CurrentPage++;
-        await LoadDeletedWorkExperiencesAsync();
     }
 
     private void RaisePagingChanged()
