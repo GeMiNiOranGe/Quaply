@@ -44,13 +44,13 @@ public partial class WorkExperienceTrashViewModel(
     public partial int FilteredCount { get; set; }
 
     [ObservableProperty]
-    public partial int TotalDeletedCount { get; set; }
+    public partial int TotalCount { get; set; }
 
     public bool IsFiltering =>
         !string.IsNullOrWhiteSpace(SearchText)
         || SelectedDeletedRange != RelativeDateRange.All;
 
-    public bool HasTrashItems => TotalDeletedCount > 0;
+    public bool HasAnyItems => TotalCount > 0;
 
     public string PageIndicator => $"Page {CurrentPage} of {TotalPages}";
 
@@ -58,22 +58,22 @@ public partial class WorkExperienceTrashViewModel(
     {
         get
         {
-            if (DeletedItems.Count == 0)
+            if (Items.Count == 0)
             {
                 return "No work experiences";
             }
 
             int first = (CurrentPage - 1) * PageSize + 1;
-            int last = first + DeletedItems.Count - 1;
+            int last = first + Items.Count - 1;
             return $"Showing {first}-{last} of {FilteredCount}";
         }
     }
 
     public string EmptyStateTitle =>
-        HasTrashItems ? "No matching work experiences" : "Trash is empty";
+        HasAnyItems ? "No matching work experiences" : "Trash is empty";
 
     public string EmptyStateMessage =>
-        HasTrashItems
+        HasAnyItems
             ? "Try changing your search or filters."
             : "Deleted work experiences will show up here.";
 
@@ -126,14 +126,14 @@ public partial class WorkExperienceTrashViewModel(
     public bool IsPreviewPanelVisible =>
         IsPreviewInlineVisible || IsPreviewOverlayVisible;
 
-    public ObservableCollection<DeletedWorkExperienceItem> DeletedItems
+    public ObservableCollection<DeletedWorkExperienceItem> Items
     {
         get;
         private set
         {
             field = value;
             OnPropertyChanged();
-            OnPropertyChanged(nameof(HasDeletedItems));
+            OnPropertyChanged(nameof(HasVisibleItems));
         }
     } = [];
 
@@ -148,9 +148,9 @@ public partial class WorkExperienceTrashViewModel(
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
-    public bool HasDeletedItems => DeletedItems.Count > 0;
+    public bool HasVisibleItems => Items.Count > 0;
 
-    public int SelectedCount => DeletedItems.Count(i => i.IsSelected);
+    public int SelectedCount => Items.Count(i => i.IsSelected);
 
     public bool HasSelection => SelectedCount > 0;
 
@@ -195,7 +195,7 @@ public partial class WorkExperienceTrashViewModel(
             return;
         }
 
-        foreach (DeletedWorkExperienceItem item in DeletedItems)
+        foreach (DeletedWorkExperienceItem item in Items)
         {
             item.IsSelected = value.Value;
         }
@@ -360,7 +360,7 @@ public partial class WorkExperienceTrashViewModel(
     {
         List<DeletedWorkExperienceItem> selected =
         [
-            .. DeletedItems.Where(i => i.IsSelected),
+            .. Items.Where(i => i.IsSelected),
         ];
 
         if (selected.Count == 0)
@@ -380,7 +380,7 @@ public partial class WorkExperienceTrashViewModel(
     {
         List<DeletedWorkExperienceItem> selected =
         [
-            .. DeletedItems.Where(i => i.IsSelected),
+            .. Items.Where(i => i.IsSelected),
         ];
 
         if (selected.Count == 0)
@@ -407,12 +407,12 @@ public partial class WorkExperienceTrashViewModel(
         await ReloadAfterRemovalAsync(selected);
     }
 
-    [RelayCommand(CanExecute = nameof(HasTrashItems))]
+    [RelayCommand(CanExecute = nameof(HasAnyItems))]
     private async Task EmptyTrashAsync()
     {
         bool confirmed = await _dialogPresenter.ShowDangerConfirmationAsync(
             title: "Empty trash?",
-            message: $"This will permanently delete all {TotalDeletedCount} work experiences in the trash, including any hidden by your search or filters. This action cannot be undone.",
+            message: $"This will permanently delete all {TotalCount} work experiences in the trash, including any hidden by your search or filters. This action cannot be undone.",
             primaryButtonText: "Empty trash",
             closeButtonText: "Cancel"
         );
@@ -424,14 +424,14 @@ public partial class WorkExperienceTrashViewModel(
 
         await _service.PurgeDeletedWorkExperiencesAsync();
 
-        ClearPreviewIfRemoved([.. DeletedItems]);
+        ClearPreviewIfRemoved([.. Items]);
         await LoadDeletedWorkExperiencesAsync();
     }
 
     [RelayCommand]
     private void ClearSelection()
     {
-        foreach (DeletedWorkExperienceItem item in DeletedItems)
+        foreach (DeletedWorkExperienceItem item in Items)
         {
             item.IsSelected = false;
         }
@@ -464,7 +464,7 @@ public partial class WorkExperienceTrashViewModel(
         OnPropertyChanged(nameof(ResultSummary));
         OnPropertyChanged(nameof(PageIndicator));
         OnPropertyChanged(nameof(IsFiltering));
-        OnPropertyChanged(nameof(HasTrashItems));
+        OnPropertyChanged(nameof(HasAnyItems));
         OnPropertyChanged(nameof(EmptyStateTitle));
         OnPropertyChanged(nameof(EmptyStateMessage));
         EmptyTrashCommand.NotifyCanExecuteChanged();
@@ -505,11 +505,11 @@ public partial class WorkExperienceTrashViewModel(
     {
         _isSyncingSelectAll = true;
 
-        IsAllSelected = DeletedItems.Count switch
+        IsAllSelected = Items.Count switch
         {
             0 => false,
-            _ when DeletedItems.All(i => i.IsSelected) => true,
-            _ when DeletedItems.All(i => !i.IsSelected) => false,
+            _ when Items.All(i => i.IsSelected) => true,
+            _ when Items.All(i => !i.IsSelected) => false,
             _ => null, // Indeterminate: select only a portion
         };
 
@@ -563,14 +563,14 @@ public partial class WorkExperienceTrashViewModel(
                 return;
             }
 
-            DeletedItems = new(
+            Items = new(
                 result.Items.Select(w => new DeletedWorkExperienceItem(w))
             );
 
             CurrentPage = result.Page;
             TotalPages = result.TotalPages;
             FilteredCount = result.TotalCount;
-            TotalDeletedCount = totalInTrash;
+            TotalCount = totalInTrash;
 
             UpdateSelectAllState();
 
