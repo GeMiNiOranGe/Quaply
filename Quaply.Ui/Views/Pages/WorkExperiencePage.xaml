@@ -117,13 +117,13 @@
 
         <StackPanel Grid.Column="0" Orientation="Horizontal">
           <ui:Button
-            Command="{Binding NavigateToProfileCommand}"
+            Command="{Binding GoBackCommand}"
             CornerRadius="4,0,0,4"
             Icon="{ui:SymbolIcon ArrowLeft24}"
             Style="{StaticResource IconOnlyButtonStyle}"
             ToolTip="Back" />
 
-          <!--  TODO: Implement `Command="{Binding NavigateForwardCommand}"`  -->
+          <!--  TODO: Implement `Command="{Binding GoForwardCommand}"`  -->
           <ui:Button
             CornerRadius="0,4,4,0"
             Icon="{ui:SymbolIcon ArrowRight24}"
@@ -134,14 +134,14 @@
         <StackPanel Grid.Column="2" Orientation="Horizontal">
           <ui:Button
             Margin="0,0,8,0"
-            Command="{Binding NavigateToWorkExperienceTrashCommand}"
+            Command="{Binding NavigateToTrashPageCommand}"
             Content="Trash"
             Icon="{ui:SymbolIcon Delete24}"
             ToolTip="View deleted work experiences" />
 
           <ui:Button
             Appearance="Primary"
-            Command="{Binding AddWorkExperienceCommand}"
+            Command="{Binding AddCommand}"
             Content="Add Work Experience"
             Icon="{ui:SymbolIcon Add24}" />
         </StackPanel>
@@ -611,16 +611,16 @@
                           <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                             <ui:Button
                               Margin="0,0,8,0"
-                              Command="{Binding Data.ViewDetailWorkExperienceCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                              Command="{Binding Data.ViewDetailsCommand, Source={StaticResource WorkExperiencePageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
-                              ToolTip="View Detail">
+                              ToolTip="View Details">
                               <ui:SymbolIcon Symbol="Eye24" />
                             </ui:Button>
 
                             <ui:Button
                               Margin="0,0,8,0"
-                              Command="{Binding Data.EditWorkExperienceCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                              Command="{Binding Data.EditCommand, Source={StaticResource WorkExperiencePageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="Edit">
@@ -635,7 +635,7 @@
                               <ui:Button.ContextMenu>
                                 <ContextMenu Placement="Bottom">
                                   <MenuItem
-                                    Command="{Binding Data.DuplicateWorkExperienceCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                                    Command="{Binding Data.DuplicateCommand, Source={StaticResource WorkExperiencePageProxy}}"
                                     CommandParameter="{Binding}"
                                     Header="Duplicate"
                                     Icon="{ui:SymbolIcon SaveCopy24}" />
@@ -643,7 +643,7 @@
                                   <Separator />
 
                                   <MenuItem
-                                    Command="{Binding Data.DeleteWorkExperienceCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                                    Command="{Binding Data.DeleteCommand, Source={StaticResource WorkExperiencePageProxy}}"
                                     CommandParameter="{Binding}"
                                     Foreground="IndianRed"
                                     Header="Delete"
@@ -668,16 +668,16 @@
                           <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                             <ui:Button
                               Margin="0,0,8,0"
-                              Command="{Binding Data.ViewDetailWorkExperienceCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                              Command="{Binding Data.ViewDetailsCommand, Source={StaticResource WorkExperiencePageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
-                              ToolTip="View Detail">
+                              ToolTip="View Details">
                               <ui:SymbolIcon Symbol="Eye24" />
                             </ui:Button>
 
                             <ui:Button
                               Margin="0,0,8,0"
-                              Command="{Binding Data.EditWorkExperienceCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                              Command="{Binding Data.EditCommand, Source={StaticResource WorkExperiencePageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="Edit">
@@ -685,7 +685,7 @@
                             </ui:Button>
 
                             <ui:Button
-                              Command="{Binding Data.DuplicateWorkExperienceCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                              Command="{Binding Data.DuplicateCommand, Source={StaticResource WorkExperiencePageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="Duplicate">
@@ -695,7 +695,7 @@
                             <atoms:Divider Margin="12,8" Orientation="Vertical" />
 
                             <ui:Button
-                              Command="{Binding Data.DeleteWorkExperienceCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                              Command="{Binding Data.DeleteCommand, Source={StaticResource WorkExperiencePageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="Delete">
@@ -1060,7 +1060,7 @@
                   Grid.Column="0"
                   Padding="16,8"
                   HorizontalAlignment="Stretch"
-                  Command="{Binding EditWorkExperienceCommand}"
+                  Command="{Binding EditCommand}"
                   CommandParameter="{Binding PreviewedItem}"
                   Content="Edit"
                   Icon="{ui:SymbolIcon Edit24}" />
@@ -1070,14 +1070,14 @@
                   Padding="16,8"
                   HorizontalAlignment="Stretch"
                   Appearance="Transparent"
-                  Command="{Binding DuplicateWorkExperienceCommand}"
+                  Command="{Binding DuplicateCommand}"
                   CommandParameter="{Binding PreviewedItem}"
                   Content="Duplicate"
                   Icon="{ui:SymbolIcon Copy24}" />
 
                 <ui:Button
                   Grid.Column="4"
-                  Command="{Binding DeleteWorkExperienceCommand}"
+                  Command="{Binding DeleteCommand}"
                   CommandParameter="{Binding PreviewedItem}"
                   Style="{StaticResource IconOnlyButtonStyle}"
                   ToolTip="Delete">

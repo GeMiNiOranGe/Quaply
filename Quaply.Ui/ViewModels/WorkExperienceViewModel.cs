@@ -176,7 +176,7 @@ public partial class WorkExperienceViewModel(
 
     public async Task OnNavigatedToAsync()
     {
-        await LoadWorkExperiencesAsync();
+        await LoadAsync();
         LoadStats();
     }
 
@@ -248,19 +248,19 @@ public partial class WorkExperienceViewModel(
     }
 
     [RelayCommand]
-    private async Task NavigateToProfileAsync()
+    private async Task GoBackAsync()
     {
         await Navigator.NavigateToAsync<ProfileViewModel>();
     }
 
     [RelayCommand]
-    private async Task NavigateToWorkExperienceTrashAsync()
+    private async Task NavigateToTrashPageAsync()
     {
         await Navigator.NavigateToAsync<WorkExperienceTrashViewModel>();
     }
 
     [RelayCommand]
-    private async Task AddWorkExperienceAsync()
+    private async Task AddAsync()
     {
         await Navigator.NavigateToAsync<
             WorkExperienceEditorViewModel,
@@ -289,7 +289,7 @@ public partial class WorkExperienceViewModel(
     [RelayCommand]
     private async Task RefreshAsync()
     {
-        await LoadWorkExperiencesAsync();
+        await LoadAsync();
     }
 
     // Called by the checkbox column's Checked/Unchecked so the bulk toolbar
@@ -306,7 +306,7 @@ public partial class WorkExperienceViewModel(
     }
 
     [RelayCommand]
-    private void ViewDetailWorkExperience(WorkExperienceItem? item)
+    private void ViewDetails(WorkExperienceItem? item)
     {
         if (item is null)
         {
@@ -318,7 +318,7 @@ public partial class WorkExperienceViewModel(
     }
 
     [RelayCommand]
-    private async Task EditWorkExperienceAsync(WorkExperienceItem? item)
+    private async Task EditAsync(WorkExperienceItem? item)
     {
         if (item is null)
         {
@@ -332,7 +332,7 @@ public partial class WorkExperienceViewModel(
     }
 
     [RelayCommand]
-    private async Task DuplicateWorkExperienceAsync(WorkExperienceItem? item)
+    private async Task DuplicateAsync(WorkExperienceItem? item)
     {
         if (item is null)
         {
@@ -346,7 +346,7 @@ public partial class WorkExperienceViewModel(
     }
 
     [RelayCommand]
-    private async Task DeleteWorkExperienceAsync(WorkExperienceItem? item)
+    private async Task DeleteAsync(WorkExperienceItem? item)
     {
         if (item is null)
         {
@@ -373,14 +373,14 @@ public partial class WorkExperienceViewModel(
     private async Task GoToPreviousPageAsync()
     {
         CurrentPage--;
-        await LoadWorkExperiencesAsync();
+        await LoadAsync();
     }
 
     [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
     private async Task GoToNextPageAsync()
     {
         CurrentPage++;
-        await LoadWorkExperiencesAsync();
+        await LoadAsync();
     }
 
     [RelayCommand]
@@ -507,7 +507,7 @@ public partial class WorkExperienceViewModel(
         _isSyncingSelectAll = false;
     }
 
-    private async Task LoadWorkExperiencesAsync(bool debounce = false)
+    private async Task LoadAsync(bool debounce = false)
     {
         int requestId = ++_loadRequestId;
 
@@ -542,7 +542,7 @@ public partial class WorkExperienceViewModel(
                 await _service.GetWorkExperiencesPagedAsync(query);
 
             // When nothing is filtered, the filtered count IS the total.
-            int total = IsFiltering
+            int totalCount = IsFiltering
                 ? await _service.GetWorkExperienceCountAsync()
                 : result.TotalCount;
 
@@ -559,7 +559,7 @@ public partial class WorkExperienceViewModel(
             CurrentPage = result.Page;
             TotalPages = result.TotalPages;
             FilteredCount = result.TotalCount;
-            TotalCount = total;
+            TotalCount = totalCount;
 
             UpdateSelectAllState();
 
@@ -622,12 +622,12 @@ public partial class WorkExperienceViewModel(
             SelectedItem = null;
         }
 
-        await LoadWorkExperiencesAsync();
+        await LoadAsync();
     }
 
     private void ReloadFromFirstPage(bool debounce = false)
     {
         CurrentPage = 1;
-        _ = LoadWorkExperiencesAsync(debounce);
+        _ = LoadAsync(debounce);
     }
 }
