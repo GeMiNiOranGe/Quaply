@@ -171,7 +171,7 @@ public partial class WorkExperienceTrashViewModel(
 
     public async Task OnNavigatedToAsync()
     {
-        await LoadDeletedWorkExperiencesAsync();
+        await LoadAsync();
     }
 
     partial void OnPageSizeChanged(int value)
@@ -243,7 +243,7 @@ public partial class WorkExperienceTrashViewModel(
     }
 
     [RelayCommand]
-    private async Task BackToWorkExperiencesAsync()
+    private async Task GoBackAsync()
     {
         await Navigator.NavigateToAsync<WorkExperienceViewModel>();
     }
@@ -269,11 +269,11 @@ public partial class WorkExperienceTrashViewModel(
     [RelayCommand]
     private async Task RefreshAsync()
     {
-        await LoadDeletedWorkExperiencesAsync();
+        await LoadAsync();
     }
 
     [RelayCommand(CanExecute = nameof(HasAnyItems))]
-    private async Task EmptyTrashAsync()
+    private async Task EmptyAsync()
     {
         bool confirmed = await _dialogPresenter.ShowDangerConfirmationAsync(
             title: "Empty trash?",
@@ -290,7 +290,7 @@ public partial class WorkExperienceTrashViewModel(
         await _service.PurgeDeletedWorkExperiencesAsync();
 
         ClearPreviewIfRemoved([.. Items]);
-        await LoadDeletedWorkExperiencesAsync();
+        await LoadAsync();
     }
 
     // Called by the checkbox column's Checked/Unchecked so the bulk toolbar
@@ -308,7 +308,7 @@ public partial class WorkExperienceTrashViewModel(
     }
 
     [RelayCommand]
-    private void ViewDetailWorkExperience(DeletedWorkExperienceItem? item)
+    private void ViewDetails(DeletedWorkExperienceItem? item)
     {
         if (item is null)
         {
@@ -320,9 +320,7 @@ public partial class WorkExperienceTrashViewModel(
     }
 
     [RelayCommand]
-    private async Task RestoreWorkExperienceAsync(
-        DeletedWorkExperienceItem? item
-    )
+    private async Task RestoreAsync(DeletedWorkExperienceItem? item)
     {
         if (item is null)
         {
@@ -334,7 +332,7 @@ public partial class WorkExperienceTrashViewModel(
     }
 
     [RelayCommand]
-    private async Task PurgeWorkExperienceAsync(DeletedWorkExperienceItem? item)
+    private async Task PurgeAsync(DeletedWorkExperienceItem? item)
     {
         if (item is null)
         {
@@ -361,14 +359,14 @@ public partial class WorkExperienceTrashViewModel(
     private async Task GoToPreviousPageAsync()
     {
         CurrentPage--;
-        await LoadDeletedWorkExperiencesAsync();
+        await LoadAsync();
     }
 
     [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
     private async Task GoToNextPageAsync()
     {
         CurrentPage++;
-        await LoadDeletedWorkExperiencesAsync();
+        await LoadAsync();
     }
 
     [RelayCommand]
@@ -467,7 +465,7 @@ public partial class WorkExperienceTrashViewModel(
         OnPropertyChanged(nameof(HasAnyItems));
         OnPropertyChanged(nameof(EmptyStateTitle));
         OnPropertyChanged(nameof(EmptyStateMessage));
-        EmptyTrashCommand.NotifyCanExecuteChanged();
+        EmptyCommand.NotifyCanExecuteChanged();
     }
 
     private void ClearPreviewIfRemoved(
@@ -516,7 +514,7 @@ public partial class WorkExperienceTrashViewModel(
         _isSyncingSelectAll = false;
     }
 
-    private async Task LoadDeletedWorkExperiencesAsync(bool debounce = false)
+    private async Task LoadAsync(bool debounce = false)
     {
         int requestId = ++_loadRequestId;
 
@@ -602,12 +600,12 @@ public partial class WorkExperienceTrashViewModel(
             SelectedItem = null;
         }
 
-        await LoadDeletedWorkExperiencesAsync();
+        await LoadAsync();
     }
 
     private void ReloadFromFirstPage(bool debounce = false)
     {
         CurrentPage = 1;
-        _ = LoadDeletedWorkExperiencesAsync(debounce);
+        _ = LoadAsync(debounce);
     }
 }

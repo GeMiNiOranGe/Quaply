@@ -106,10 +106,10 @@
 
       <ui:Button
         HorizontalAlignment="Left"
-        Command="{Binding BackToWorkExperiencesCommand}"
+        Command="{Binding GoBackCommand}"
         Icon="{ui:SymbolIcon ArrowLeft24}"
         Style="{StaticResource IconOnlyButtonStyle}"
-        ToolTip="Go Back" />
+        ToolTip="Back" />
     </StackPanel>
 
     <!--  Row 1: Card - header now only has the title  -->
@@ -333,7 +333,7 @@
                             <ContextMenu Placement="Bottom">
                               <!--  Destructive action: buried behind an extra click on purpose  -->
                               <MenuItem
-                                Command="{Binding EmptyTrashCommand}"
+                                Command="{Binding EmptyCommand}"
                                 Foreground="IndianRed"
                                 Header="Empty Trash"
                                 IsEnabled="{Binding HasAnyItems}">
@@ -367,7 +367,7 @@
 
                             <!--  Destructive action: last, apart from the safe ones  -->
                             <MenuItem
-                              Command="{Binding EmptyTrashCommand}"
+                              Command="{Binding EmptyCommand}"
                               Foreground="IndianRed"
                               Header="Empty Trash"
                               IsEnabled="{Binding HasAnyItems}">
@@ -521,16 +521,16 @@
                       <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                         <ui:Button
                           Margin="0,0,8,0"
-                          Command="{Binding DataContext.ViewDetailWorkExperienceCommand, ElementName=workExperienceTrashPage}"
+                          Command="{Binding DataContext.ViewDetailsCommand, ElementName=workExperienceTrashPage}"
                           CommandParameter="{Binding}"
                           Style="{StaticResource IconOnlyButtonStyle}"
-                          ToolTip="View Detail">
+                          ToolTip="View Details">
                           <ui:SymbolIcon Symbol="Eye24" />
                         </ui:Button>
 
                         <ui:Button
                           Margin="0,0,8,0"
-                          Command="{Binding DataContext.RestoreWorkExperienceCommand, ElementName=workExperienceTrashPage}"
+                          Command="{Binding DataContext.RestoreCommand, ElementName=workExperienceTrashPage}"
                           CommandParameter="{Binding}"
                           Style="{StaticResource IconOnlyButtonStyle}"
                           ToolTip="Restore">
@@ -538,7 +538,7 @@
                         </ui:Button>
 
                         <ui:Button
-                          Command="{Binding DataContext.PurgeWorkExperienceCommand, ElementName=workExperienceTrashPage}"
+                          Command="{Binding DataContext.PurgeCommand, ElementName=workExperienceTrashPage}"
                           CommandParameter="{Binding}"
                           Style="{StaticResource IconOnlyButtonStyle}"
                           ToolTip="Delete Permanently">
@@ -895,7 +895,7 @@
                   Grid.Column="0"
                   Padding="16,8"
                   HorizontalAlignment="Stretch"
-                  Command="{Binding RestoreWorkExperienceCommand}"
+                  Command="{Binding RestoreCommand}"
                   CommandParameter="{Binding PreviewedItem}"
                   Content="Restore"
                   Icon="{ui:SymbolIcon ArrowUndo24}" />
@@ -905,7 +905,7 @@
                   Padding="16,8"
                   HorizontalAlignment="Stretch"
                   Appearance="Transparent"
-                  Command="{Binding PurgeWorkExperienceCommand}"
+                  Command="{Binding PurgeCommand}"
                   CommandParameter="{Binding PreviewedItem}"
                   Content="Delete"
                   Foreground="IndianRed"
