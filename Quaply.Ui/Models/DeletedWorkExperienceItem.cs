@@ -17,6 +17,8 @@ public partial class DeletedWorkExperienceItem(WorkExperience workExperience)
     [ObservableProperty]
     public partial bool IsSelected { get; set; }
 
+    public int Id => WorkExperience.Id;
+
     public string CompanyName => WorkExperience.CompanyName;
 
     public string PositionTitle => WorkExperience.PositionTitle;

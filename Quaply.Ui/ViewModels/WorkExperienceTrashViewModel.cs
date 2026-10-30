@@ -329,7 +329,7 @@ public partial class WorkExperienceTrashViewModel(
             return;
         }
 
-        await _service.RestoreWorkExperienceAsync(item.WorkExperience.Id);
+        await _service.RestoreWorkExperienceAsync(item.Id);
         await ReloadAfterRemovalAsync([item]);
     }
 
@@ -353,7 +353,7 @@ public partial class WorkExperienceTrashViewModel(
             return;
         }
 
-        await _service.PurgeWorkExperienceAsync(item.WorkExperience.Id);
+        await _service.PurgeWorkExperienceAsync(item.Id);
         await ReloadAfterRemovalAsync([item]);
     }
 
@@ -551,7 +551,7 @@ public partial class WorkExperienceTrashViewModel(
                 await _service.GetDeletedWorkExperiencesPagedAsync(query);
 
             // When nothing is filtered, the filtered count IS the trash total.
-            int totalInTrash = IsFiltering
+            int totalCount = IsFiltering
                 ? await _service.GetDeletedWorkExperienceCountAsync()
                 : result.TotalCount;
 
@@ -570,7 +570,7 @@ public partial class WorkExperienceTrashViewModel(
             CurrentPage = result.Page;
             TotalPages = result.TotalPages;
             FilteredCount = result.TotalCount;
-            TotalCount = totalInTrash;
+            TotalCount = totalCount;
 
             UpdateSelectAllState();
 
@@ -596,6 +596,12 @@ public partial class WorkExperienceTrashViewModel(
     )
     {
         ClearPreviewIfRemoved(removed);
+
+        if (SelectedItem is not null && removed.Contains(SelectedItem))
+        {
+            SelectedItem = null;
+        }
+
         await LoadDeletedWorkExperiencesAsync();
     }
 
