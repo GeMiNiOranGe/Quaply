@@ -215,11 +215,7 @@ public partial class WorkExperienceTrashViewModel(
             item.IsSelected = value.Value;
         }
 
-        OnPropertyChanged(nameof(SelectedCount));
-        OnPropertyChanged(nameof(HasSelection));
-
-        RestoreSelectedCommand.NotifyCanExecuteChanged();
-        PurgeSelectedCommand.NotifyCanExecuteChanged();
+        RaiseSelectionChanged();
     }
 
     partial void OnIsPreviewPanelPinnedChanged(bool value)
@@ -298,12 +294,7 @@ public partial class WorkExperienceTrashViewModel(
     [RelayCommand]
     private void ToggleSelection()
     {
-        OnPropertyChanged(nameof(SelectedCount));
-        OnPropertyChanged(nameof(HasSelection));
-
-        RestoreSelectedCommand.NotifyCanExecuteChanged();
-        PurgeSelectedCommand.NotifyCanExecuteChanged();
-
+        RaiseSelectionChanged();
         UpdateSelectAllState();
     }
 
@@ -448,13 +439,17 @@ public partial class WorkExperienceTrashViewModel(
             item.IsSelected = false;
         }
 
+        RaiseSelectionChanged();
+        UpdateSelectAllState();
+    }
+
+    private void RaiseSelectionChanged()
+    {
         OnPropertyChanged(nameof(SelectedCount));
         OnPropertyChanged(nameof(HasSelection));
 
         RestoreSelectedCommand.NotifyCanExecuteChanged();
         PurgeSelectedCommand.NotifyCanExecuteChanged();
-
-        UpdateSelectAllState();
     }
 
     private void RaisePagingChanged()
@@ -571,13 +566,7 @@ public partial class WorkExperienceTrashViewModel(
             TotalCount = totalCount;
 
             UpdateSelectAllState();
-
-            OnPropertyChanged(nameof(SelectedCount));
-            OnPropertyChanged(nameof(HasSelection));
-
-            RestoreSelectedCommand.NotifyCanExecuteChanged();
-            PurgeSelectedCommand.NotifyCanExecuteChanged();
-
+            RaiseSelectionChanged();
             RaisePagingChanged();
         }
         finally
