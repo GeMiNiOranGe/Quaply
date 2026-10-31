@@ -36,6 +36,12 @@ public partial class ProfileTrashViewModel(
     }
 
     [RelayCommand]
+    private async Task GoBackAsync()
+    {
+        await Navigator.NavigateToAsync<ProfileViewModel>();
+    }
+
+    [RelayCommand]
     private async Task RestoreAsync(Profile? profile)
     {
         if (profile is null)
@@ -79,12 +85,6 @@ public partial class ProfileTrashViewModel(
         {
             SelectedItem = null;
         }
-    }
-
-    [RelayCommand]
-    private async Task GoBackAsync()
-    {
-        await Navigator.NavigateToAsync<ProfileViewModel>();
     }
 
     private async Task LoadAsync()
