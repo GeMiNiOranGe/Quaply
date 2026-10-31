@@ -29,8 +29,8 @@
       Orientation="Horizontal">
       <ui:Button
         Padding="8"
-        Command="{Binding BackToProfilesCommand}"
-        Content="Back to Profiles"
+        Command="{Binding GoBackCommand}"
+        Content="Back"
         Icon="{ui:SymbolIcon ArrowLeft24}" />
     </StackPanel>
 
@@ -93,9 +93,9 @@
           CanUserDeleteRows="False"
           HeadersVisibility="Column"
           IsReadOnly="True"
-          ItemsSource="{Binding DeletedProfiles}"
+          ItemsSource="{Binding Items}"
           RowHeight="48"
-          SelectedItem="{Binding SelectedProfile}"
+          SelectedItem="{Binding SelectedItem}"
           SelectionMode="Extended">
           <DataGrid.Columns>
             <!--  Checkbox  -->
@@ -144,7 +144,7 @@
                       Margin="0,0,8,0"
                       Padding="8"
                       Appearance="Transparent"
-                      Command="{Binding DataContext.RestoreProfileCommand, ElementName=profileTrashPage}"
+                      Command="{Binding DataContext.RestoreCommand, ElementName=profileTrashPage}"
                       CommandParameter="{Binding}"
                       ToolTip="Restore">
                       <ui:SymbolIcon Symbol="ArrowUndo24" />
@@ -153,7 +153,7 @@
                     <ui:Button
                       Padding="8"
                       Appearance="Transparent"
-                      Command="{Binding DataContext.PurgeProfileCommand, ElementName=profileTrashPage}"
+                      Command="{Binding DataContext.PurgeCommand, ElementName=profileTrashPage}"
                       CommandParameter="{Binding}"
                       ToolTip="Delete Permanently">
                       <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />

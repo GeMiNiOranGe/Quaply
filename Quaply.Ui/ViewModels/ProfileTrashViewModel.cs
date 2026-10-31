@@ -18,9 +18,9 @@ public partial class ProfileTrashViewModel(
     private readonly IDialogPresenter _dialogPresenter = dialogPresenter;
 
     [ObservableProperty]
-    public partial Profile? SelectedProfile { get; set; }
+    public partial Profile? SelectedItem { get; set; }
 
-    public ObservableCollection<Profile> DeletedProfiles
+    public ObservableCollection<Profile> Items
     {
         get;
         private set
@@ -32,11 +32,11 @@ public partial class ProfileTrashViewModel(
 
     public async Task OnNavigatedToAsync()
     {
-        await LoadDeletedProfilesAsync();
+        await LoadAsync();
     }
 
     [RelayCommand]
-    private async Task RestoreProfileAsync(Profile? profile)
+    private async Task RestoreAsync(Profile? profile)
     {
         if (profile is null)
         {
@@ -44,16 +44,16 @@ public partial class ProfileTrashViewModel(
         }
 
         await _service.RestoreProfileAsync(profile.Id);
-        DeletedProfiles.Remove(profile);
+        Items.Remove(profile);
 
-        if (SelectedProfile == profile)
+        if (SelectedItem == profile)
         {
-            SelectedProfile = null;
+            SelectedItem = null;
         }
     }
 
     [RelayCommand]
-    private async Task PurgeProfileAsync(Profile? profile)
+    private async Task PurgeAsync(Profile? profile)
     {
         if (profile is null)
         {
@@ -73,24 +73,24 @@ public partial class ProfileTrashViewModel(
         }
 
         await _service.PurgeProfileAsync(profile.Id);
-        DeletedProfiles.Remove(profile);
+        Items.Remove(profile);
 
-        if (SelectedProfile == profile)
+        if (SelectedItem == profile)
         {
-            SelectedProfile = null;
+            SelectedItem = null;
         }
     }
 
     [RelayCommand]
-    private async Task BackToProfilesAsync()
+    private async Task GoBackAsync()
     {
         await Navigator.NavigateToAsync<ProfileViewModel>();
     }
 
-    private async Task LoadDeletedProfilesAsync()
+    private async Task LoadAsync()
     {
         IEnumerable<Profile> deletedProfiles =
             await _service.GetDeletedProfilesAsync();
-        DeletedProfiles = new(deletedProfiles);
+        Items = new(deletedProfiles);
     }
 }
