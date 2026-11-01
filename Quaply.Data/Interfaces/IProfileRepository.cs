@@ -1,4 +1,6 @@
 using Quaply.Data.Models;
+using Quaply.Data.Querying.Base;
+using Quaply.Data.Querying.Profiles;
 
 namespace Quaply.Data.Interfaces;
 
@@ -11,6 +13,12 @@ public interface IProfileRepository
     IAsyncEnumerable<Profile> GetManyAsync();
 
     IAsyncEnumerable<Profile> GetManyDeletedAsync();
+
+    Task<PagedResult<Profile>> GetManyDeletedPagedAsync(
+        DeletedProfileQuery query
+    );
+
+    Task<int> CountDeletedAsync();
 
     void Add(Profile entity);
 

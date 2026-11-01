@@ -1,4 +1,6 @@
 using Quaply.Data.Models;
+using Quaply.Data.Querying.Base;
+using Quaply.Data.Querying.Profiles;
 
 namespace Quaply.Service.Interfaces;
 
@@ -9,6 +11,12 @@ public interface IProfileService
     Task<IEnumerable<Profile>> GetProfilesAsync();
 
     Task<IEnumerable<Profile>> GetDeletedProfilesAsync();
+
+    Task<PagedResult<Profile>> GetDeletedProfilesPagedAsync(
+        DeletedProfileQuery query
+    );
+
+    Task<int> GetDeletedProfileCountAsync();
 
     Task CreateProfileAsync(Profile profile);
 

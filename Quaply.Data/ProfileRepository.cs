@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Quaply.Data.Contexts;
 using Quaply.Data.Interfaces;
 using Quaply.Data.Models;
+using Quaply.Data.Querying.Base;
+using Quaply.Data.Querying.Profiles;
 
 namespace Quaply.Data;
 
@@ -33,6 +35,33 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
             .AsNoTracking()
             .Where(entity => entity.DeletedAt != null)
             .AsAsyncEnumerable();
+    }
+
+    public async Task<PagedResult<Profile>> GetManyDeletedPagedAsync(
+        DeletedProfileQuery query
+    )
+    {
+        IQueryable<Profile> filtered = _context
+            .Profiles.IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(entity => entity.DeletedAt != null)
+            .ApplySearch(query.SearchText)
+            .ApplyDeletedAtRange(query.DeletedRange);
+
+        // Sequential on purpose: a DbContext is not thread-safe.
+        // Counting before sorting is more efficient.
+        int total = await filtered.CountAsync();
+
+        return await filtered
+            .ApplySort(query.Sort)
+            .ToPagedResultAsync(total, query.Paging);
+    }
+
+    public Task<int> CountDeletedAsync()
+    {
+        return _context
+            .Profiles.IgnoreQueryFilters()
+            .CountAsync(entity => entity.DeletedAt != null);
     }
 
     public void Add(Profile entity)
