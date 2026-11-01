@@ -115,7 +115,7 @@
         ToolTip="Back" />
     </StackPanel>
 
-    <!--  Row 1: Card - header now only has the title  -->
+    <!--  Row 1: Card - list + optional detail panel  -->
     <Grid
       Grid.Row="1"
       layout:WidthBreakpointBehavior.Breakpoint="{StaticResource PreviewOverlayBreakpoint}"
@@ -148,6 +148,7 @@
             <RowDefinition Height="Auto" />
           </Grid.RowDefinitions>
 
+          <!--  Toolbar: search, filter, sort, page-level actions  -->
           <Border
             Grid.Row="0"
             Padding="24,12"
@@ -390,10 +391,6 @@
 
           <!--  Table row hosts BOTH the DataGrid and the floating bulk-action bar  -->
           <Grid Grid.Row="1">
-            <Grid.Resources>
-              <markup:BindingProxy x:Key="DataGridWidthProxy" Data="{Binding ActualWidth, ElementName=listCardGrid}" />
-            </Grid.Resources>
-
             <!--  Empty state  -->
             <StackPanel
               HorizontalAlignment="Center"
@@ -420,12 +417,11 @@
             </StackPanel>
 
             <!--  Table  -->
-            <DataGrid
+            <atoms:AdaptiveDataGrid
               x:Name="workExperienceTrashDataGrid"
               Padding="{Binding SelectedCount, Converter={converters:ConditionalBottomInsetConverter}, ConverterParameter='0,0,0,0|72'}"
               layout:DataGridMultiSelectBehavior.AfterSyncCommand="{Binding ToggleSelectionCommand}"
               layout:DataGridMultiSelectBehavior.IsEnabled="True"
-              layout:DataGridStarColumnRefreshBehavior.RefreshTrigger="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data}"
               AutoGenerateColumns="False"
               CanUserAddRows="False"
               CanUserDeleteRows="False"
@@ -433,13 +429,14 @@
               HeadersVisibility="Column"
               IsReadOnly="True"
               ItemsSource="{Binding Items}"
+              ReferenceWidth="{Binding ActualWidth, ElementName=listCardGrid}"
               RowHeight="52"
               RowStyle="{StaticResource SelectableDataGridRowStyle}"
               SelectedItem="{Binding SelectedItem}"
               SelectionMode="Extended"
               Visibility="{Binding HasVisibleItems, Converter={converters:BooleanToVisibilityConverter}}">
-              <DataGrid.Columns>
-                <!--  Bulk select checkbox - actually bound this time  -->
+              <atoms:AdaptiveDataGrid.Layout>
+                <!--  Bulk select checkbox  -->
                 <DataGridTemplateColumn Width="Auto">
                   <DataGridTemplateColumn.HeaderTemplate>
                     <DataTemplate>
@@ -463,38 +460,39 @@
                   </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <!--  Company / Position  -->
-                <DataGridTemplateColumn
-                  Width="*"
-                  Header="Company / Position"
-                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='0;880'}">
-                  <DataGridTemplateColumn.CellTemplate>
-                    <DataTemplate>
-                      <StackPanel VerticalAlignment="Center">
-                        <TextBlock FontWeight="SemiBold" Text="{Binding CompanyName}" />
+                <atoms:AdaptiveColumn Breakpoints="0;880">
+                  <atoms:AdaptiveColumn.Compact>
+                    <!--  Company + Position  -->
+                    <DataGridTemplateColumn Width="*" Header="Company / Position">
+                      <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                          <StackPanel VerticalAlignment="Center">
+                            <TextBlock FontWeight="SemiBold" Text="{Binding CompanyName}" />
 
-                        <TextBlock
-                          FontSize="12"
-                          Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                          Text="{Binding PositionTitle}" />
-                      </StackPanel>
-                    </DataTemplate>
-                  </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                            <TextBlock
+                              FontSize="12"
+                              Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                              Text="{Binding PositionTitle}" />
+                          </StackPanel>
+                        </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                  </atoms:AdaptiveColumn.Compact>
 
-                <!--  Company  -->
-                <DataGridTextColumn
-                  Width="2*"
-                  Binding="{Binding CompanyName}"
-                  Header="Company"
-                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='880;'}" />
+                  <atoms:AdaptiveColumn.Medium>
+                    <!--  Company  -->
+                    <DataGridTextColumn
+                      Width="2*"
+                      Binding="{Binding CompanyName}"
+                      Header="Company" />
 
-                <!--  Position  -->
-                <DataGridTextColumn
-                  Width="2*"
-                  Binding="{Binding PositionTitle}"
-                  Header="Position"
-                  Visibility="{Binding Source={StaticResource DataGridWidthProxy}, Path=Data, Converter={converters:WidthRangeVisibilityConverter}, ConverterParameter='880;'}" />
+                    <!--  Position  -->
+                    <DataGridTextColumn
+                      Width="2*"
+                      Binding="{Binding PositionTitle}"
+                      Header="Position" />
+                  </atoms:AdaptiveColumn.Medium>
+                </atoms:AdaptiveColumn>
 
                 <!--  Deleted On  -->
                 <DataGridTextColumn Width="*" Header="Deleted On">
@@ -551,8 +549,8 @@
                     </DataTemplate>
                   </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-              </DataGrid.Columns>
-            </DataGrid>
+              </atoms:AdaptiveDataGrid.Layout>
+            </atoms:AdaptiveDataGrid>
 
             <!--
               Floating bulk-action bar - only appears once something is checked,
