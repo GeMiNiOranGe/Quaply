@@ -8,6 +8,7 @@ using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
 using Quaply.Ui.Models;
 using Quaply.Ui.ViewModels.Base;
+using Wpf.Ui.Controls;
 
 namespace Quaply.Ui.ViewModels;
 
@@ -73,7 +74,8 @@ public partial class ProfileTrashViewModel(
             title: "Confirm permanent deletion",
             message: $"Permanently delete the profile '{item.FullName}'? This action cannot be undone.",
             primaryButtonText: "Delete permanently",
-            closeButtonText: "Cancel"
+            closeButtonText: "Cancel",
+            defaultButton: ContentDialogButton.Close
         );
 
         if (!confirmed)

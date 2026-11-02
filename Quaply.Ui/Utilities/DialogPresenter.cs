@@ -1,7 +1,6 @@
 using Quaply.Ui.Interfaces;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
-using Wpf.Ui.Extensions;
 
 namespace Quaply.Ui.Utilities;
 
@@ -15,19 +14,30 @@ public sealed class DialogPresenter(IContentDialogService contentDialogService)
         string title,
         string message,
         string primaryButtonText = "Confirm",
-        string closeButtonText = "Cancel"
+        string closeButtonText = "Cancel",
+        ContentDialogButton defaultButton = ContentDialogButton.Primary
     )
     {
-        ContentDialogResult result =
-            await _contentDialogService.ShowSimpleDialogAsync(
-                new SimpleContentDialogCreateOptions
-                {
-                    Title = title,
-                    Content = message,
-                    PrimaryButtonText = primaryButtonText,
-                    CloseButtonText = closeButtonText,
-                }
-            );
+        ContentDialog dialog = new()
+        {
+            Title = title,
+            Content = message,
+            PrimaryButtonText = primaryButtonText,
+            CloseButtonText = closeButtonText,
+
+            // Always highlight the primary button, regardless of
+            // where the Enter key is focused.
+            PrimaryButtonAppearance = ControlAppearance.Primary,
+            CloseButtonAppearance = ControlAppearance.Secondary,
+
+            // The button that receives the Enter key.
+            DefaultButton = defaultButton,
+        };
+
+        ContentDialogResult result = await _contentDialogService.ShowAsync(
+            dialog,
+            CancellationToken.None
+        );
 
         return result == ContentDialogResult.Primary;
     }

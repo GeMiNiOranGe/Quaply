@@ -1,3 +1,5 @@
+using Wpf.Ui.Controls;
+
 namespace Quaply.Ui.Interfaces;
 
 public interface IDialogPresenter
@@ -6,7 +8,8 @@ public interface IDialogPresenter
         string title,
         string message,
         string primaryButtonText = "Confirm",
-        string closeButtonText = "Cancel"
+        string closeButtonText = "Cancel",
+        ContentDialogButton defaultButton = ContentDialogButton.Primary
     );
 
     Task<bool> ShowDangerConfirmationAsync(

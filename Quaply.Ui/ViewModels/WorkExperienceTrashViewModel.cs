@@ -8,6 +8,7 @@ using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
 using Quaply.Ui.Models;
 using Quaply.Ui.ViewModels.Base;
+using Wpf.Ui.Controls;
 
 namespace Quaply.Ui.ViewModels;
 
@@ -271,11 +272,12 @@ public partial class WorkExperienceTrashViewModel(
     [RelayCommand(CanExecute = nameof(HasAnyItems))]
     private async Task EmptyAsync()
     {
-        bool confirmed = await _dialogPresenter.ShowDangerConfirmationAsync(
+        bool confirmed = await _dialogPresenter.ShowConfirmationAsync(
             title: "Empty trash?",
             message: $"This will permanently delete all {TotalCount} work experiences in the trash, including any hidden by your search or filters. This action cannot be undone.",
             primaryButtonText: "Empty trash",
-            closeButtonText: "Cancel"
+            closeButtonText: "Cancel",
+            defaultButton: ContentDialogButton.Close
         );
 
         if (!confirmed)
@@ -330,11 +332,12 @@ public partial class WorkExperienceTrashViewModel(
             return;
         }
 
-        bool confirmed = await _dialogPresenter.ShowDangerConfirmationAsync(
+        bool confirmed = await _dialogPresenter.ShowConfirmationAsync(
             title: "Delete permanently?",
             message: BuildPurgeWarning([item]),
             primaryButtonText: "Delete permanently",
-            closeButtonText: "Cancel"
+            closeButtonText: "Cancel",
+            defaultButton: ContentDialogButton.Close
         );
 
         if (!confirmed)
@@ -412,11 +415,12 @@ public partial class WorkExperienceTrashViewModel(
             return;
         }
 
-        bool confirmed = await _dialogPresenter.ShowDangerConfirmationAsync(
+        bool confirmed = await _dialogPresenter.ShowConfirmationAsync(
             title: $"Delete {selected.Count} items permanently?",
             message: BuildPurgeWarning(selected),
             primaryButtonText: "Delete permanently",
-            closeButtonText: "Cancel"
+            closeButtonText: "Cancel",
+            defaultButton: ContentDialogButton.Close
         );
 
         if (!confirmed)
