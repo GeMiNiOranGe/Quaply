@@ -20,11 +20,6 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
         return await _unitOfWork.Profiles.GetManyAsync().ToListAsync();
     }
 
-    public async Task<IEnumerable<Profile>> GetDeletedProfilesAsync()
-    {
-        return await _unitOfWork.Profiles.GetManyDeletedAsync().ToListAsync();
-    }
-
     public async Task<PagedResult<Profile>> GetDeletedProfilesPagedAsync(
         DeletedProfileQuery query
     )

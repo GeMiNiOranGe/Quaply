@@ -32,7 +32,6 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
     {
         return _context
             .Profiles.IgnoreQueryFilters()
-            .AsNoTracking()
             .Where(entity => entity.DeletedAt != null)
             .AsAsyncEnumerable();
     }
