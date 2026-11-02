@@ -85,6 +85,11 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
         _context.Profiles.Remove(entity);
     }
 
+    public void PurgeRange(IEnumerable<Profile> entities)
+    {
+        _context.Profiles.RemoveRange(entities);
+    }
+
     public void Restore(Profile entity)
     {
         entity.DeletedAt = null;

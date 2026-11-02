@@ -28,5 +28,7 @@ public interface IProfileRepository
 
     void Purge(Profile entity);
 
+    void PurgeRange(IEnumerable<Profile> entities);
+
     void Restore(Profile entity);
 }

@@ -24,5 +24,7 @@ public interface IProfileService
 
     Task PurgeProfileAsync(int id);
 
+    Task PurgeDeletedProfilesAsync();
+
     Task RestoreProfileAsync(int id);
 }

@@ -81,6 +81,21 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
         await _unitOfWork.SaveChangesAsync();
     }
 
+    public async Task PurgeDeletedProfilesAsync()
+    {
+        List<Profile> profiles = await _unitOfWork
+            .Profiles.GetManyDeletedAsync()
+            .ToListAsync();
+
+        if (profiles.Count == 0)
+        {
+            return;
+        }
+
+        _unitOfWork.Profiles.PurgeRange(profiles);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
     public async Task RestoreProfileAsync(int id)
     {
         Profile? profile =
