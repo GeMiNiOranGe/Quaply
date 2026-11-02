@@ -6,6 +6,7 @@ using Quaply.Data.Querying.Base;
 using Quaply.Data.Querying.Profiles;
 using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
+using Quaply.Ui.Models;
 using Quaply.Ui.ViewModels.Base;
 
 namespace Quaply.Ui.ViewModels;
@@ -20,9 +21,9 @@ public partial class ProfileTrashViewModel(
     private readonly IDialogPresenter _dialogPresenter = dialogPresenter;
 
     [ObservableProperty]
-    public partial Profile? SelectedItem { get; set; }
+    public partial DeletedProfileItem? SelectedItem { get; set; }
 
-    public ObservableCollection<Profile> Items
+    public ObservableCollection<DeletedProfileItem> Items
     {
         get;
         private set
@@ -44,33 +45,33 @@ public partial class ProfileTrashViewModel(
     }
 
     [RelayCommand]
-    private async Task RestoreAsync(Profile? profile)
+    private async Task RestoreAsync(DeletedProfileItem? item)
     {
-        if (profile is null)
+        if (item is null)
         {
             return;
         }
 
-        await _service.RestoreProfileAsync(profile.Id);
-        Items.Remove(profile);
+        await _service.RestoreProfileAsync(item.Id);
+        Items.Remove(item);
 
-        if (SelectedItem == profile)
+        if (SelectedItem == item)
         {
             SelectedItem = null;
         }
     }
 
     [RelayCommand]
-    private async Task PurgeAsync(Profile? profile)
+    private async Task PurgeAsync(DeletedProfileItem? item)
     {
-        if (profile is null)
+        if (item is null)
         {
             return;
         }
 
         bool confirmed = await _dialogPresenter.ShowConfirmationAsync(
             title: "Confirm permanent deletion",
-            message: $"Permanently delete the profile '{profile.FullName}'? This action cannot be undone.",
+            message: $"Permanently delete the profile '{item.FullName}'? This action cannot be undone.",
             primaryButtonText: "Delete permanently",
             closeButtonText: "Cancel"
         );
@@ -80,10 +81,10 @@ public partial class ProfileTrashViewModel(
             return;
         }
 
-        await _service.PurgeProfileAsync(profile.Id);
-        Items.Remove(profile);
+        await _service.PurgeProfileAsync(item.Id);
+        Items.Remove(item);
 
-        if (SelectedItem == profile)
+        if (SelectedItem == item)
         {
             SelectedItem = null;
         }
@@ -106,7 +107,7 @@ public partial class ProfileTrashViewModel(
             PagedResult<Profile> result =
                 await _service.GetDeletedProfilesPagedAsync(query);
 
-            Items = new(result.Items);
+            Items = new(result.Items.Select(p => new DeletedProfileItem(p)));
         }
         finally { }
     }
