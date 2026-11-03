@@ -81,6 +81,28 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
         await _unitOfWork.SaveChangesAsync();
     }
 
+    public async Task PurgeRangeProfilesAsync(IEnumerable<int> ids)
+    {
+        if (!ids.Any())
+        {
+            return;
+        }
+
+        List<Profile> profiles = await _unitOfWork
+            .Profiles.GetManyByIdsIncludingDeletedAsync(ids)
+            .ToListAsync();
+
+        if (profiles.Any(entity => entity.DeletedAt is null))
+        {
+            throw new InvalidOperationException(
+                "All profiles must be soft-deleted before they can be permanently hard-deleted."
+            );
+        }
+
+        _unitOfWork.Profiles.PurgeRange(profiles);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
     public async Task PurgeDeletedProfilesAsync()
     {
         List<Profile> profiles = await _unitOfWork

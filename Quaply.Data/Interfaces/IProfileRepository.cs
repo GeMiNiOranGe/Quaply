@@ -10,6 +10,10 @@ public interface IProfileRepository
 
     Task<Profile?> GetByIdIncludingDeletedAsync(int id);
 
+    IAsyncEnumerable<Profile> GetManyByIdsIncludingDeletedAsync(
+        IEnumerable<int> ids
+    );
+
     IAsyncEnumerable<Profile> GetManyAsync();
 
     IAsyncEnumerable<Profile> GetManyDeletedAsync();

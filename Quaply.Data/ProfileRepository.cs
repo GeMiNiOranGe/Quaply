@@ -23,6 +23,16 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
             .FirstOrDefaultAsync(entity => entity.Id == id);
     }
 
+    public IAsyncEnumerable<Profile> GetManyByIdsIncludingDeletedAsync(
+        IEnumerable<int> ids
+    )
+    {
+        return _context
+            .Profiles.IgnoreQueryFilters()
+            .Where(entity => ids.Contains(entity.Id))
+            .AsAsyncEnumerable();
+    }
+
     public IAsyncEnumerable<Profile> GetManyAsync()
     {
         return _context.Profiles.AsNoTracking().AsAsyncEnumerable();
