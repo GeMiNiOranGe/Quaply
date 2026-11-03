@@ -2,169 +2,1050 @@
   x:Class="Quaply.Ui.Views.Pages.ProfileTrashPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:atoms="clr-namespace:Quaply.Ui.Views.Atoms"
   xmlns:converters="clr-namespace:Quaply.Ui.Converters"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:layout="clr-namespace:Quaply.Ui.AttachedProperties"
   xmlns:local="clr-namespace:Quaply.Ui.Views.Pages"
+  xmlns:markup="clr-namespace:Quaply.Ui.MarkupHelpers"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:molecules="clr-namespace:Quaply.Ui.Views.Molecules"
+  xmlns:queryingBase="clr-namespace:Quaply.Data.Querying.Base;assembly=Quaply.Data"
+  xmlns:queryingProfiles="clr-namespace:Quaply.Data.Querying.Profiles;assembly=Quaply.Data"
   xmlns:system="clr-namespace:System;assembly=mscorlib"
   xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
   xmlns:viewModels="clr-namespace:Quaply.Ui.ViewModels"
-  x:Name="profileTrashPage"
   d:DataContext="{d:DesignInstance Type=viewModels:ProfileTrashViewModel,
                                    IsDesignTimeCreatable=False}"
   d:DesignHeight="450"
   d:DesignWidth="800"
   Style="{StaticResource FadeInSlideUpPage}"
   mc:Ignorable="d">
-  <Grid Margin="24,16">
+  <UserControl.Resources>
+    <!--
+      PROXY-BINDING: Bridge to this page's ViewModel for elements OUTSIDE
+      the visual tree (ContextMenu, Popup, DataGridColumn.Header/Visibility).
+      Usage: {Binding Data.XxxCommand, Source={StaticResource ProfileTrashPageProxy}}
+      CommandParameter still uses a plain {Binding}.
+    -->
+    <markup:BindingProxy x:Key="ProfileTrashPageProxy" Data="{Binding}" />
+
+    <!--  Preview panel text styles  -->
+    <Style x:Key="PreviewSectionHeaderStyle" TargetType="TextBlock">
+      <Setter Property="Margin" Value="0,0,0,8" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    </Style>
+
+    <Style x:Key="PreviewLabelStyle" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    </Style>
+
+    <Style x:Key="PreviewValueStyle" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <ContextMenu
+      x:Key="DeletedRangeMenu"
+      x:Shared="False"
+      ItemsSource="{markup:EnumBindingSource {x:Type queryingBase:RelativeDateRange}}"
+      Placement="Bottom">
+      <ContextMenu.ItemContainerStyle>
+        <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
+          <Setter Property="Command" Value="{Binding Data.SetDeletedRangeCommand, Source={StaticResource ProfileTrashPageProxy}}" />
+
+          <Setter Property="CommandParameter" Value="{Binding}" />
+
+          <Setter Property="Header" Value="{Binding Converter={converters:EnumDisplayNameConverter}}" />
+
+          <Setter Property="IsCheckable" Value="True" />
+
+          <Setter Property="IsChecked">
+            <Setter.Value>
+              <MultiBinding Converter="{converters:EnumEqualityConverter}" Mode="OneWay">
+                <Binding Path="Data.SelectedDeletedRange" Source="{StaticResource ProfileTrashPageProxy}" />
+
+                <Binding />
+              </MultiBinding>
+            </Setter.Value>
+          </Setter>
+        </Style>
+      </ContextMenu.ItemContainerStyle>
+    </ContextMenu>
+
+    <ContextMenu
+      x:Key="SortFieldMenu"
+      x:Shared="False"
+      ItemsSource="{markup:EnumBindingSource {x:Type queryingProfiles:DeletedProfileSortField}}"
+      Placement="Bottom">
+      <ContextMenu.ItemContainerStyle>
+        <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
+          <Setter Property="Command" Value="{Binding Data.SetSortFieldCommand, Source={StaticResource ProfileTrashPageProxy}}" />
+
+          <Setter Property="CommandParameter" Value="{Binding}" />
+
+          <Setter Property="Header" Value="{Binding Converter={converters:EnumDisplayNameConverter}}" />
+
+          <Setter Property="IsCheckable" Value="True" />
+
+          <Setter Property="IsChecked">
+            <Setter.Value>
+              <MultiBinding Converter="{converters:EnumEqualityConverter}" Mode="OneWay">
+                <Binding Path="Data.SortField" Source="{StaticResource ProfileTrashPageProxy}" />
+
+                <Binding />
+              </MultiBinding>
+            </Setter.Value>
+          </Setter>
+        </Style>
+      </ContextMenu.ItemContainerStyle>
+    </ContextMenu>
+  </UserControl.Resources>
+
+  <Grid MaxWidth="{StaticResource PageMaxWidthTable}" Margin="24,16">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <!--  Top actions  -->
-    <StackPanel
-      Grid.Row="0"
-      Margin="0,0,0,8"
-      Orientation="Horizontal">
+    <!--  Navigation and Page Header  -->
+    <StackPanel Grid.Row="0" Margin="0,0,0,24">
+      <StackPanel Margin="0,0,0,8">
+        <TextBlock
+          FontSize="22"
+          FontWeight="SemiBold"
+          Text="Deleted Profiles" />
+
+        <TextBlock
+          Margin="0,4,0,0"
+          Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+          Text="View deleted profiles and restore them to your Resume anytime." />
+      </StackPanel>
+
       <ui:Button
-        Padding="8"
+        HorizontalAlignment="Left"
         Command="{Binding GoBackCommand}"
-        Content="Back"
-        Icon="{ui:SymbolIcon ArrowLeft24}" />
+        Icon="{ui:SymbolIcon ArrowLeft24}"
+        Style="{StaticResource IconOnlyButtonStyle}"
+        ToolTip="Back" />
     </StackPanel>
 
-    <!--  List  -->
-    <ui:Card
+    <!--  Row 1: Card - list + optional detail panel  -->
+    <Grid
       Grid.Row="1"
-      Padding="0"
-      HorizontalAlignment="Stretch"
-      VerticalAlignment="Stretch"
-      HorizontalContentAlignment="Stretch"
-      VerticalContentAlignment="Stretch">
-      <Grid>
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+      layout:WidthBreakpointBehavior.Breakpoint="{StaticResource PreviewOverlayBreakpoint}"
+      layout:WidthBreakpointBehavior.IsBelowBreakpoint="{Binding IsPreviewOverlayMode, Mode=OneWayToSource}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" MinWidth="320" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition>
+          <ColumnDefinition.Width>
+            <MultiBinding Converter="{converters:PanelColumnWidthConverter}" Mode="TwoWay">
+              <Binding Path="IsPreviewInlineVisible" />
+              <Binding Mode="TwoWay" Path="PreviewPanelWidth" />
+            </MultiBinding>
+          </ColumnDefinition.Width>
+        </ColumnDefinition>
+      </Grid.ColumnDefinitions>
 
-        <!--  Header  -->
-        <Border
-          Grid.Row="0"
-          Padding="24,16"
-          BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-          BorderThickness="0,0,0,1">
-          <Grid>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition />
-              <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+      <!--  List  -->
+      <ui:Card
+        Grid.Column="0"
+        Padding="0"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        HorizontalContentAlignment="Stretch"
+        VerticalContentAlignment="Stretch">
+        <Grid x:Name="listCardGrid">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
 
-            <TextBlock
+          <!--  Toolbar: search, filter, sort, page-level actions  -->
+          <Border
+            Grid.Row="0"
+            Padding="24,12"
+            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+            BorderThickness="0,0,0,1">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              <ui:TextBox
+                Grid.Column="0"
+                Width="{Binding ActualWidth, ElementName=listCardGrid, Converter={converters:LinearInterpolationConverter}, ConverterParameter='SourceMin=720;SourceMax=880;TargetMin=160;TargetMax=320'}"
+                Padding="8,6"
+                PlaceholderText="Search by name or email..."
+                Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
+                <ui:TextBox.Icon>
+                  <ui:SymbolIcon Symbol="Search24" />
+                </ui:TextBox.Icon>
+              </ui:TextBox>
+
+              <ui:ProgressRing
+                Grid.Column="1"
+                Width="20"
+                Height="20"
+                Margin="8,0"
+                VerticalAlignment="Center"
+                IsIndeterminate="True"
+                Visibility="{Binding IsSearching, Converter={converters:BooleanToVisibilityConverter}}" />
+
+              <StackPanel Grid.Column="3" Orientation="Horizontal">
+                <!--  Filter: scoping the current view, not an action  -->
+                <atoms:AdaptiveContent Breakpoints="0;720;1120" ReferenceWidth="{Binding ActualWidth, ElementName=listCardGrid}">
+                  <atoms:AdaptiveContent.Expanded>
+                    <DataTemplate>
+                      <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                          Margin="0,0,8,0"
+                          VerticalAlignment="Center"
+                          Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                          Text="Deleted" />
+
+                        <molecules:SegmentedButton
+                          Appearance="Transparent"
+                          ItemsSource="{markup:EnumBindingSource {x:Type queryingBase:RelativeDateRange}}"
+                          SelectedAppearance="Secondary"
+                          SelectedValue="{Binding SelectedDeletedRange}">
+                          <molecules:SegmentedButton.ItemTemplate>
+                            <DataTemplate>
+                              <TextBlock Text="{Binding Converter={converters:EnumDisplayNameConverter}}" />
+                            </DataTemplate>
+                          </molecules:SegmentedButton.ItemTemplate>
+                        </molecules:SegmentedButton>
+                      </StackPanel>
+                    </DataTemplate>
+                  </atoms:AdaptiveContent.Expanded>
+
+                  <atoms:AdaptiveContent.Medium>
+                    <DataTemplate>
+                      <ui:DropDownButton
+                        MinWidth="136"
+                        Padding="8,6"
+                        HorizontalContentAlignment="Stretch"
+                        layout:ContextMenuBehavior.OpenOnClick="True"
+                        Background="Transparent"
+                        Content="{Binding SelectedDeletedRange, Converter={converters:EnumDisplayNameConverter}}"
+                        ContextMenu="{StaticResource DeletedRangeMenu}"
+                        Icon="{ui:SymbolIcon Filter24}"
+                        ToolTip="Filter by deleted date" />
+                    </DataTemplate>
+                  </atoms:AdaptiveContent.Medium>
+
+                  <atoms:AdaptiveContent.Compact>
+                    <DataTemplate>
+                      <ui:Button
+                        MinWidth="120"
+                        Padding="8,6"
+                        HorizontalContentAlignment="Left"
+                        layout:ContextMenuBehavior.OpenOnClick="True"
+                        Appearance="Transparent"
+                        Content="{Binding SelectedDeletedRange, Converter={converters:EnumDisplayNameConverter}}"
+                        ContextMenu="{StaticResource DeletedRangeMenu}"
+                        Icon="{ui:SymbolIcon Filter24}"
+                        ToolTip="Filter by deleted date" />
+                    </DataTemplate>
+                  </atoms:AdaptiveContent.Compact>
+                </atoms:AdaptiveContent>
+
+                <atoms:Divider Margin="12,8" Orientation="Vertical" />
+
+                <!--  Sort field  -->
+                <atoms:AdaptiveContent Breakpoints="0;720;1200" ReferenceWidth="{Binding ActualWidth, ElementName=listCardGrid}">
+                  <atoms:AdaptiveContent.Expanded>
+                    <DataTemplate>
+                      <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                          Margin="0,0,8,0"
+                          VerticalAlignment="Center"
+                          Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                          Text="Sort by" />
+
+                        <ComboBox
+                          MinWidth="144"
+                          Margin="0,0,8,0"
+                          Padding="8,6"
+                          Background="Transparent"
+                          ItemsSource="{markup:EnumBindingSource {x:Type queryingProfiles:DeletedProfileSortField}}"
+                          SelectedItem="{Binding SortField}">
+                          <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                              <TextBlock Text="{Binding Converter={converters:EnumDisplayNameConverter}}" />
+                            </DataTemplate>
+                          </ComboBox.ItemTemplate>
+                        </ComboBox>
+                      </StackPanel>
+                    </DataTemplate>
+                  </atoms:AdaptiveContent.Expanded>
+
+                  <atoms:AdaptiveContent.Medium>
+                    <DataTemplate>
+                      <ui:DropDownButton
+                        MinWidth="160"
+                        Margin="0,0,8,0"
+                        Padding="8,6"
+                        HorizontalContentAlignment="Stretch"
+                        layout:ContextMenuBehavior.OpenOnClick="True"
+                        Background="Transparent"
+                        Content="{Binding SortField, Converter={converters:EnumDisplayNameConverter}}"
+                        ContextMenu="{StaticResource SortFieldMenu}"
+                        Icon="{ui:SymbolIcon ArrowSort24}"
+                        ToolTip="Sort by field" />
+                    </DataTemplate>
+                  </atoms:AdaptiveContent.Medium>
+
+                  <atoms:AdaptiveContent.Compact>
+                    <DataTemplate>
+                      <ui:Button
+                        MinWidth="144"
+                        Margin="0,0,8,0"
+                        Padding="8,6"
+                        HorizontalContentAlignment="Left"
+                        layout:ContextMenuBehavior.OpenOnClick="True"
+                        Appearance="Transparent"
+                        Content="{Binding SortField, Converter={converters:EnumDisplayNameConverter}}"
+                        ContextMenu="{StaticResource SortFieldMenu}"
+                        Icon="{ui:SymbolIcon ArrowSort24}"
+                        ToolTip="Sort by field" />
+                    </DataTemplate>
+                  </atoms:AdaptiveContent.Compact>
+                </atoms:AdaptiveContent>
+
+                <ui:Button
+                  Command="{Binding ToggleSortDirectionCommand}"
+                  Icon="{Binding IsSortDescending, Converter={converters:SortDirectionIconConverter}}"
+                  Style="{StaticResource IconOnlyButtonStyle}"
+                  ToolTip="{Binding SortDirectionTooltip}" />
+
+                <atoms:Divider Margin="12,8" Orientation="Vertical" />
+
+                <!--
+                  Page-level actions. Two states only ("0;720" = no Expanded).
+                  Medium: Refresh is a visible button; More holds the destructive action.
+                  Compact: Refresh folds into More.
+                  TODO: Future "Reset filters": add one MenuItem to Compact and one button to Medium.
+                -->
+                <atoms:AdaptiveContent Breakpoints="0;720" ReferenceWidth="{Binding ActualWidth, ElementName=listCardGrid}">
+                  <atoms:AdaptiveContent.Medium>
+                    <DataTemplate>
+                      <StackPanel Orientation="Horizontal">
+                        <ui:Button
+                          Margin="0,0,8,0"
+                          Command="{Binding RefreshCommand}"
+                          Icon="{ui:SymbolIcon ArrowClockwise24}"
+                          Style="{StaticResource IconOnlyButtonStyle}"
+                          ToolTip="Refresh" />
+
+                        <ui:Button
+                          layout:ContextMenuBehavior.OpenOnClick="True"
+                          Icon="{ui:SymbolIcon MoreVertical24}"
+                          Style="{StaticResource IconOnlyButtonStyle}"
+                          ToolTip="More">
+                          <ui:Button.ContextMenu>
+                            <ContextMenu Placement="Bottom">
+                              <!--  Destructive action: buried behind an extra click on purpose  -->
+                              <MenuItem
+                                Command="{Binding Data.EmptyCommand, Source={StaticResource ProfileTrashPageProxy}}"
+                                Foreground="IndianRed"
+                                Header="Empty Trash"
+                                IsEnabled="{Binding Data.HasAnyItems, Source={StaticResource ProfileTrashPageProxy}}">
+                                <MenuItem.Icon>
+                                  <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />
+                                </MenuItem.Icon>
+                              </MenuItem>
+                            </ContextMenu>
+                          </ui:Button.ContextMenu>
+                        </ui:Button>
+                      </StackPanel>
+                    </DataTemplate>
+                  </atoms:AdaptiveContent.Medium>
+
+                  <atoms:AdaptiveContent.Compact>
+                    <DataTemplate>
+                      <ui:Button
+                        layout:ContextMenuBehavior.OpenOnClick="True"
+                        Icon="{ui:SymbolIcon MoreVertical24}"
+                        Style="{StaticResource IconOnlyButtonStyle}"
+                        ToolTip="More">
+                        <ui:Button.ContextMenu>
+                          <ContextMenu Placement="Bottom">
+                            <MenuItem Command="{Binding Data.RefreshCommand, Source={StaticResource ProfileTrashPageProxy}}" Header="Refresh">
+                              <MenuItem.Icon>
+                                <ui:SymbolIcon Symbol="ArrowClockwise24" />
+                              </MenuItem.Icon>
+                            </MenuItem>
+
+                            <Separator />
+
+                            <!--  Destructive action: last, apart from the safe ones  -->
+                            <MenuItem
+                              Command="{Binding Data.EmptyCommand, Source={StaticResource ProfileTrashPageProxy}}"
+                              Foreground="IndianRed"
+                              Header="Empty Trash"
+                              IsEnabled="{Binding Data.HasAnyItems, Source={StaticResource ProfileTrashPageProxy}}">
+                              <MenuItem.Icon>
+                                <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />
+                              </MenuItem.Icon>
+                            </MenuItem>
+                          </ContextMenu>
+                        </ui:Button.ContextMenu>
+                      </ui:Button>
+                    </DataTemplate>
+                  </atoms:AdaptiveContent.Compact>
+                </atoms:AdaptiveContent>
+              </StackPanel>
+            </Grid>
+          </Border>
+
+          <!--  Table row hosts BOTH the DataGrid and the floating bulk-action bar  -->
+          <Grid Grid.Row="1">
+            <!--  Empty state  -->
+            <StackPanel
+              HorizontalAlignment="Center"
               VerticalAlignment="Center"
-              FontSize="18"
-              FontWeight="SemiBold"
-              Text="Deleted Profiles" />
+              Visibility="{Binding HasVisibleItems, Converter={converters:InverseBooleanToVisibilityConverter}}">
+              <ui:SymbolIcon
+                HorizontalAlignment="Center"
+                FontSize="48"
+                Foreground="{DynamicResource TextFillColorDisabledBrush}"
+                Symbol="Delete48" />
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
-              <ui:Button
-                Margin="0,0,8,0"
-                Padding="8"
-                Appearance="Transparent"
-                ToolTip="Filter">
-                <ui:SymbolIcon Symbol="Filter24" />
-              </ui:Button>
+              <TextBlock
+                Margin="0,12,0,0"
+                HorizontalAlignment="Center"
+                FontSize="16"
+                FontWeight="SemiBold"
+                Text="{Binding EmptyStateTitle}" />
 
-              <ui:Button
-                Padding="8"
-                Appearance="Transparent"
-                ToolTip="More">
-                <ui:SymbolIcon Symbol="MoreVertical24" />
-              </ui:Button>
+              <TextBlock
+                Margin="0,4,0,0"
+                HorizontalAlignment="Center"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                Text="{Binding EmptyStateMessage}" />
             </StackPanel>
+
+            <!--  Table  -->
+            <atoms:AdaptiveDataGrid
+              x:Name="profileTrashDataGrid"
+              Padding="{Binding SelectedCount, Converter={converters:ConditionalBottomInsetConverter}, ConverterParameter='0,0,0,0|72'}"
+              layout:DataGridMultiSelectBehavior.AfterSyncCommand="{Binding ToggleSelectionCommand}"
+              layout:DataGridMultiSelectBehavior.IsEnabled="True"
+              AutoGenerateColumns="False"
+              CanUserAddRows="False"
+              CanUserDeleteRows="False"
+              CanUserSortColumns="False"
+              HeadersVisibility="Column"
+              IsReadOnly="True"
+              ItemsSource="{Binding Items}"
+              ReferenceWidth="{Binding ActualWidth, ElementName=listCardGrid}"
+              RowHeight="52"
+              RowStyle="{StaticResource SelectableDataGridRowStyle}"
+              SelectedItem="{Binding SelectedItem}"
+              SelectionMode="Extended"
+              Visibility="{Binding HasVisibleItems, Converter={converters:BooleanToVisibilityConverter}}">
+              <atoms:AdaptiveDataGrid.Layout>
+                <!--  Bulk select checkbox  -->
+                <DataGridTemplateColumn Width="Auto">
+                  <DataGridTemplateColumn.HeaderTemplate>
+                    <DataTemplate>
+                      <CheckBox
+                        Margin="16,0,0,0"
+                        Padding="0"
+                        layout:DataGridMultiSelectBehavior.SelectAllFor="{Binding ElementName=profileTrashDataGrid}"
+                        IsChecked="{Binding DataContext.IsAllSelected, RelativeSource={RelativeSource AncestorType=DataGrid}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        IsThreeState="True" />
+                    </DataTemplate>
+                  </DataGridTemplateColumn.HeaderTemplate>
+
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <CheckBox
+                        Margin="16,0,0,0"
+                        Padding="2"
+                        Command="{Binding Data.ToggleSelectionCommand, Source={StaticResource ProfileTrashPageProxy}}"
+                        IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" />
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <atoms:AdaptiveColumn Breakpoints="0;880">
+                  <atoms:AdaptiveColumn.Compact>
+                    <!--  Full Name + Email  -->
+                    <DataGridTemplateColumn Width="*" Header="Name / Email">
+                      <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                          <StackPanel VerticalAlignment="Center">
+                            <TextBlock FontWeight="SemiBold" Text="{Binding FullName}" />
+
+                            <TextBlock
+                              FontSize="12"
+                              Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                              Text="{Binding Email}" />
+                          </StackPanel>
+                        </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                  </atoms:AdaptiveColumn.Compact>
+
+                  <atoms:AdaptiveColumn.Medium>
+                    <!--  Full Name  -->
+                    <DataGridTextColumn
+                      Width="2*"
+                      Binding="{Binding FullName}"
+                      Header="Full Name" />
+
+                    <!--  Email  -->
+                    <DataGridTextColumn
+                      Width="2*"
+                      Binding="{Binding Email}"
+                      Header="Email" />
+                  </atoms:AdaptiveColumn.Medium>
+                </atoms:AdaptiveColumn>
+
+                <!--  Deleted On  -->
+                <DataGridTextColumn Width="*" Header="Deleted On">
+                  <DataGridTextColumn.ElementStyle>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Text" Value="{Binding DeletedAt, Converter={converters:RelativeDateTimeConverter}}" />
+
+                      <Setter Property="ToolTip">
+                        <Setter.Value>
+                          <ToolTip MaxWidth="{x:Static system:Double.PositiveInfinity}">
+                            <TextBlock Text="{Binding DeletedAt, Converter={converters:FullLocalDateTimeConverter}}" TextWrapping="NoWrap" />
+                          </ToolTip>
+                        </Setter.Value>
+                      </Setter>
+                    </Style>
+                  </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <!--  Actions  -->
+                <DataGridTemplateColumn
+                  Width="Auto"
+                  CellStyle="{StaticResource CenteredDataGridCellStyle}"
+                  Header="Actions"
+                  HeaderStyle="{StaticResource CenteredDataGridColumnHeaderStyle}">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                        <ui:Button
+                          Margin="0,0,8,0"
+                          Command="{Binding Data.ViewDetailsCommand, Source={StaticResource ProfileTrashPageProxy}}"
+                          CommandParameter="{Binding}"
+                          Style="{StaticResource IconOnlyButtonStyle}"
+                          ToolTip="View Details">
+                          <ui:SymbolIcon Symbol="Eye24" />
+                        </ui:Button>
+
+                        <ui:Button
+                          Margin="0,0,8,0"
+                          Command="{Binding Data.RestoreCommand, Source={StaticResource ProfileTrashPageProxy}}"
+                          CommandParameter="{Binding}"
+                          Style="{StaticResource IconOnlyButtonStyle}"
+                          ToolTip="Restore">
+                          <ui:SymbolIcon Symbol="ArrowUndo24" />
+                        </ui:Button>
+
+                        <ui:Button
+                          Command="{Binding Data.PurgeCommand, Source={StaticResource ProfileTrashPageProxy}}"
+                          CommandParameter="{Binding}"
+                          Style="{StaticResource IconOnlyButtonStyle}"
+                          ToolTip="Delete Permanently">
+                          <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />
+                        </ui:Button>
+                      </StackPanel>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+              </atoms:AdaptiveDataGrid.Layout>
+            </atoms:AdaptiveDataGrid>
+
+            <!--
+              Floating bulk-action bar - only appears once something is checked,
+              sits above the DataGrid, doesn't push layout
+            -->
+            <Border
+              MaxWidth="{StaticResource PageMaxWidthForm}"
+              Margin="24,8"
+              Padding="16,8,12,8"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Bottom"
+              layout:ToggleBulkBarAnimation.IsVisible="{Binding HasSelection}"
+              Background="{DynamicResource ControlFillColorDefaultBrush}"
+              BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+              BorderThickness="1"
+              CornerRadius="4"
+              Effect="{StaticResource FloatingBarShadow}">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                  Margin="4,0,16,0"
+                  VerticalAlignment="Center"
+                  FontWeight="SemiBold"
+                  Text="{Binding SelectedCount, StringFormat='{}{0} selected'}" />
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                  <ui:Button
+                    Margin="0,0,8,0"
+                    Padding="16,8"
+                    Appearance="Transparent"
+                    Command="{Binding RestoreSelectedCommand}"
+                    Content="Restore"
+                    Icon="{ui:SymbolIcon ArrowUndo24}" />
+
+                  <ui:Button
+                    Padding="16,8"
+                    Appearance="Transparent"
+                    Command="{Binding PurgeSelectedCommand}"
+                    Content="Delete Permanently"
+                    Foreground="IndianRed"
+                    Icon="{ui:SymbolIcon Delete24}" />
+
+                  <atoms:Divider Margin="12,8" Orientation="Vertical" />
+
+                  <ui:Button
+                    Command="{Binding ClearSelectionCommand}"
+                    Style="{StaticResource IconOnlyButtonStyle}"
+                    ToolTip="Clear selection">
+                    <ui:SymbolIcon Symbol="Dismiss24" />
+                  </ui:Button>
+                </StackPanel>
+              </Grid>
+            </Border>
           </Grid>
-        </Border>
 
-        <!--  Table  -->
-        <DataGrid
-          Grid.Row="1"
-          AutoGenerateColumns="False"
-          CanUserAddRows="False"
-          CanUserDeleteRows="False"
-          HeadersVisibility="Column"
-          IsReadOnly="True"
-          ItemsSource="{Binding Items}"
-          RowHeight="48"
-          SelectedItem="{Binding SelectedItem}"
-          SelectionMode="Extended">
-          <DataGrid.Columns>
-            <!--  Checkbox  -->
-            <DataGridTemplateColumn Width="64">
-              <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate>
-                  <CheckBox />
-                </DataTemplate>
-              </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
+          <!--  Footer  -->
+          <Border
+            Grid.Row="2"
+            Padding="24,8"
+            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
 
-            <!--  Full Name  -->
-            <DataGridTextColumn
-              Width="180"
-              Binding="{Binding FullName}"
-              Header="Full Name" />
+              <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                <TextBlock Text="{Binding ResultSummary}" />
 
-            <!--  Email  -->
-            <DataGridTextColumn
-              Width="224"
-              Binding="{Binding Email}"
-              Header="Email" />
+                <TextBlock
+                  Margin="8,0,0,0"
+                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                  Text="{Binding TotalCount, StringFormat='({0} in trash)'}"
+                  Visibility="{Binding IsFiltering, Converter={converters:BooleanToVisibilityConverter}}" />
+              </StackPanel>
 
-            <!--  Deleted At  -->
-            <DataGridTextColumn Width="170" Header="Deleted On">
-              <DataGridTextColumn.ElementStyle>
-                <Style TargetType="TextBlock">
-                  <Setter Property="Text" Value="{Binding DeletedAt, Converter={converters:RelativeDateTimeConverter}}" />
-                  <Setter Property="ToolTip">
-                    <Setter.Value>
-                      <ToolTip MaxWidth="{x:Static system:Double.PositiveInfinity}">
-                        <TextBlock Text="{Binding DeletedAt, Converter={converters:FullLocalDateTimeConverter}}" TextWrapping="NoWrap" />
-                      </ToolTip>
-                    </Setter.Value>
-                  </Setter>
-                </Style>
-              </DataGridTextColumn.ElementStyle>
-            </DataGridTextColumn>
+              <StackPanel
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <TextBlock
+                  Margin="0,0,8,0"
+                  VerticalAlignment="Center"
+                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                  Text="Show" />
 
-            <!--  Actions  -->
-            <DataGridTemplateColumn Width="96" Header="Actions">
-              <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate>
-                  <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                    <ui:Button
-                      Margin="0,0,8,0"
-                      Padding="8"
-                      Appearance="Transparent"
-                      Command="{Binding DataContext.RestoreCommand, ElementName=profileTrashPage}"
-                      CommandParameter="{Binding}"
-                      ToolTip="Restore">
-                      <ui:SymbolIcon Symbol="ArrowUndo24" />
-                    </ui:Button>
+                <ComboBox
+                  MinWidth="72"
+                  Padding="8,6"
+                  Background="Transparent"
+                  ItemsSource="{x:Static viewModels:WorkExperienceTrashViewModel.PageSizeOptions}"
+                  SelectedItem="{Binding PageSize}" />
 
-                    <ui:Button
-                      Padding="8"
-                      Appearance="Transparent"
-                      Command="{Binding DataContext.PurgeCommand, ElementName=profileTrashPage}"
-                      CommandParameter="{Binding}"
-                      ToolTip="Delete Permanently">
-                      <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />
-                    </ui:Button>
-                  </StackPanel>
-                </DataTemplate>
-              </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
-          </DataGrid.Columns>
-        </DataGrid>
+                <atoms:Divider Margin="12,8" Orientation="Vertical" />
+
+                <TextBlock
+                  MinWidth="72"
+                  Margin="0,0,16,0"
+                  VerticalAlignment="Center"
+                  FontWeight="SemiBold"
+                  Text="{Binding PageIndicator}" />
+
+                <ui:Button
+                  Margin="0,0,8,0"
+                  Padding="8"
+                  Appearance="Transparent"
+                  Command="{Binding GoToPreviousPageCommand}"
+                  ToolTip="Previous page">
+                  <ui:SymbolIcon Symbol="ChevronLeft24" />
+                </ui:Button>
+
+                <ui:Button
+                  Padding="8"
+                  Appearance="Transparent"
+                  Command="{Binding GoToNextPageCommand}"
+                  ToolTip="Next page">
+                  <ui:SymbolIcon Symbol="ChevronRight24" />
+                </ui:Button>
+              </StackPanel>
+            </Grid>
+          </Border>
+        </Grid>
+      </ui:Card>
+
+      <GridSplitter
+        Grid.Column="1"
+        Width="8"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Background="Transparent"
+        Cursor="SizeWE"
+        ResizeBehavior="PreviousAndNext"
+        ShowsPreview="False"
+        Visibility="{Binding IsPreviewInlineVisible, Converter={converters:BooleanToVisibilityConverter}}" />
+
+      <!--  Scrim: Only appears in overlay mode; click to close.  -->
+      <Border
+        Grid.Column="0"
+        Grid.ColumnSpan="3"
+        Background="{DynamicResource SmokeFillColorDefaultBrush}"
+        CornerRadius="4"
+        Visibility="{Binding IsPreviewOverlayVisible, Converter={converters:BooleanToVisibilityConverter}}">
+        <Border.InputBindings>
+          <MouseBinding Command="{Binding ClosePreviewPanelCommand}" MouseAction="LeftClick" />
+        </Border.InputBindings>
+      </Border>
+
+      <!--  Host: Decide whether the panel is inline (column 2) or floating (overlay).  -->
+      <Grid Visibility="{Binding IsPreviewPanelVisible, Converter={converters:BooleanToVisibilityConverter}}">
+        <Grid.Style>
+          <Style TargetType="Grid">
+            <!--  Default: inline, column 2  -->
+            <Setter Property="Grid.Column" Value="2" />
+            <Setter Property="Grid.ColumnSpan" Value="1" />
+
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsPreviewOverlayMode}" Value="True">
+                <Setter Property="Grid.Column" Value="0" />
+                <Setter Property="Grid.ColumnSpan" Value="3" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="Width" Value="{StaticResource PreviewOverlayWidth}" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Grid.Style>
+
+        <ui:Card
+          Padding="0"
+          HorizontalAlignment="Stretch"
+          VerticalAlignment="Stretch"
+          HorizontalContentAlignment="Stretch"
+          VerticalContentAlignment="Stretch">
+          <ui:Card.Style>
+            <Style BasedOn="{StaticResource {x:Type ui:Card}}" TargetType="ui:Card">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding IsPreviewOverlayMode}" Value="True">
+                  <Setter Property="Effect" Value="{StaticResource FloatingBarShadow}" />
+                  <Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorQuarternaryBrush}" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </ui:Card.Style>
+
+          <Grid>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="*" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  Panel header  -->
+            <Border
+              Grid.Row="0"
+              Padding="24,12"
+              BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+              BorderThickness="0,0,0,1">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                  VerticalAlignment="Center"
+                  FontSize="18"
+                  FontWeight="SemiBold"
+                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                  Text="Details" />
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                  <!--  Pin toggle  -->
+                  <ui:Button
+                    Command="{Binding TogglePreviewPanelPinCommand}"
+                    Icon="{Binding IsPreviewPanelPinned, Converter={converters:PinIconConverter}}"
+                    Style="{StaticResource IconOnlyButtonStyle}"
+                    ToolTip="{Binding PinTooltip}"
+                    Visibility="{Binding IsPreviewOverlayMode, Converter={converters:InverseBooleanToVisibilityConverter}}" />
+
+                  <ui:Button
+                    Margin="8,0,0,0"
+                    Command="{Binding ClosePreviewPanelCommand}"
+                    Icon="{ui:SymbolIcon Dismiss24}"
+                    Style="{StaticResource IconOnlyButtonStyle}"
+                    ToolTip="Close" />
+                </StackPanel>
+              </Grid>
+            </Border>
+
+            <!--  Empty state: panel is pinned but nothing selected yet  -->
+            <StackPanel
+              Grid.Row="1"
+              Margin="16"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Visibility="{Binding PreviewedItem, Converter={converters:InverseNullToVisibilityConverter}}">
+              <ui:SymbolIcon
+                HorizontalAlignment="Center"
+                FontSize="32"
+                Foreground="{DynamicResource TextFillColorDisabledBrush}"
+                Symbol="DocumentSearch24" />
+
+              <TextBlock
+                Margin="0,8,0,0"
+                HorizontalAlignment="Center"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                Text="Select a row to preview its details"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            </StackPanel>
+
+            <!--  Content  -->
+            <ScrollViewer
+              Grid.Row="1"
+              VerticalScrollBarVisibility="Auto"
+              Visibility="{Binding PreviewedItem, Converter={converters:NullToVisibilityConverter}}">
+              <StackPanel Margin="24,16">
+                <!--  Identity: full name + email  -->
+                <TextBlock
+                  FontSize="18"
+                  FontWeight="SemiBold"
+                  Text="{Binding PreviewedItem.FullName}"
+                  TextWrapping="Wrap" />
+
+                <TextBlock
+                  Margin="0,2,0,0"
+                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                  Text="{Binding PreviewedItem.Email}"
+                  TextWrapping="Wrap"
+                  Visibility="{Binding PreviewedItem.Email, Converter={converters:NullToVisibilityConverter}}" />
+
+                <TextBlock
+                  Margin="0,2,0,0"
+                  FontStyle="Italic"
+                  Foreground="{DynamicResource TextFillColorDisabledBrush}"
+                  Text="No email added."
+                  Visibility="{Binding PreviewedItem.Email, Converter={converters:InverseNullToVisibilityConverter}}" />
+
+                <atoms:Divider Margin="0,16" />
+
+                <!--  Usage: helps decide restore vs. delete permanently  -->
+                <TextBlock Style="{StaticResource PreviewSectionHeaderStyle}" Text="Usage" />
+
+                <StackPanel Orientation="Horizontal">
+                  <ui:SymbolIcon
+                    Margin="0,0,6,0"
+                    FontSize="14"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Symbol="Document24" />
+
+                  <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="14"
+                    Text="{Binding PreviewedItem.ResumeUsageText}" />
+                </StackPanel>
+
+                <atoms:Divider Margin="0,16" />
+
+                <!--  Contact & links  -->
+                <TextBlock Style="{StaticResource PreviewSectionHeaderStyle}" Text="Contact &amp; links" />
+
+                <Grid Margin="0,0,0,8" Visibility="{Binding PreviewedItem.PhoneNumber, Converter={converters:NullToVisibilityConverter}}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="104" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+
+                  <TextBlock Style="{StaticResource PreviewLabelStyle}" Text="Phone" />
+
+                  <TextBlock
+                    Grid.Column="1"
+                    Style="{StaticResource PreviewValueStyle}"
+                    Text="{Binding PreviewedItem.PhoneNumber}"
+                    ToolTip="{Binding PreviewedItem.PhoneNumber}" />
+                </Grid>
+
+                <Grid Margin="0,0,0,8" Visibility="{Binding PreviewedItem.LinkedInUsername, Converter={converters:NullToVisibilityConverter}}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="104" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+
+                  <TextBlock Style="{StaticResource PreviewLabelStyle}" Text="LinkedIn" />
+
+                  <TextBlock
+                    Grid.Column="1"
+                    Style="{StaticResource PreviewValueStyle}"
+                    Text="{Binding PreviewedItem.LinkedInUsername}"
+                    ToolTip="{Binding PreviewedItem.LinkedInUsername}" />
+                </Grid>
+
+                <Grid Margin="0,0,0,8" Visibility="{Binding PreviewedItem.GitHubUsername, Converter={converters:NullToVisibilityConverter}}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="104" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+
+                  <TextBlock Style="{StaticResource PreviewLabelStyle}" Text="GitHub" />
+
+                  <TextBlock
+                    Grid.Column="1"
+                    Style="{StaticResource PreviewValueStyle}"
+                    Text="{Binding PreviewedItem.GitHubUsername}"
+                    ToolTip="{Binding PreviewedItem.GitHubUsername}" />
+                </Grid>
+
+                <Grid Margin="0,0,0,8" Visibility="{Binding PreviewedItem.PortfolioUrl, Converter={converters:NullToVisibilityConverter}}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="104" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+
+                  <TextBlock Style="{StaticResource PreviewLabelStyle}" Text="Portfolio" />
+
+                  <TextBlock
+                    Grid.Column="1"
+                    Style="{StaticResource PreviewValueStyle}"
+                    Text="{Binding PreviewedItem.PortfolioUrl}"
+                    ToolTip="{Binding PreviewedItem.PortfolioUrl}" />
+                </Grid>
+
+                <Grid Margin="0,0,0,8" Visibility="{Binding PreviewedItem.DateOfBirth, Converter={converters:NullToVisibilityConverter}}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="104" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+
+                  <TextBlock Style="{StaticResource PreviewLabelStyle}" Text="Date of birth" />
+
+                  <TextBlock
+                    Grid.Column="1"
+                    Style="{StaticResource PreviewValueStyle}"
+                    Text="{Binding PreviewedItem.DateOfBirth, StringFormat='{}{0:dd MMM yyyy}'}"
+                    ToolTip="{Binding PreviewedItem.DateOfBirth, StringFormat='{}{0:dd MMM yyyy}'}" />
+                </Grid>
+
+                <TextBlock
+                  FontSize="13"
+                  FontStyle="Italic"
+                  Foreground="{DynamicResource TextFillColorDisabledBrush}"
+                  Text="No contact details added."
+                  Visibility="{Binding PreviewedItem.HasContactDetails, Converter={converters:InverseBooleanToVisibilityConverter}}" />
+
+                <atoms:Divider Margin="0,16" />
+
+                <!--  Timeline  -->
+                <TextBlock Style="{StaticResource PreviewSectionHeaderStyle}" Text="Timeline" />
+
+                <Grid Margin="0,0,0,8">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="104" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+
+                  <TextBlock Style="{StaticResource PreviewLabelStyle}" Text="Created" />
+
+                  <TextBlock
+                    Grid.Column="1"
+                    FontSize="14"
+                    Text="{Binding PreviewedItem.CreatedAt, Converter={converters:RelativeDateTimeConverter}}"
+                    ToolTip="{Binding PreviewedItem.CreatedAt, Converter={converters:FullLocalDateTimeConverter}}" />
+                </Grid>
+
+                <Grid Margin="0,0,0,8">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="104" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+
+                  <TextBlock Style="{StaticResource PreviewLabelStyle}" Text="Last updated" />
+
+                  <TextBlock
+                    Grid.Column="1"
+                    FontSize="14"
+                    Text="{Binding PreviewedItem.UpdatedAt, Converter={converters:RelativeDateTimeConverter}}"
+                    ToolTip="{Binding PreviewedItem.UpdatedAt, Converter={converters:FullLocalDateTimeConverter}}" />
+                </Grid>
+
+                <Grid Margin="0,0,0,8">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="104" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+
+                  <TextBlock Style="{StaticResource PreviewLabelStyle}" Text="Deleted" />
+
+                  <TextBlock
+                    Grid.Column="1"
+                    FontSize="14"
+                    Text="{Binding PreviewedItem.DeletedAt, Converter={converters:RelativeDateTimeConverter}}"
+                    ToolTip="{Binding PreviewedItem.DeletedAt, Converter={converters:FullLocalDateTimeConverter}}" />
+                </Grid>
+              </StackPanel>
+            </ScrollViewer>
+
+            <Border
+              Grid.Row="2"
+              Padding="24,12"
+              BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+              BorderThickness="0,1,0,0"
+              Visibility="{Binding PreviewedItem, Converter={converters:NullToVisibilityConverter}}">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="8" />
+                  <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <ui:Button
+                  Grid.Column="0"
+                  Padding="16,8"
+                  HorizontalAlignment="Stretch"
+                  Command="{Binding RestoreCommand}"
+                  CommandParameter="{Binding PreviewedItem}"
+                  Content="Restore"
+                  Icon="{ui:SymbolIcon ArrowUndo24}" />
+
+                <ui:Button
+                  Grid.Column="2"
+                  Padding="16,8"
+                  HorizontalAlignment="Stretch"
+                  Appearance="Transparent"
+                  Command="{Binding PurgeCommand}"
+                  CommandParameter="{Binding PreviewedItem}"
+                  Content="Delete"
+                  Foreground="IndianRed"
+                  Icon="{ui:SymbolIcon Delete24}"
+                  ToolTip="Delete permanently" />
+              </Grid>
+            </Border>
+          </Grid>
+        </ui:Card>
       </Grid>
-    </ui:Card>
+    </Grid>
   </Grid>
 </UserControl>

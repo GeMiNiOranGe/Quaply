@@ -21,6 +21,112 @@ public partial class ProfileTrashViewModel(
     private readonly IProfileService _service = service;
     private readonly IDialogPresenter _dialogPresenter = dialogPresenter;
 
+    // Guard flag to prevent IsAllSelected's setter and per-item ToggleSelection
+    // from re-triggering each other in a loop.
+    private bool _isSyncingSelectAll;
+
+    private int _loadRequestId;
+
+    public static IReadOnlyList<int> PageSizeOptions { get; } = [20, 50, 100];
+
+    [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
+    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+    [ObservableProperty]
+    public partial int CurrentPage { get; set; } = 1;
+
+    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+    [ObservableProperty]
+    public partial int TotalPages { get; set; } = 1;
+
+    [ObservableProperty]
+    public partial int PageSize { get; set; } = PageSizeOptions[0];
+
+    [ObservableProperty]
+    public partial int FilteredCount { get; set; }
+
+    [ObservableProperty]
+    public partial int TotalCount { get; set; }
+
+    public bool IsFiltering =>
+        !string.IsNullOrWhiteSpace(SearchText)
+        || SelectedDeletedRange != RelativeDateRange.All;
+
+    public bool HasAnyItems => TotalCount > 0;
+
+    public string PageIndicator => $"Page {CurrentPage} of {TotalPages}";
+
+    public string ResultSummary
+    {
+        get
+        {
+            if (Items.Count == 0)
+            {
+                return "No profiles";
+            }
+
+            int first = (CurrentPage - 1) * PageSize + 1;
+            int last = first + Items.Count - 1;
+            return $"Showing {first}-{last} of {FilteredCount}";
+        }
+    }
+
+    public string EmptyStateTitle =>
+        HasAnyItems ? "No matching profiles" : "Trash is empty";
+
+    public string EmptyStateMessage =>
+        HasAnyItems
+            ? "Try changing your search or filters."
+            : "Deleted profiles will show up here.";
+
+    private bool CanGoToPreviousPage => CurrentPage > 1;
+    private bool CanGoToNextPage => CurrentPage < TotalPages;
+
+    [ObservableProperty]
+    public partial bool IsSearching { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsLoading { get; set; }
+
+    [ObservableProperty]
+    public partial double PreviewPanelWidth { get; set; }
+
+    [NotifyPropertyChangedFor(nameof(IsPreviewPanelOpen))]
+    [NotifyPropertyChangedFor(nameof(PinTooltip))]
+    [ObservableProperty]
+    public partial bool IsPreviewPanelPinned { get; set; }
+
+    [NotifyPropertyChangedFor(nameof(IsPreviewInlineVisible))]
+    [NotifyPropertyChangedFor(nameof(IsPreviewOverlayVisible))]
+    [NotifyPropertyChangedFor(nameof(IsPreviewPanelVisible))]
+    [ObservableProperty]
+    public partial bool IsPreviewPanelOpen { get; set; } = false;
+
+    // Pushed from `WidthBreakpointBehavior` (OneWayToSource).
+    [NotifyPropertyChangedFor(nameof(IsPreviewInlineVisible))]
+    [NotifyPropertyChangedFor(nameof(IsPreviewOverlayVisible))]
+    [NotifyPropertyChangedFor(nameof(IsPreviewPanelVisible))]
+    [ObservableProperty]
+    public partial bool IsPreviewOverlayMode { get; set; }
+
+    public string PinTooltip =>
+        IsPreviewPanelPinned ? "Unpin panel" : "Keep panel open";
+
+    public string SortDirectionTooltip =>
+        IsSortDescending ? "Sort ascending" : "Sort descending";
+
+    // The panel occupies a separate column next to the card list.
+    public bool IsPreviewInlineVisible =>
+        IsPreviewPanelOpen && !IsPreviewOverlayMode;
+
+    // A panel floats above the list. It appears only when there is an item
+    // to view; an empty state overlay (e.g., "Select a row...")
+    // would merely obscure the list unnecessarily.
+    public bool IsPreviewOverlayVisible =>
+        IsPreviewPanelOpen && IsPreviewOverlayMode && PreviewedItem is not null;
+
+    public bool IsPreviewPanelVisible =>
+        IsPreviewInlineVisible || IsPreviewOverlayVisible;
+
     [ObservableProperty]
     public partial DeletedProfileItem? SelectedItem { get; set; }
 
@@ -31,18 +137,179 @@ public partial class ProfileTrashViewModel(
         {
             field = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(HasVisibleItems));
         }
     } = [];
+
+    [NotifyPropertyChangedFor(nameof(IsPreviewOverlayVisible))]
+    [NotifyPropertyChangedFor(nameof(IsPreviewPanelVisible))]
+    [ObservableProperty]
+    public partial DeletedProfileItem? PreviewedItem { get; set; }
+
+    [ObservableProperty]
+    public partial string SearchText { get; set; } = string.Empty;
+
+    public bool HasVisibleItems => Items.Count > 0;
+
+    public int SelectedCount => Items.Count(i => i.IsSelected);
+
+    public bool HasSelection => SelectedCount > 0;
+
+    [ObservableProperty]
+    public partial RelativeDateRange SelectedDeletedRange { get; set; } =
+        RelativeDateRange.All;
+
+    [ObservableProperty]
+    public partial bool? IsAllSelected { get; set; } = false;
+
+    [ObservableProperty]
+    public partial DeletedProfileSortField SortField { get; set; } =
+        DeletedProfileSortField.DeletedAt;
+
+    [NotifyPropertyChangedFor(nameof(SortDirectionTooltip))]
+    [ObservableProperty]
+    public partial bool IsSortDescending { get; set; } = true;
 
     public async Task OnNavigatedToAsync()
     {
         await LoadAsync();
     }
 
+    partial void OnPageSizeChanged(int value)
+    {
+        ReloadFromFirstPage();
+    }
+
+    partial void OnSearchTextChanged(string value)
+    {
+        IsSearching = true;
+        ReloadFromFirstPage(debounce: true);
+    }
+
+    partial void OnSelectedDeletedRangeChanged(RelativeDateRange value)
+    {
+        ReloadFromFirstPage();
+    }
+
+    partial void OnSortFieldChanged(DeletedProfileSortField value)
+    {
+        ReloadFromFirstPage();
+    }
+
+    partial void OnIsSortDescendingChanged(bool value)
+    {
+        ReloadFromFirstPage();
+    }
+
+    partial void OnIsAllSelectedChanged(bool? value)
+    {
+        // Skip when we're the ones setting this value programmatically
+        // (see UpdateSelectAllState), or when it's the indeterminate state,
+        // which should only ever be computed, never set by the user directly.
+        if (_isSyncingSelectAll || value is null)
+        {
+            return;
+        }
+
+        foreach (DeletedProfileItem item in Items)
+        {
+            item.IsSelected = value.Value;
+        }
+
+        RaiseSelectionChanged();
+    }
+
+    partial void OnIsPreviewPanelPinnedChanged(bool value)
+    {
+        // Unpin while the panel is empty: there's no reason to keep it open,
+        // following the rule "unpinned + nothing to show = closed."
+        if (!value && PreviewedItem is null)
+        {
+            IsPreviewPanelOpen = false;
+        }
+    }
+
+    partial void OnIsPreviewOverlayModeChanged(bool value)
+    {
+        // Returning to inline mode: the pinned panel must reappear
+        // (it might have been closed while in overlay mode).
+        if (!value && IsPreviewPanelPinned)
+        {
+            IsPreviewPanelOpen = true;
+        }
+    }
+
     [RelayCommand]
     private async Task GoBackAsync()
     {
         await Navigator.NavigateToAsync<ProfileViewModel>();
+    }
+
+    [RelayCommand]
+    private void SetDeletedRange(RelativeDateRange range)
+    {
+        SelectedDeletedRange = range;
+    }
+
+    [RelayCommand]
+    private void SetSortField(DeletedProfileSortField field)
+    {
+        SortField = field;
+    }
+
+    [RelayCommand]
+    private void ToggleSortDirection()
+    {
+        IsSortDescending = !IsSortDescending;
+    }
+
+    [RelayCommand]
+    private async Task RefreshAsync()
+    {
+        await LoadAsync();
+    }
+
+    [RelayCommand(CanExecute = nameof(HasAnyItems))]
+    private async Task EmptyAsync()
+    {
+        bool confirmed = await _dialogPresenter.ShowConfirmationAsync(
+            title: "Empty trash?",
+            message: $"This will permanently delete all {TotalCount} profiles in the trash, including any hidden by your search or filters. This action cannot be undone.",
+            primaryButtonText: "Empty trash",
+            closeButtonText: "Cancel",
+            defaultButton: ContentDialogButton.Close
+        );
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        await _service.PurgeDeletedProfilesAsync();
+
+        ClearPreviewIfRemoved([.. Items]);
+        await LoadAsync();
+    }
+
+    // Called by the checkbox column's Checked/Unchecked so the bulk toolbar
+    // and "N selected" count stay in sync.
+    [RelayCommand]
+    private void ToggleSelection()
+    {
+        RaiseSelectionChanged();
+        UpdateSelectAllState();
+    }
+
+    [RelayCommand]
+    private void ViewDetails(DeletedProfileItem? item)
+    {
+        if (item is null)
+        {
+            return;
+        }
+
+        PreviewedItem = item;
+        IsPreviewPanelOpen = true;
     }
 
     [RelayCommand]
@@ -66,8 +333,8 @@ public partial class ProfileTrashViewModel(
         }
 
         bool confirmed = await _dialogPresenter.ShowConfirmationAsync(
-            title: "Confirm permanent deletion",
-            message: $"Permanently delete the profile '{item.FullName}'? This action cannot be undone.",
+            title: "Delete permanently?",
+            message: BuildPurgeWarning([item]),
             primaryButtonText: "Delete permanently",
             closeButtonText: "Cancel",
             defaultButton: ContentDialogButton.Close
@@ -82,37 +349,246 @@ public partial class ProfileTrashViewModel(
         await ReloadAfterRemovalAsync([item]);
     }
 
-    private async Task LoadAsync()
+    [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
+    private async Task GoToPreviousPageAsync()
     {
+        CurrentPage--;
+        await LoadAsync();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
+    private async Task GoToNextPageAsync()
+    {
+        CurrentPage++;
+        await LoadAsync();
+    }
+
+    [RelayCommand]
+    private void TogglePreviewPanelPin()
+    {
+        IsPreviewPanelPinned = !IsPreviewPanelPinned;
+    }
+
+    [RelayCommand]
+    private void ClosePreviewPanel()
+    {
+        IsPreviewPanelOpen = false;
+
+        // Pinning is only relevant in inline mode. Temporarily closing
+        // the overlay should not clear the user's pinning selection.
+        if (!IsPreviewOverlayMode)
+        {
+            IsPreviewPanelPinned = false;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private async Task RestoreSelectedAsync()
+    {
+        List<DeletedProfileItem> selected = [.. Items.Where(i => i.IsSelected)];
+
+        if (selected.Count == 0)
+        {
+            return;
+        }
+
+        await _service.RestoreRangeProfilesAsync(
+            selected.Select(i => i.Profile.Id)
+        );
+
+        await ReloadAfterRemovalAsync(selected);
+    }
+
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private async Task PurgeSelectedAsync()
+    {
+        List<DeletedProfileItem> selected = [.. Items.Where(i => i.IsSelected)];
+
+        if (selected.Count == 0)
+        {
+            return;
+        }
+
+        bool confirmed = await _dialogPresenter.ShowConfirmationAsync(
+            title: $"Delete {selected.Count} items permanently?",
+            message: BuildPurgeWarning(selected),
+            primaryButtonText: "Delete permanently",
+            closeButtonText: "Cancel",
+            defaultButton: ContentDialogButton.Close
+        );
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        await _service.PurgeRangeProfilesAsync(
+            selected.Select(i => i.Profile.Id)
+        );
+
+        await ReloadAfterRemovalAsync(selected);
+    }
+
+    [RelayCommand]
+    private void ClearSelection()
+    {
+        foreach (DeletedProfileItem item in Items)
+        {
+            item.IsSelected = false;
+        }
+
+        RaiseSelectionChanged();
+        UpdateSelectAllState();
+    }
+
+    private void RaiseSelectionChanged()
+    {
+        OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(HasSelection));
+
+        RestoreSelectedCommand.NotifyCanExecuteChanged();
+        PurgeSelectedCommand.NotifyCanExecuteChanged();
+    }
+
+    private void RaisePagingChanged()
+    {
+        OnPropertyChanged(nameof(ResultSummary));
+        OnPropertyChanged(nameof(PageIndicator));
+        OnPropertyChanged(nameof(IsFiltering));
+        OnPropertyChanged(nameof(HasAnyItems));
+        OnPropertyChanged(nameof(EmptyStateTitle));
+        OnPropertyChanged(nameof(EmptyStateMessage));
+        EmptyCommand.NotifyCanExecuteChanged();
+    }
+
+    private void ClearPreviewIfRemoved(
+        IEnumerable<DeletedProfileItem> removedItems
+    )
+    {
+        if (PreviewedItem is null || !removedItems.Contains(PreviewedItem))
+        {
+            return;
+        }
+
+        PreviewedItem = null;
+
+        // If pinned: keep the panel open and display the empty state instead of
+        // having it disappear abruptly. If not pinned: close as usual.
+        if (!IsPreviewPanelPinned)
+        {
+            IsPreviewPanelOpen = false;
+        }
+    }
+
+    private static string BuildPurgeWarning(List<DeletedProfileItem> items)
+    {
+        string subject =
+            items.Count == 1
+                ? $"'{items[0].FullName}'"
+                : $"{items.Count} profiles";
+
+        return $"This will permanently delete {subject}. This action cannot be undone.";
+    }
+
+    private void UpdateSelectAllState()
+    {
+        _isSyncingSelectAll = true;
+
+        IsAllSelected = Items.Count switch
+        {
+            0 => false,
+            _ when Items.All(i => i.IsSelected) => true,
+            _ when Items.All(i => !i.IsSelected) => false,
+            _ => null, // Indeterminate: select only a portion
+        };
+
+        _isSyncingSelectAll = false;
+    }
+
+    private async Task LoadAsync(bool debounce = false)
+    {
+        int requestId = ++_loadRequestId;
+
+        if (debounce)
+        {
+            await Task.Delay(300);
+
+            // While waiting, if the user types another character
+            // -> this request is obsolete; discard it.
+            if (requestId != _loadRequestId)
+            {
+                return;
+            }
+        }
+
+        IsSearching = false;
+        IsLoading = true;
+
         try
         {
             DeletedProfileQuery query = new(
-                SearchText: "",
-                DeletedRange: RelativeDateRange.All,
+                SearchText: SearchText,
+                DeletedRange: SelectedDeletedRange,
                 Sort: new DeletedProfileSortOption(
-                    Field: DeletedProfileSortField.DeletedAt,
-                    Descending: true
+                    Field: SortField,
+                    Descending: IsSortDescending
                 ),
-                Paging: new PageOption(1, 20)
+                Paging: new PageOption(CurrentPage, PageSize)
             );
 
             PagedResult<Profile> result =
                 await _service.GetDeletedProfilesPagedAsync(query);
 
+            // When nothing is filtered, the filtered count IS the trash total.
+            int totalCount = IsFiltering
+                ? await _service.GetDeletedProfileCountAsync()
+                : result.TotalCount;
+
+            // To handle cases where the database query runs slowly
+            // and a newer request intervenes while waiting for the result
+            // (even without debouncing).
+            if (requestId != _loadRequestId)
+            {
+                return;
+            }
+
             Items = new(result.Items.Select(p => new DeletedProfileItem(p)));
+
+            CurrentPage = result.Page;
+            TotalPages = result.TotalPages;
+            FilteredCount = result.TotalCount;
+            TotalCount = totalCount;
+
+            UpdateSelectAllState();
+            RaiseSelectionChanged();
+            RaisePagingChanged();
         }
-        finally { }
+        finally
+        {
+            if (requestId == _loadRequestId)
+            {
+                IsLoading = false;
+            }
+        }
     }
 
     private async Task ReloadAfterRemovalAsync(
         IEnumerable<DeletedProfileItem> removed
     )
     {
+        ClearPreviewIfRemoved(removed);
+
         if (SelectedItem is not null && removed.Contains(SelectedItem))
         {
             SelectedItem = null;
         }
 
         await LoadAsync();
+    }
+
+    private void ReloadFromFirstPage(bool debounce = false)
+    {
+        CurrentPage = 1;
+        _ = LoadAsync(debounce);
     }
 }
