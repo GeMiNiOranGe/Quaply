@@ -135,4 +135,29 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
         _unitOfWork.Profiles.Restore(profile);
         await _unitOfWork.SaveChangesAsync();
     }
+
+    public async Task RestoreRangeProfilesAsync(IEnumerable<int> ids)
+    {
+        if (!ids.Any())
+        {
+            return;
+        }
+
+        List<Profile> profiles = await _unitOfWork
+            .Profiles.GetManyByIdsIncludingDeletedAsync(ids)
+            .ToListAsync();
+
+        List<Profile> toRestore =
+        [
+            .. profiles.Where(entity => entity.DeletedAt is not null),
+        ];
+
+        if (toRestore.Count == 0)
+        {
+            return;
+        }
+
+        _unitOfWork.Profiles.RestoreRange(toRestore);
+        await _unitOfWork.SaveChangesAsync();
+    }
 }

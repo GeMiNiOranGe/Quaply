@@ -29,4 +29,6 @@ public interface IProfileService
     Task PurgeDeletedProfilesAsync();
 
     Task RestoreProfileAsync(int id);
+
+    Task RestoreRangeProfilesAsync(IEnumerable<int> ids);
 }

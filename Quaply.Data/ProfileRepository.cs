@@ -106,4 +106,14 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
         entity.UpdatedAt = DateTime.UtcNow;
         _context.Profiles.Update(entity);
     }
+
+    public void RestoreRange(IEnumerable<Profile> entities)
+    {
+        foreach (Profile entity in entities)
+        {
+            entity.DeletedAt = null;
+        }
+
+        _context.Profiles.UpdateRange(entities);
+    }
 }
