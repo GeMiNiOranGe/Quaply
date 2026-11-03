@@ -54,12 +54,7 @@ public partial class ProfileTrashViewModel(
         }
 
         await _service.RestoreProfileAsync(item.Id);
-        Items.Remove(item);
-
-        if (SelectedItem == item)
-        {
-            SelectedItem = null;
-        }
+        await ReloadAfterRemovalAsync([item]);
     }
 
     [RelayCommand]
@@ -84,12 +79,7 @@ public partial class ProfileTrashViewModel(
         }
 
         await _service.PurgeProfileAsync(item.Id);
-        Items.Remove(item);
-
-        if (SelectedItem == item)
-        {
-            SelectedItem = null;
-        }
+        await ReloadAfterRemovalAsync([item]);
     }
 
     private async Task LoadAsync()
@@ -112,5 +102,17 @@ public partial class ProfileTrashViewModel(
             Items = new(result.Items.Select(p => new DeletedProfileItem(p)));
         }
         finally { }
+    }
+
+    private async Task ReloadAfterRemovalAsync(
+        IEnumerable<DeletedProfileItem> removed
+    )
+    {
+        if (SelectedItem is not null && removed.Contains(SelectedItem))
+        {
+            SelectedItem = null;
+        }
+
+        await LoadAsync();
     }
 }
