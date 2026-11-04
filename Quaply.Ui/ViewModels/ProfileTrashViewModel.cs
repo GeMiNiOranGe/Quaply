@@ -529,7 +529,7 @@ public partial class ProfileTrashViewModel(
             DeletedProfileQuery query = new(
                 SearchText: SearchText,
                 DeletedRange: SelectedDeletedRange,
-                Sort: new DeletedProfileSortOption(
+                Sort: new SortOption<DeletedProfileSortField>(
                     Field: SortField,
                     Descending: IsSortDescending
                 ),

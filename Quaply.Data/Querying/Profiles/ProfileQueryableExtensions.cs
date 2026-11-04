@@ -38,7 +38,7 @@ internal static class ProfileQueryableExtensions
 
     public static IOrderedQueryable<Profile> ApplySort(
         this IQueryable<Profile> query,
-        DeletedProfileSortOption sort
+        SortOption<DeletedProfileSortField> sort
     )
     {
         IOrderedQueryable<Profile> ordered = sort.Field switch
