@@ -5,6 +5,6 @@ namespace Quaply.Data.Querying.WorkExperiences;
 public readonly record struct WorkExperienceQuery(
     string? SearchText,
     RelativeDateRange UpdatedRange,
-    WorkExperienceSortOption Sort,
+    SortOption<WorkExperienceSortField> Sort,
     PageOption Paging
 );

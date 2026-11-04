@@ -531,7 +531,7 @@ public partial class WorkExperienceViewModel(
             WorkExperienceQuery query = new(
                 SearchText: SearchText,
                 UpdatedRange: SelectedUpdatedRange,
-                Sort: new WorkExperienceSortOption(
+                Sort: new SortOption<WorkExperienceSortField>(
                     Field: SortField,
                     Descending: IsSortDescending
                 ),
