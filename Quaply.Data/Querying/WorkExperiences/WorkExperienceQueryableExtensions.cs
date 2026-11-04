@@ -83,7 +83,7 @@ internal static class WorkExperienceQueryableExtensions
 
     public static IOrderedQueryable<WorkExperience> ApplySort(
         this IQueryable<WorkExperience> query,
-        DeletedWorkExperienceSortOption sort
+        SortOption<DeletedWorkExperienceSortField> sort
     )
     {
         IOrderedQueryable<WorkExperience> ordered = sort.Field switch
