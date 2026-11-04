@@ -1,15 +1,15 @@
-using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Quaply.Data.Querying.Profiles;
 
 public enum DeletedProfileSortField
 {
-    [Description("Full name")]
+    [Display(Name = "Full name")]
     FullName,
 
-    [Description("Email")]
+    [Display(Name = "Email")]
     Email,
 
-    [Description("Deleted date")]
+    [Display(Name = "Deleted date")]
     DeletedAt,
 }
