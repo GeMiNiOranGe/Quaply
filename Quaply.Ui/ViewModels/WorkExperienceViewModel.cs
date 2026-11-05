@@ -528,10 +528,10 @@ public partial class WorkExperienceViewModel(
 
         try
         {
-            WorkExperienceQuery query = new(
+            ItemsQuery<WorkExperienceSortField> query = new(
                 SearchText: SearchText,
                 UpdatedRange: SelectedUpdatedRange,
-                Sort: new SortOption<WorkExperienceSortField>(
+                Sorting: new SortOption<WorkExperienceSortField>(
                     Field: SortField,
                     Descending: IsSortDescending
                 ),

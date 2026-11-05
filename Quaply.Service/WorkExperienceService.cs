@@ -17,7 +17,7 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
     }
 
     public async Task<PagedResult<WorkExperience>> GetWorkExperiencesPagedAsync(
-        WorkExperienceQuery query
+        ItemsQuery<WorkExperienceSortField> query
     )
     {
         return await _unitOfWork.WorkExperiences.GetManyPagedAsync(query);

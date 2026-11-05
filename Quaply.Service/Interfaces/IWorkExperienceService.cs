@@ -9,7 +9,7 @@ public interface IWorkExperienceService
     Task<WorkExperience?> GetWorkExperienceByIdAsync(int id);
 
     Task<PagedResult<WorkExperience>> GetWorkExperiencesPagedAsync(
-        WorkExperienceQuery query
+        ItemsQuery<WorkExperienceSortField> query
     );
 
     Task<PagedResult<WorkExperience>> GetDeletedWorkExperiencesPagedAsync(
