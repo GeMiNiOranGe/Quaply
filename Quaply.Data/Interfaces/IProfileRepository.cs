@@ -19,7 +19,7 @@ public interface IProfileRepository
     IAsyncEnumerable<Profile> GetManyDeletedAsync();
 
     Task<PagedResult<Profile>> GetManyDeletedPagedAsync(
-        DeletedProfileQuery query
+        DeletedItemsQuery<DeletedProfileSortField> query
     );
 
     Task<int> CountDeletedAsync();

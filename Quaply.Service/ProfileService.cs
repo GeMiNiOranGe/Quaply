@@ -21,7 +21,7 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
     }
 
     public async Task<PagedResult<Profile>> GetDeletedProfilesPagedAsync(
-        DeletedProfileQuery query
+        DeletedItemsQuery<DeletedProfileSortField> query
     )
     {
         return await _unitOfWork.Profiles.GetManyDeletedPagedAsync(query);

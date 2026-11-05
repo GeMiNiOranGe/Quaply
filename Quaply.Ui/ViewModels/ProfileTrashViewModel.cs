@@ -526,10 +526,10 @@ public partial class ProfileTrashViewModel(
 
         try
         {
-            DeletedProfileQuery query = new(
+            DeletedItemsQuery<DeletedProfileSortField> query = new(
                 SearchText: SearchText,
                 DeletedRange: SelectedDeletedRange,
-                Sort: new SortOption<DeletedProfileSortField>(
+                Sorting: new SortOption<DeletedProfileSortField>(
                     Field: SortField,
                     Descending: IsSortDescending
                 ),

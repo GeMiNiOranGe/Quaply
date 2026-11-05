@@ -47,7 +47,7 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
     }
 
     public async Task<PagedResult<Profile>> GetManyDeletedPagedAsync(
-        DeletedProfileQuery query
+        DeletedItemsQuery<DeletedProfileSortField> query
     )
     {
         IQueryable<Profile> filtered = _context
@@ -62,7 +62,7 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
         int total = await filtered.CountAsync();
 
         return await filtered
-            .ApplySort(query.Sort)
+            .ApplySort(query.Sorting)
             .ToPagedResultAsync(total, query.Paging);
     }
 
