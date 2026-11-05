@@ -25,7 +25,7 @@ public interface IWorkExperienceRepository
     );
 
     Task<PagedResult<WorkExperience>> GetManyDeletedPagedAsync(
-        DeletedWorkExperienceQuery query
+        DeletedItemsQuery<DeletedWorkExperienceSortField> query
     );
 
     Task<int> CountAsync();

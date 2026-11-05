@@ -13,7 +13,7 @@ public interface IWorkExperienceService
     );
 
     Task<PagedResult<WorkExperience>> GetDeletedWorkExperiencesPagedAsync(
-        DeletedWorkExperienceQuery query
+        DeletedItemsQuery<DeletedWorkExperienceSortField> query
     );
 
     Task<int> GetWorkExperienceCountAsync();

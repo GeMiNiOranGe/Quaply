@@ -81,7 +81,7 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
     }
 
     public async Task<PagedResult<WorkExperience>> GetManyDeletedPagedAsync(
-        DeletedWorkExperienceQuery query
+        DeletedItemsQuery<DeletedWorkExperienceSortField> query
     )
     {
         IQueryable<WorkExperience> filtered = _context
@@ -96,7 +96,7 @@ internal class WorkExperienceRepository(QuaplyDbContext context)
         int total = await filtered.CountAsync();
 
         return await filtered
-            .ApplySort(query.Sort)
+            .ApplySort(query.Sorting)
             .ToPagedResultAsync(total, query.Paging);
     }
 

@@ -534,10 +534,10 @@ public partial class WorkExperienceTrashViewModel(
 
         try
         {
-            DeletedWorkExperienceQuery query = new(
+            DeletedItemsQuery<DeletedWorkExperienceSortField> query = new(
                 SearchText: SearchText,
                 DeletedRange: SelectedDeletedRange,
-                Sort: new SortOption<DeletedWorkExperienceSortField>(
+                Sorting: new SortOption<DeletedWorkExperienceSortField>(
                     Field: SortField,
                     Descending: IsSortDescending
                 ),
