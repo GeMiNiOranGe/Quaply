@@ -45,9 +45,9 @@ public partial class ProfileViewModel(
     }
 
     [RelayCommand]
-    private async Task NavigateToProfileTrashAsync()
+    private async Task NavigateToRecoveryAsync()
     {
-        await Navigator.NavigateToAsync<ProfileTrashViewModel>();
+        await Navigator.NavigateToAsync<ProfileRecoveryViewModel>();
     }
 
     [RelayCommand]

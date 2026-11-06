@@ -27,7 +27,7 @@
         <pages:ProfilePage />
       </DataTemplate>
 
-      <DataTemplate DataType="{x:Type viewModels:ProfileTrashViewModel}">
+      <DataTemplate DataType="{x:Type viewModels:ProfileRecoveryViewModel}">
         <pages:ProfileTrashPage />
       </DataTemplate>
 

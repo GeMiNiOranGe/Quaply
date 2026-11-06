@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Quaply.Data.Models;
+using Quaply.Ui.Interfaces;
 
 namespace Quaply.Ui.Models;
 
@@ -9,12 +10,16 @@ namespace Quaply.Ui.Models;
 /// Requires <c>Profile.ResumeProfiles</c> to be loaded (Include) for
 /// <see cref="ResumeCount"/> to be accurate.
 /// </summary>
-public partial class DeletedProfileItem(Profile profile) : ObservableObject
+public partial class ProfileRecoveryItem(Profile profile)
+    : ObservableObject,
+        IRecoveryItem
 {
     public Profile Profile { get; } = profile;
 
     [ObservableProperty]
     public partial bool IsSelected { get; set; }
+
+    public string DisplayName => Profile.FullName;
 
     public int Id => Profile.Id;
 

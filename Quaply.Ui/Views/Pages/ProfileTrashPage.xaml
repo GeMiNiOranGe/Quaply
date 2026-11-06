@@ -664,7 +664,7 @@
                   MinWidth="72"
                   Padding="8,6"
                   Background="Transparent"
-                  ItemsSource="{x:Static viewModels:ProfileTrashViewModel.PageSizeOptions}"
+                  ItemsSource="{Binding PageSizeOptions}"
                   SelectedItem="{Binding PageSize}" />
 
                 <atoms:Divider Margin="12,8" Orientation="Vertical" />

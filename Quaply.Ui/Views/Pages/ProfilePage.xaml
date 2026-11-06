@@ -39,7 +39,7 @@
       <Button
         Margin="8,0,0,0"
         Padding="8"
-        Command="{Binding NavigateToProfileTrashCommand}"
+        Command="{Binding NavigateToRecoveryCommand}"
         Content="View Deleted Profiles" />
     </StackPanel>
 
