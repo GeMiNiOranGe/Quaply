@@ -39,7 +39,7 @@
         <pages:WorkExperiencePage />
       </DataTemplate>
 
-      <DataTemplate DataType="{x:Type viewModels:WorkExperienceTrashViewModel}">
+      <DataTemplate DataType="{x:Type viewModels:WorkExperienceRecoveryViewModel}">
         <pages:WorkExperienceTrashPage />
       </DataTemplate>
     </ResourceDictionary>

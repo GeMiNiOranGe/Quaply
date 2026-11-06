@@ -254,9 +254,9 @@ public partial class WorkExperienceViewModel(
     }
 
     [RelayCommand]
-    private async Task NavigateToTrashPageAsync()
+    private async Task NavigateToRecoveryAsync()
     {
-        await Navigator.NavigateToAsync<WorkExperienceTrashViewModel>();
+        await Navigator.NavigateToAsync<WorkExperienceRecoveryViewModel>();
     }
 
     [RelayCommand]

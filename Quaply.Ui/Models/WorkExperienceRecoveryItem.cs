@@ -8,14 +8,16 @@ namespace Quaply.Ui.Models;
 /// Wraps a soft-deleted WorkExperience with UI-only state (selection,
 /// purge countdown) without polluting the EF entity itself.
 /// </summary>
-public partial class DeletedWorkExperienceItem(WorkExperience workExperience)
+public partial class WorkExperienceRecoveryItem(WorkExperience workExperience)
     : ObservableObject,
-        ISelectableItem
+        IRecoveryItem
 {
     public WorkExperience WorkExperience { get; } = workExperience;
 
     [ObservableProperty]
     public partial bool IsSelected { get; set; }
+
+    public string DisplayName => CompanyName;
 
     public int Id => WorkExperience.Id;
 

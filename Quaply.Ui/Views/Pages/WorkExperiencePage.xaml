@@ -134,7 +134,7 @@
         <StackPanel Grid.Column="2" Orientation="Horizontal">
           <ui:Button
             Margin="0,0,8,0"
-            Command="{Binding NavigateToTrashPageCommand}"
+            Command="{Binding NavigateToRecoveryCommand}"
             Content="Trash"
             Icon="{ui:SymbolIcon Delete24}"
             ToolTip="View deleted work experiences" />
