@@ -1,5 +1,5 @@
 ﻿<UserControl
-  x:Class="Quaply.Ui.Views.Pages.WorkExperienceTrashPage"
+  x:Class="Quaply.Ui.Views.Pages.WorkExperienceRecoveryPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:atoms="clr-namespace:Quaply.Ui.Views.Atoms"
@@ -25,10 +25,10 @@
     <!--
       PROXY-BINDING: Bridge to this page's ViewModel for elements OUTSIDE
       the visual tree (ContextMenu, Popup, DataGridColumn.Header/Visibility).
-      Usage: {Binding Data.XxxCommand, Source={StaticResource WorkExperienceTrashPageProxy}}
+      Usage: {Binding Data.XxxCommand, Source={StaticResource WorkExperienceRecoveryPageProxy}}
       CommandParameter still uses a plain {Binding}.
     -->
-    <markup:BindingProxy x:Key="WorkExperienceTrashPageProxy" Data="{Binding}" />
+    <markup:BindingProxy x:Key="WorkExperienceRecoveryPageProxy" Data="{Binding}" />
 
     <ContextMenu
       x:Key="DeletedRangeMenu"
@@ -37,7 +37,7 @@
       Placement="Bottom">
       <ContextMenu.ItemContainerStyle>
         <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
-          <Setter Property="Command" Value="{Binding Data.SetDeletedRangeCommand, Source={StaticResource WorkExperienceTrashPageProxy}}" />
+          <Setter Property="Command" Value="{Binding Data.SetDeletedRangeCommand, Source={StaticResource WorkExperienceRecoveryPageProxy}}" />
 
           <Setter Property="CommandParameter" Value="{Binding}" />
 
@@ -48,7 +48,7 @@
           <Setter Property="IsChecked">
             <Setter.Value>
               <MultiBinding Converter="{converters:EnumEqualityConverter}" Mode="OneWay">
-                <Binding Path="Data.SelectedDeletedRange" Source="{StaticResource WorkExperienceTrashPageProxy}" />
+                <Binding Path="Data.SelectedDeletedRange" Source="{StaticResource WorkExperienceRecoveryPageProxy}" />
 
                 <Binding />
               </MultiBinding>
@@ -65,7 +65,7 @@
       Placement="Bottom">
       <ContextMenu.ItemContainerStyle>
         <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
-          <Setter Property="Command" Value="{Binding Data.SetSortFieldCommand, Source={StaticResource WorkExperienceTrashPageProxy}}" />
+          <Setter Property="Command" Value="{Binding Data.SetSortFieldCommand, Source={StaticResource WorkExperienceRecoveryPageProxy}}" />
 
           <Setter Property="CommandParameter" Value="{Binding}" />
 
@@ -76,7 +76,7 @@
           <Setter Property="IsChecked">
             <Setter.Value>
               <MultiBinding Converter="{converters:EnumEqualityConverter}" Mode="OneWay">
-                <Binding Path="Data.SortField" Source="{StaticResource WorkExperienceTrashPageProxy}" />
+                <Binding Path="Data.SortField" Source="{StaticResource WorkExperienceRecoveryPageProxy}" />
 
                 <Binding />
               </MultiBinding>
@@ -337,10 +337,10 @@
                             <ContextMenu Placement="Bottom">
                               <!--  Destructive action: buried behind an extra click on purpose  -->
                               <MenuItem
-                                Command="{Binding Data.EmptyCommand, Source={StaticResource WorkExperienceTrashPageProxy}}"
+                                Command="{Binding Data.EmptyCommand, Source={StaticResource WorkExperienceRecoveryPageProxy}}"
                                 Foreground="IndianRed"
                                 Header="Empty Trash"
-                                IsEnabled="{Binding Data.HasAnyItems, Source={StaticResource WorkExperienceTrashPageProxy}}">
+                                IsEnabled="{Binding Data.HasAnyItems, Source={StaticResource WorkExperienceRecoveryPageProxy}}">
                                 <MenuItem.Icon>
                                   <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />
                                 </MenuItem.Icon>
@@ -361,7 +361,7 @@
                         ToolTip="More">
                         <ui:Button.ContextMenu>
                           <ContextMenu Placement="Bottom">
-                            <MenuItem Command="{Binding Data.RefreshCommand, Source={StaticResource WorkExperienceTrashPageProxy}}" Header="Refresh">
+                            <MenuItem Command="{Binding Data.RefreshCommand, Source={StaticResource WorkExperienceRecoveryPageProxy}}" Header="Refresh">
                               <MenuItem.Icon>
                                 <ui:SymbolIcon Symbol="ArrowClockwise24" />
                               </MenuItem.Icon>
@@ -371,10 +371,10 @@
 
                             <!--  Destructive action: last, apart from the safe ones  -->
                             <MenuItem
-                              Command="{Binding Data.EmptyCommand, Source={StaticResource WorkExperienceTrashPageProxy}}"
+                              Command="{Binding Data.EmptyCommand, Source={StaticResource WorkExperienceRecoveryPageProxy}}"
                               Foreground="IndianRed"
                               Header="Empty Trash"
-                              IsEnabled="{Binding Data.HasAnyItems, Source={StaticResource WorkExperienceTrashPageProxy}}">
+                              IsEnabled="{Binding Data.HasAnyItems, Source={StaticResource WorkExperienceRecoveryPageProxy}}">
                               <MenuItem.Icon>
                                 <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />
                               </MenuItem.Icon>
@@ -418,7 +418,7 @@
 
             <!--  Table  -->
             <atoms:AdaptiveDataGrid
-              x:Name="workExperienceTrashDataGrid"
+              x:Name="workExperienceRecoveryDataGrid"
               Padding="{Binding SelectedCount, Converter={converters:ConditionalBottomInsetConverter}, ConverterParameter='0,0,0,0|72'}"
               layout:DataGridMultiSelectBehavior.AfterSyncCommand="{Binding ToggleSelectionCommand}"
               layout:DataGridMultiSelectBehavior.IsEnabled="True"
@@ -443,7 +443,7 @@
                       <CheckBox
                         Margin="16,0,0,0"
                         Padding="0"
-                        layout:DataGridMultiSelectBehavior.SelectAllFor="{Binding ElementName=workExperienceTrashDataGrid}"
+                        layout:DataGridMultiSelectBehavior.SelectAllFor="{Binding ElementName=workExperienceRecoveryDataGrid}"
                         IsChecked="{Binding DataContext.IsAllSelected, RelativeSource={RelativeSource AncestorType=DataGrid}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         IsThreeState="True" />
                     </DataTemplate>
@@ -454,7 +454,7 @@
                       <CheckBox
                         Margin="16,0,0,0"
                         Padding="2"
-                        Command="{Binding Data.ToggleSelectionCommand, Source={StaticResource WorkExperienceTrashPageProxy}}"
+                        Command="{Binding Data.ToggleSelectionCommand, Source={StaticResource WorkExperienceRecoveryPageProxy}}"
                         IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" />
                     </DataTemplate>
                   </DataGridTemplateColumn.CellTemplate>
@@ -522,7 +522,7 @@
                       <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                         <ui:Button
                           Margin="0,0,8,0"
-                          Command="{Binding Data.ViewDetailsCommand, Source={StaticResource WorkExperienceTrashPageProxy}}"
+                          Command="{Binding Data.ViewDetailsCommand, Source={StaticResource WorkExperienceRecoveryPageProxy}}"
                           CommandParameter="{Binding}"
                           Style="{StaticResource IconOnlyButtonStyle}"
                           ToolTip="View Details">
@@ -531,7 +531,7 @@
 
                         <ui:Button
                           Margin="0,0,8,0"
-                          Command="{Binding Data.RestoreCommand, Source={StaticResource WorkExperienceTrashPageProxy}}"
+                          Command="{Binding Data.RestoreCommand, Source={StaticResource WorkExperienceRecoveryPageProxy}}"
                           CommandParameter="{Binding}"
                           Style="{StaticResource IconOnlyButtonStyle}"
                           ToolTip="Restore">
@@ -539,7 +539,7 @@
                         </ui:Button>
 
                         <ui:Button
-                          Command="{Binding Data.PurgeCommand, Source={StaticResource WorkExperienceTrashPageProxy}}"
+                          Command="{Binding Data.PurgeCommand, Source={StaticResource WorkExperienceRecoveryPageProxy}}"
                           CommandParameter="{Binding}"
                           Style="{StaticResource IconOnlyButtonStyle}"
                           ToolTip="Delete Permanently">
