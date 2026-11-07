@@ -73,7 +73,7 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     );
 
     /// <summary>
-    /// Total number of items in the trash, ignoring search/filters.
+    /// Total number of deleted items, ignoring search/filters.
     /// </summary>
     protected abstract Task<int> FetchTotalCountAsync();
 
@@ -556,7 +556,7 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
 
             PagedResult<TEntity> result = await FetchPageAsync(query);
 
-            // When nothing is filtered, the filtered count IS the trash total.
+            // Without filters, the filtered count equals the total deleted items.
             int totalCount = IsFiltering
                 ? await FetchTotalCountAsync()
                 : result.TotalCount;

@@ -5,7 +5,7 @@ using Quaply.Ui.Interfaces;
 namespace Quaply.Ui.Models;
 
 /// <summary>
-/// Row wrapper for the Profile trash list: adds selection state and
+/// Row wrapper for the Profile recovery view: adds selection state and
 /// forwards the fields the DataGrid / preview panel bind to.
 /// Requires <c>Profile.ResumeProfiles</c> to be loaded (Include) for
 /// <see cref="ResumeCount"/> to be accurate.
