@@ -3,11 +3,11 @@ using System.Windows.Controls;
 namespace Quaply.Ui.Views.Pages;
 
 /// <summary>
-/// Interaction logic for ProfileTrashPage.xaml
+/// Interaction logic for ProfileRecoveryPage.xaml
 /// </summary>
-public partial class ProfileTrashPage : UserControl
+public partial class ProfileRecoveryPage : UserControl
 {
-    public ProfileTrashPage()
+    public ProfileRecoveryPage()
     {
         InitializeComponent();
     }

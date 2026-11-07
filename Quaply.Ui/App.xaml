@@ -28,7 +28,7 @@
       </DataTemplate>
 
       <DataTemplate DataType="{x:Type viewModels:ProfileRecoveryViewModel}">
-        <pages:ProfileTrashPage />
+        <pages:ProfileRecoveryPage />
       </DataTemplate>
 
       <DataTemplate DataType="{x:Type viewModels:WorkExperienceEditorViewModel}">

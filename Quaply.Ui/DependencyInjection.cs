@@ -35,7 +35,7 @@ public static class DependencyInjection
 
             services.AddSingleton<ProfileEditorPage>();
             services.AddSingleton<ProfilePage>();
-            services.AddSingleton<ProfileTrashPage>();
+            services.AddSingleton<ProfileRecoveryPage>();
             services.AddSingleton<WorkExperienceEditorPage>();
             services.AddSingleton<WorkExperiencePage>();
             services.AddSingleton<WorkExperienceTrashPage>();
