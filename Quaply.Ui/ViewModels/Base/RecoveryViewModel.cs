@@ -19,7 +19,7 @@ namespace Quaply.Ui.ViewModels.Base;
 /// UI wrapper for one row, e.g. ProfileRecoveryItem.
 /// </typeparam>
 /// <typeparam name="TSortField">
-/// Sort-field enum, e.g. ProfileRecoverySortField.
+/// Sort-field enum, e.g. DeletedProfileSortField.
 /// </typeparam>
 public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     : NavigableViewModel,
@@ -96,12 +96,9 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     // Instance property (not static) so it works on an open generic base.
     public IReadOnlyList<int> PageSizeOptions => DefaultPageSizeOptions;
 
-    [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
-    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
     [ObservableProperty]
     public partial int CurrentPage { get; set; } = 1;
 
-    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
     [ObservableProperty]
     public partial int TotalPages { get; set; } = 1;
 
@@ -131,8 +128,13 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
         }
     }
 
-    private bool CanGoToPreviousPage => CurrentPage > 1;
-    private bool CanGoToNextPage => CurrentPage < TotalPages;
+    [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
+    [ObservableProperty]
+    public partial bool CanGoToPreviousPage { get; set; }
+
+    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+    [ObservableProperty]
+    public partial bool CanGoToNextPage { get; set; }
 
     #endregion
 
@@ -355,6 +357,11 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
     private async Task GoToPreviousPageAsync()
     {
+        if (IsLoading)
+        {
+            return;
+        }
+
         CurrentPage--;
         await LoadAsync();
     }
@@ -362,6 +369,11 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
     private async Task GoToNextPageAsync()
     {
+        if (IsLoading)
+        {
+            return;
+        }
+
         CurrentPage++;
         await LoadAsync();
     }
@@ -561,6 +573,8 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
             CurrentPage = result.Page;
             TotalPages = result.TotalPages;
             FilteredCount = result.TotalCount;
+            CanGoToPreviousPage = result.HasPreviousPage;
+            CanGoToNextPage = result.HasNextPage;
             TotalCount = totalCount;
 
             UpdateSelectAllState();
