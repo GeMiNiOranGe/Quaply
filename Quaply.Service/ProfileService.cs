@@ -20,11 +20,23 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
         return await _unitOfWork.Profiles.GetManyAsync().ToListAsync();
     }
 
+    public async Task<PagedResult<Profile>> GetProfilesPagedAsync(
+        ItemsQuery<ProfileSortField> query
+    )
+    {
+        return await _unitOfWork.Profiles.GetManyPagedAsync(query);
+    }
+
     public async Task<PagedResult<Profile>> GetDeletedProfilesPagedAsync(
         DeletedItemsQuery<DeletedProfileSortField> query
     )
     {
         return await _unitOfWork.Profiles.GetManyDeletedPagedAsync(query);
+    }
+
+    public Task<int> GetProfileCountAsync()
+    {
+        return _unitOfWork.Profiles.CountAsync();
     }
 
     public Task<int> GetDeletedProfileCountAsync()

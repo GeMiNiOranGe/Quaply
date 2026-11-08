@@ -10,9 +10,15 @@ public interface IProfileService
 
     Task<IEnumerable<Profile>> GetProfilesAsync();
 
+    Task<PagedResult<Profile>> GetProfilesPagedAsync(
+        ItemsQuery<ProfileSortField> query
+    );
+
     Task<PagedResult<Profile>> GetDeletedProfilesPagedAsync(
         DeletedItemsQuery<DeletedProfileSortField> query
     );
+
+    Task<int> GetProfileCountAsync();
 
     Task<int> GetDeletedProfileCountAsync();
 

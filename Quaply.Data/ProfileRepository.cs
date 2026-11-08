@@ -46,6 +46,25 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
             .AsAsyncEnumerable();
     }
 
+    public async Task<PagedResult<Profile>> GetManyPagedAsync(
+        ItemsQuery<ProfileSortField> query
+    )
+    {
+        IQueryable<Profile> filtered = _context
+            .Profiles.AsNoTracking()
+            .Include(entity => entity.ResumeProfiles)
+            .ApplySearch(query.SearchText)
+            .ApplyUpdatedAtRange(query.UpdatedRange);
+
+        // Sequential on purpose: a DbContext is not thread-safe.
+        // Counting before sorting is more efficient.
+        int total = await filtered.CountAsync();
+
+        return await filtered
+            .ApplySort(query.Sorting)
+            .ToPagedResultAsync(total, query.Paging);
+    }
+
     public async Task<PagedResult<Profile>> GetManyDeletedPagedAsync(
         DeletedItemsQuery<DeletedProfileSortField> query
     )
@@ -64,6 +83,11 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
         return await filtered
             .ApplySort(query.Sorting)
             .ToPagedResultAsync(total, query.Paging);
+    }
+
+    public Task<int> CountAsync()
+    {
+        return _context.Profiles.CountAsync();
     }
 
     public Task<int> CountDeletedAsync()
