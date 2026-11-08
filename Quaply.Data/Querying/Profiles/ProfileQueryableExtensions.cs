@@ -25,6 +25,17 @@ internal static class ProfileQueryableExtensions
         );
     }
 
+    public static IQueryable<Profile> ApplyUpdatedAtRange(
+        this IQueryable<Profile> query,
+        RelativeDateRange range
+    )
+    {
+        DateTime? cutoff = ResolveCutoff(range);
+        return cutoff is null
+            ? query
+            : query.Where(entity => entity.UpdatedAt >= cutoff);
+    }
+
     public static IQueryable<Profile> ApplyDeletedAtRange(
         this IQueryable<Profile> query,
         RelativeDateRange range
@@ -34,6 +45,32 @@ internal static class ProfileQueryableExtensions
         return cutoff is null
             ? query
             : query.Where(entity => entity.DeletedAt >= cutoff);
+    }
+
+    public static IOrderedQueryable<Profile> ApplySort(
+        this IQueryable<Profile> query,
+        SortOption<ProfileSortField> sort
+    )
+    {
+        IOrderedQueryable<Profile> ordered = sort.Field switch
+        {
+            ProfileSortField.FullName => sort.Descending
+                ? query.OrderByDescending(e => e.FullName)
+                : query.OrderBy(e => e.FullName),
+
+            ProfileSortField.Email => sort.Descending
+                ? query.OrderByDescending(e => e.Email)
+                : query.OrderBy(e => e.Email),
+
+            ProfileSortField.UpdatedAt => sort.Descending
+                ? query.OrderByDescending(e => e.UpdatedAt)
+                : query.OrderBy(e => e.UpdatedAt),
+
+            _ => throw ThrowHelper.InvalidEnumValue(sort.Field, nameof(sort)),
+        };
+
+        // Tiebreaker for stable paging when the primary sort key has duplicates.
+        return ordered.ThenBy(e => e.Id);
     }
 
     public static IOrderedQueryable<Profile> ApplySort(
