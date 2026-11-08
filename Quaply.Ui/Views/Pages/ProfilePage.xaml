@@ -27,15 +27,16 @@
       Grid.Row="0"
       Margin="0,0,0,8"
       Orientation="Horizontal">
-      <Button
-        Padding="8"
-        Command="{Binding AddProfileCommand}"
-        Content="+ Add Profile" />
+      <ui:Button
+        Command="{Binding GoBackCommand}"
+        Icon="{ui:SymbolIcon ArrowLeft24}"
+        Style="{StaticResource IconOnlyButtonStyle}"
+        ToolTip="Back" />
       <Button
         Margin="8,0,0,0"
         Padding="8"
-        Command="{Binding NavigateToWorkExperienceCommand}"
-        Content="Go to Work Experience page" />
+        Command="{Binding AddCommand}"
+        Content="+ Add Profile" />
       <Button
         Margin="8,0,0,0"
         Padding="8"
@@ -105,9 +106,9 @@
           CanUserDeleteRows="False"
           HeadersVisibility="Column"
           IsReadOnly="True"
-          ItemsSource="{Binding Profiles}"
+          ItemsSource="{Binding Items}"
           RowHeight="48"
-          SelectedItem="{Binding SelectedProfile}"
+          SelectedItem="{Binding SelectedItem}"
           SelectionMode="Extended">
           <DataGrid.Columns>
             <!--  TODO: Fixing CheckBox's padding is not equal to the left padding with header and footer  -->
@@ -175,7 +176,7 @@
                       Margin="0,0,8,0"
                       Padding="8"
                       Appearance="Transparent"
-                      Command="{Binding DataContext.EditProfileCommand, ElementName=profilePage}"
+                      Command="{Binding DataContext.EditCommand, ElementName=profilePage}"
                       CommandParameter="{Binding}"
                       ToolTip="Edit">
                       <ui:SymbolIcon Symbol="Edit24" />
@@ -185,7 +186,7 @@
                       Margin="0,0,8,0"
                       Padding="8"
                       Appearance="Transparent"
-                      Command="{Binding DataContext.DuplicateProfileCommand, ElementName=profilePage}"
+                      Command="{Binding DataContext.DuplicateCommand, ElementName=profilePage}"
                       CommandParameter="{Binding}"
                       ToolTip="Duplicate">
                       <ui:SymbolIcon Symbol="Copy24" />
@@ -194,7 +195,7 @@
                     <ui:Button
                       Padding="8"
                       Appearance="Transparent"
-                      Command="{Binding DataContext.DeleteProfileCommand, ElementName=profilePage}"
+                      Command="{Binding DataContext.DeleteCommand, ElementName=profilePage}"
                       CommandParameter="{Binding}"
                       ToolTip="Delete">
                       <ui:SymbolIcon Foreground="IndianRed" Symbol="Delete24" />

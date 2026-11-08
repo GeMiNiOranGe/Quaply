@@ -16,9 +16,9 @@ public partial class ProfileViewModel(
     private readonly IProfileService _service = service;
 
     [ObservableProperty]
-    public partial Profile? SelectedProfile { get; set; }
+    public partial Profile? SelectedItem { get; set; }
 
-    public ObservableCollection<Profile> Profiles
+    public ObservableCollection<Profile> Items
     {
         get;
         private set
@@ -30,18 +30,13 @@ public partial class ProfileViewModel(
 
     public async Task OnNavigatedToAsync()
     {
-        await LoadProfilesAsync();
+        await LoadAsync();
     }
 
-    [RelayCommand(CanExecute = nameof(CanNavigateToWorkExperience))]
-    private async Task NavigateToWorkExperienceAsync()
+    [RelayCommand]
+    private async Task GoBackAsync()
     {
         await Navigator.NavigateToAsync<WorkExperienceViewModel>();
-    }
-
-    private static bool CanNavigateToWorkExperience()
-    {
-        return true;
     }
 
     [RelayCommand]
@@ -51,7 +46,7 @@ public partial class ProfileViewModel(
     }
 
     [RelayCommand]
-    private async Task AddProfileAsync()
+    private async Task AddAsync()
     {
         await Navigator.NavigateToAsync<
             ProfileEditorViewModel,
@@ -60,7 +55,7 @@ public partial class ProfileViewModel(
     }
 
     [RelayCommand]
-    private async Task EditProfileAsync(Profile? profile)
+    private async Task EditAsync(Profile? profile)
     {
         if (profile is null)
         {
@@ -74,7 +69,7 @@ public partial class ProfileViewModel(
     }
 
     [RelayCommand]
-    private async Task DuplicateProfileAsync(Profile? profile)
+    private async Task DuplicateAsync(Profile? profile)
     {
         if (profile is null)
         {
@@ -88,7 +83,7 @@ public partial class ProfileViewModel(
     }
 
     [RelayCommand]
-    private async Task DeleteProfileAsync(Profile? profile)
+    private async Task DeleteAsync(Profile? profile)
     {
         if (profile is null)
         {
@@ -96,17 +91,17 @@ public partial class ProfileViewModel(
         }
 
         await _service.DeleteProfileAsync(profile.Id);
-        Profiles.Remove(profile);
+        Items.Remove(profile);
 
-        if (SelectedProfile == profile)
+        if (SelectedItem == profile)
         {
-            SelectedProfile = null;
+            SelectedItem = null;
         }
     }
 
-    private async Task LoadProfilesAsync()
+    private async Task LoadAsync()
     {
         IEnumerable<Profile> profiles = await _service.GetProfilesAsync();
-        Profiles = new(profiles);
+        Items = new(profiles);
     }
 }
