@@ -26,6 +26,8 @@ public interface IProfileService
 
     Task DeleteProfileAsync(int id);
 
+    Task DeleteRangeProfilesAsync(IEnumerable<int> ids);
+
     Task PurgeProfileAsync(int id);
 
     Task PurgeRangeProfilesAsync(IEnumerable<int> ids);

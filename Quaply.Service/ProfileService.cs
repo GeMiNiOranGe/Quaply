@@ -68,6 +68,32 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
         await _unitOfWork.SaveChangesAsync();
     }
 
+    public async Task DeleteRangeProfilesAsync(IEnumerable<int> ids)
+    {
+        if (!ids.Any())
+        {
+            return;
+        }
+
+        List<Profile> profiles = await _unitOfWork
+            .Profiles.GetManyByIdsAsync(ids)
+            .ToListAsync();
+
+        if (profiles.Count == 0)
+        {
+            return;
+        }
+
+        // Remove links to ResumeProfile
+        List<ResumeProfile> links = await _unitOfWork
+            .ResumeProfiles.GetManyByProfileIdsAsync(ids)
+            .ToListAsync();
+        _unitOfWork.ResumeProfiles.RemoveRange(links);
+
+        _unitOfWork.Profiles.RemoveRange(profiles);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
     public async Task PurgeProfileAsync(int id)
     {
         Profile? profile =

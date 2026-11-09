@@ -23,6 +23,13 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
             .FirstOrDefaultAsync(entity => entity.Id == id);
     }
 
+    public IAsyncEnumerable<Profile> GetManyByIdsAsync(IEnumerable<int> ids)
+    {
+        return _context
+            .Profiles.Where(entity => ids.Contains(entity.Id))
+            .AsAsyncEnumerable();
+    }
+
     public IAsyncEnumerable<Profile> GetManyByIdsIncludingDeletedAsync(
         IEnumerable<int> ids
     )
@@ -107,6 +114,16 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
     {
         entity.DeletedAt = DateTime.UtcNow;
         _context.Profiles.Update(entity);
+    }
+
+    public void RemoveRange(IEnumerable<Profile> entities)
+    {
+        foreach (Profile entity in entities)
+        {
+            entity.DeletedAt = DateTime.UtcNow;
+        }
+
+        _context.Profiles.UpdateRange(entities);
     }
 
     public void Purge(Profile entity)

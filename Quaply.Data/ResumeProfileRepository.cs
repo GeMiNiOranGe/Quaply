@@ -19,6 +19,15 @@ internal class ResumeProfileRepository(QuaplyDbContext context)
             .AsAsyncEnumerable();
     }
 
+    public IAsyncEnumerable<ResumeProfile> GetManyByProfileIdsAsync(
+        IEnumerable<int> ids
+    )
+    {
+        return _context
+            .ResumeProfiles.Where(entity => ids.Contains(entity.ProfileId))
+            .AsAsyncEnumerable();
+    }
+
     public void RemoveRange(IEnumerable<ResumeProfile> entities)
     {
         _context.ResumeProfiles.RemoveRange(entities);

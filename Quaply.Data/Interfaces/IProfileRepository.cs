@@ -10,6 +10,8 @@ public interface IProfileRepository
 
     Task<Profile?> GetByIdIncludingDeletedAsync(int id);
 
+    IAsyncEnumerable<Profile> GetManyByIdsAsync(IEnumerable<int> ids);
+
     IAsyncEnumerable<Profile> GetManyByIdsIncludingDeletedAsync(
         IEnumerable<int> ids
     );
@@ -33,6 +35,8 @@ public interface IProfileRepository
     void Update(Profile entity);
 
     void Remove(Profile entity);
+
+    void RemoveRange(IEnumerable<Profile> entities);
 
     void Purge(Profile entity);
 
