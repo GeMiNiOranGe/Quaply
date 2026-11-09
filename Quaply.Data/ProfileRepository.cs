@@ -33,11 +33,6 @@ internal class ProfileRepository(QuaplyDbContext context) : IProfileRepository
             .AsAsyncEnumerable();
     }
 
-    public IAsyncEnumerable<Profile> GetManyAsync()
-    {
-        return _context.Profiles.AsNoTracking().AsAsyncEnumerable();
-    }
-
     public IAsyncEnumerable<Profile> GetManyDeletedAsync()
     {
         return _context

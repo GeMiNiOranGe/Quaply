@@ -8,8 +8,6 @@ public interface IProfileService
 {
     Task<Profile?> GetProfileByIdAsync(int id);
 
-    Task<IEnumerable<Profile>> GetProfilesAsync();
-
     Task<PagedResult<Profile>> GetProfilesPagedAsync(
         ItemsQuery<ProfileSortField> query
     );

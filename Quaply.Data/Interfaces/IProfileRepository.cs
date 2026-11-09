@@ -14,8 +14,6 @@ public interface IProfileRepository
         IEnumerable<int> ids
     );
 
-    IAsyncEnumerable<Profile> GetManyAsync();
-
     IAsyncEnumerable<Profile> GetManyDeletedAsync();
 
     Task<PagedResult<Profile>> GetManyPagedAsync(

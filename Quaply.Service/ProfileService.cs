@@ -15,11 +15,6 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
         return _unitOfWork.Profiles.GetByIdAsync(id);
     }
 
-    public async Task<IEnumerable<Profile>> GetProfilesAsync()
-    {
-        return await _unitOfWork.Profiles.GetManyAsync().ToListAsync();
-    }
-
     public async Task<PagedResult<Profile>> GetProfilesPagedAsync(
         ItemsQuery<ProfileSortField> query
     )

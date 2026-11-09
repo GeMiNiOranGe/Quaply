@@ -2,8 +2,11 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quaply.Data.Models;
+using Quaply.Data.Querying.Base;
+using Quaply.Data.Querying.Profiles;
 using Quaply.Service.Interfaces;
 using Quaply.Ui.Interfaces;
+using Quaply.Ui.Models;
 using Quaply.Ui.ViewModels.Base;
 
 namespace Quaply.Ui.ViewModels;
@@ -16,9 +19,9 @@ public partial class ProfileViewModel(
     private readonly IProfileService _service = service;
 
     [ObservableProperty]
-    public partial Profile? SelectedItem { get; set; }
+    public partial ProfileItem? SelectedItem { get; set; }
 
-    public ObservableCollection<Profile> Items
+    public ObservableCollection<ProfileItem> Items
     {
         get;
         private set
@@ -55,9 +58,9 @@ public partial class ProfileViewModel(
     }
 
     [RelayCommand]
-    private async Task EditAsync(Profile? profile)
+    private async Task EditAsync(ProfileItem? item)
     {
-        if (profile is null)
+        if (item is null)
         {
             return;
         }
@@ -65,13 +68,13 @@ public partial class ProfileViewModel(
         await Navigator.NavigateToAsync<
             ProfileEditorViewModel,
             ProfileEditorParameter
-        >(ProfileEditorParameter.ForEdit(profile.Id));
+        >(ProfileEditorParameter.ForEdit(item.Id));
     }
 
     [RelayCommand]
-    private async Task DuplicateAsync(Profile? profile)
+    private async Task DuplicateAsync(ProfileItem? item)
     {
-        if (profile is null)
+        if (item is null)
         {
             return;
         }
@@ -79,21 +82,21 @@ public partial class ProfileViewModel(
         await Navigator.NavigateToAsync<
             ProfileEditorViewModel,
             ProfileEditorParameter
-        >(ProfileEditorParameter.ForDuplicate(profile.Id));
+        >(ProfileEditorParameter.ForDuplicate(item.Id));
     }
 
     [RelayCommand]
-    private async Task DeleteAsync(Profile? profile)
+    private async Task DeleteAsync(ProfileItem? item)
     {
-        if (profile is null)
+        if (item is null)
         {
             return;
         }
 
-        await _service.DeleteProfileAsync(profile.Id);
-        Items.Remove(profile);
+        await _service.DeleteProfileAsync(item.Id);
+        Items.Remove(item);
 
-        if (SelectedItem == profile)
+        if (SelectedItem == item)
         {
             SelectedItem = null;
         }
@@ -101,7 +104,25 @@ public partial class ProfileViewModel(
 
     private async Task LoadAsync()
     {
-        IEnumerable<Profile> profiles = await _service.GetProfilesAsync();
-        Items = new(profiles);
+        try
+        {
+            ItemsQuery<ProfileSortField> query = new(
+                SearchText: null,
+                UpdatedRange: RelativeDateRange.All,
+                Sorting: new SortOption<ProfileSortField>(
+                    Field: ProfileSortField.UpdatedAt,
+                    Descending: true
+                ),
+                Paging: new PageOption(1, 20)
+            );
+
+            PagedResult<Profile> result = await _service.GetProfilesPagedAsync(
+                query
+            );
+            Items = new(
+                result.Items.Select(profile => new ProfileItem(profile))
+            );
+        }
+        finally { }
     }
 }
