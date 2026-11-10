@@ -1,50 +1,11 @@
 using Quaply.Data.Models;
-using Quaply.Data.Querying.Base;
 using Quaply.Data.Querying.WorkExperiences;
 
 namespace Quaply.Data.Interfaces;
 
 public interface IWorkExperienceRepository
-{
-    Task<WorkExperience?> GetByIdAsync(int id);
-
-    Task<WorkExperience?> GetByIdIncludingDeletedAsync(int id);
-
-    IAsyncEnumerable<WorkExperience> GetManyByIdsAsync(IEnumerable<int> ids);
-
-    IAsyncEnumerable<WorkExperience> GetManyByIdsIncludingDeletedAsync(
-        IEnumerable<int> ids
-    );
-
-    // IAsyncEnumerable<WorkExperience> GetManyAsync();
-
-    IAsyncEnumerable<WorkExperience> GetManyDeletedAsync();
-
-    Task<PagedResult<WorkExperience>> GetManyPagedAsync(
-        ItemsQuery<WorkExperienceSortField> query
-    );
-
-    Task<PagedResult<WorkExperience>> GetManyDeletedPagedAsync(
-        DeletedItemsQuery<DeletedWorkExperienceSortField> query
-    );
-
-    Task<int> CountAsync();
-
-    Task<int> CountDeletedAsync();
-
-    void Add(WorkExperience entity);
-
-    void Update(WorkExperience entity);
-
-    void Remove(WorkExperience entity);
-
-    void RemoveRange(IEnumerable<WorkExperience> entities);
-
-    void Purge(WorkExperience entity);
-
-    void PurgeRange(IEnumerable<WorkExperience> entities);
-
-    void Restore(WorkExperience entity);
-
-    void RestoreRange(IEnumerable<WorkExperience> entities);
-}
+    : IRepository<
+        WorkExperience,
+        WorkExperienceSortField,
+        DeletedWorkExperienceSortField
+    >;
