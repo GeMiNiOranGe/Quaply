@@ -32,7 +32,7 @@ internal class ResumeWorkExperienceRepository(QuaplyDbContext context)
             .AsAsyncEnumerable();
     }
 
-    public void RemoveRange(IEnumerable<ResumeWorkExperience> entities)
+    public void PurgeRange(IEnumerable<ResumeWorkExperience> entities)
     {
         _context.ResumeWorkExperiences.RemoveRange(entities);
     }

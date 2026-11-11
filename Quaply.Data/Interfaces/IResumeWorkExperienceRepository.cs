@@ -12,5 +12,5 @@ public interface IResumeWorkExperienceRepository
         IEnumerable<int> ids
     );
 
-    void RemoveRange(IEnumerable<ResumeWorkExperience> entities);
+    void PurgeRange(IEnumerable<ResumeWorkExperience> entities);
 }

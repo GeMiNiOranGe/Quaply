@@ -69,7 +69,7 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
         IEnumerable<ResumeWorkExperience> links = await _unitOfWork
             .ResumeWorkExperiences.GetManyByWorkExperienceIdAsync(id)
             .ToListAsync();
-        _unitOfWork.ResumeWorkExperiences.RemoveRange(links);
+        _unitOfWork.ResumeWorkExperiences.PurgeRange(links);
 
         // and set WorkExperienceId to null for Projects
         IEnumerable<Project> projects = await _unitOfWork
@@ -107,7 +107,7 @@ public class WorkExperienceService(IUnitOfWork unitOfWork)
         List<ResumeWorkExperience> links = await _unitOfWork
             .ResumeWorkExperiences.GetManyByWorkExperienceIdsAsync(ids)
             .ToListAsync();
-        _unitOfWork.ResumeWorkExperiences.RemoveRange(links);
+        _unitOfWork.ResumeWorkExperiences.PurgeRange(links);
 
         // and set WorkExperienceId to null for Projects
         List<Project> projects = await _unitOfWork
