@@ -10,5 +10,5 @@ public interface IResumeProfileRepository
         IEnumerable<int> ids
     );
 
-    void RemoveRange(IEnumerable<ResumeProfile> entities);
+    void PurgeRange(IEnumerable<ResumeProfile> entities);
 }

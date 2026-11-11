@@ -62,7 +62,7 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
         IEnumerable<ResumeProfile> links = await _unitOfWork
             .ResumeProfiles.GetManyByProfileIdAsync(id)
             .ToListAsync();
-        _unitOfWork.ResumeProfiles.RemoveRange(links);
+        _unitOfWork.ResumeProfiles.PurgeRange(links);
 
         _unitOfWork.Profiles.Remove(profile);
         await _unitOfWork.SaveChangesAsync();
@@ -88,7 +88,7 @@ public class ProfileService(IUnitOfWork unitOfWork) : IProfileService
         List<ResumeProfile> links = await _unitOfWork
             .ResumeProfiles.GetManyByProfileIdsAsync(ids)
             .ToListAsync();
-        _unitOfWork.ResumeProfiles.RemoveRange(links);
+        _unitOfWork.ResumeProfiles.PurgeRange(links);
 
         _unitOfWork.Profiles.RemoveRange(profiles);
         await _unitOfWork.SaveChangesAsync();

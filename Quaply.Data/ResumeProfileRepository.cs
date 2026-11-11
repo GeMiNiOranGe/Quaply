@@ -28,7 +28,7 @@ internal class ResumeProfileRepository(QuaplyDbContext context)
             .AsAsyncEnumerable();
     }
 
-    public void RemoveRange(IEnumerable<ResumeProfile> entities)
+    public void PurgeRange(IEnumerable<ResumeProfile> entities)
     {
         _context.ResumeProfiles.RemoveRange(entities);
     }
