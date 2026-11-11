@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Quaply.Data.Converters;
 using Quaply.Data.Models;
 
@@ -6,7 +7,8 @@ namespace Quaply.Data.Contexts;
 
 public partial class QuaplyDbContext
 {
-    // See Docs/DATABASE.md#timestamps
+    // See Docs/DATABASE.md#timestamps for details
+    // Lifecycle columns: changing only these does not count as a content edit.
     private static readonly HashSet<string> LifecycleOnly =
     [
         "UpdatedAt",
@@ -145,7 +147,7 @@ public partial class QuaplyDbContext
         DateTime now = DateTime.UtcNow;
 
         foreach (
-            var entry in ChangeTracker
+            EntityEntry? entry in ChangeTracker
                 .Entries()
                 .Where(e => e.State == EntityState.Modified)
         )
@@ -156,6 +158,8 @@ public partial class QuaplyDbContext
                 continue;
             }
 
+            // Real content change: not lifecycle-only, and value differs
+            // from original.
             bool contentChanged = entry.Properties.Any(p =>
                 p.IsModified
                 && !LifecycleOnly.Contains(p.Metadata.Name)
