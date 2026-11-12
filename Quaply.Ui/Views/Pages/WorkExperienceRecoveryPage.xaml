@@ -240,6 +240,13 @@
                   </atoms:AdaptiveContent.Compact>
                 </atoms:AdaptiveContent>
 
+                <ui:Button
+                  Margin="8,0,0,0"
+                  Command="{Binding ResetFiltersCommand}"
+                  Icon="{ui:SymbolIcon FilterDismiss24}"
+                  Style="{StaticResource IconOnlyButtonStyle}"
+                  ToolTip="Clear filters" />
+
                 <atoms:Divider Margin="12,8" Orientation="Vertical" />
 
                 <!--  Sort field  -->
@@ -414,6 +421,13 @@
                 HorizontalAlignment="Center"
                 Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                 Text="{Binding EmptyStateMessage}" />
+
+              <ui:Button
+                Margin="0,16,0,0"
+                HorizontalAlignment="Center"
+                Command="{Binding ResetFiltersCommand}"
+                Content="Clear filters"
+                Visibility="{Binding HasAnyItems, Converter={converters:BooleanToVisibilityConverter}}" />
             </StackPanel>
 
             <!--  Table  -->

@@ -34,6 +34,11 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
         100,
     ];
 
+    private static readonly string DefaultSearchText = string.Empty;
+
+    private static readonly RelativeDateRange DefaultDeletedRange =
+        RelativeDateRange.All;
+
     private readonly IDialogPresenter _dialogPresenter;
 
     // Prevents IsAllSelected's setter and per-item ToggleSelection
@@ -42,7 +47,7 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
 
     // Guard flag so that several query inputs can change at once
     // (constructor defaults, ResetFilters) but trigger ONE reload at most.
-    private readonly bool _suppressReload;
+    private bool _suppressReload;
 
     private int _loadRequestId;
 
@@ -63,6 +68,11 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     // -------------------------------------------------------------------------
     // Extension points (what a derived page must / may provide)
     // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Override when the page has filters beyond search + date.
+    /// </summary>
+    protected virtual bool HasExtraFilters => false;
 
     /// <summary>
     /// Lower-case plural noun for UI text, e.g. "profiles".
@@ -91,6 +101,11 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     protected abstract Task PurgeAllAsync();
 
     protected abstract Task NavigateBackAsync();
+
+    /// <summary>
+    /// Reset the extra filters; reload is handled by the base.
+    /// </summary>
+    protected virtual void ResetExtraFilters() { }
 
     // -------------------------------------------------------------------------
     // Paging
@@ -156,12 +171,16 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     [ObservableProperty]
     public partial TItem? SelectedItem { get; set; }
 
+    [NotifyPropertyChangedFor(nameof(IsFiltering))]
+    [NotifyCanExecuteChangedFor(nameof(ResetFiltersCommand))]
     [ObservableProperty]
-    public partial string SearchText { get; set; } = string.Empty;
+    public partial string SearchText { get; set; } = DefaultSearchText;
 
+    [NotifyPropertyChangedFor(nameof(IsFiltering))]
+    [NotifyCanExecuteChangedFor(nameof(ResetFiltersCommand))]
     [ObservableProperty]
     public partial RelativeDateRange SelectedDeletedRange { get; set; } =
-        RelativeDateRange.All;
+        DefaultDeletedRange;
 
     [ObservableProperty]
     public partial TSortField SortField { get; set; }
@@ -178,7 +197,8 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
 
     public bool IsFiltering =>
         !string.IsNullOrWhiteSpace(SearchText)
-        || SelectedDeletedRange != RelativeDateRange.All;
+        || SelectedDeletedRange != RelativeDateRange.All
+        || HasExtraFilters;
 
     public bool HasAnyItems => TotalCount > 0;
 
@@ -271,6 +291,11 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
 
     partial void OnSearchTextChanged(string value)
     {
+        if (_suppressReload)
+        {
+            return;
+        }
+
         IsSearching = true;
         ReloadFromFirstPage(debounce: true);
     }
@@ -356,6 +381,27 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     private void ToggleSortDirection()
     {
         IsSortDescending = !IsSortDescending;
+    }
+
+    // Used by the "Clear filters" button of the "no matching ..." empty state:
+    // the user is stuck on an empty list, so give them a one-click way out.
+    [RelayCommand(CanExecute = nameof(IsFiltering))]
+    private void ResetFilters()
+    {
+        _suppressReload = true;
+
+        try
+        {
+            SearchText = DefaultSearchText;
+            SelectedDeletedRange = DefaultDeletedRange;
+            ResetExtraFilters();
+        }
+        finally
+        {
+            _suppressReload = false;
+        }
+
+        ReloadFromFirstPage();
     }
 
     [RelayCommand]
@@ -603,6 +649,15 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
         }
     }
 
+    /// <summary>
+    /// Derived pages call this whenever one of their extra filters changes.
+    /// </summary>
+    protected void RaiseFilterStateChanged()
+    {
+        OnPropertyChanged(nameof(IsFiltering));
+        ResetFiltersCommand.NotifyCanExecuteChanged();
+    }
+
     private void ReloadFromFirstPage(bool debounce = false)
     {
         if (_suppressReload)
@@ -711,7 +766,6 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     {
         OnPropertyChanged(nameof(ResultSummary));
         OnPropertyChanged(nameof(PageIndicator));
-        OnPropertyChanged(nameof(IsFiltering));
         OnPropertyChanged(nameof(HasAnyItems));
         OnPropertyChanged(nameof(EmptyStateTitle));
         OnPropertyChanged(nameof(EmptyStateMessage));
