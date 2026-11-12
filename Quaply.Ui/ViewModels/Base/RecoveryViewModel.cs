@@ -40,7 +40,8 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     // from re-triggering each other in a loop.
     private bool _isSyncingSelectAll;
 
-    // Lets the constructor assign defaults without kicking off a load.
+    // Guard flag so that several query inputs can change at once
+    // (constructor defaults, ResetFilters) but trigger ONE reload at most.
     private readonly bool _suppressReload;
 
     private int _loadRequestId;
@@ -59,21 +60,21 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
         _suppressReload = false;
     }
 
-    #region Extension points (what derived classes must provide)
+    // -------------------------------------------------------------------------
+    // Extension points (what a derived page must / may provide)
+    // -------------------------------------------------------------------------
 
     /// <summary>
     /// Lower-case plural noun for UI text, e.g. "profiles".
     /// </summary>
     protected abstract string EntityNamePlural { get; }
 
-    protected abstract Task NavigateBackAsync();
-
     protected abstract Task<PagedResult<TEntity>> FetchPageAsync(
         DeletedItemsQuery<TSortField> query
     );
 
     /// <summary>
-    /// Total number of deleted items, ignoring search/filters.
+    /// Total number of records ignoring search/filters.
     /// </summary>
     protected abstract Task<int> FetchTotalCountAsync();
 
@@ -89,11 +90,12 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
 
     protected abstract Task PurgeAllAsync();
 
-    #endregion
+    protected abstract Task NavigateBackAsync();
 
-    #region Paging
+    // -------------------------------------------------------------------------
+    // Paging
+    // -------------------------------------------------------------------------
 
-    // Instance property (not static) so it works on an open generic base.
     public IReadOnlyList<int> PageSizeOptions => DefaultPageSizeOptions;
 
     [ObservableProperty]
@@ -136,9 +138,9 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     [ObservableProperty]
     public partial bool CanGoToNextPage { get; set; }
 
-    #endregion
-
-    #region Items, search, filter, sort
+    // -------------------------------------------------------------------------
+    // Items, loading, empty state, search, filter, sort
+    // -------------------------------------------------------------------------
 
     public ObservableCollection<TItem> Items
     {
@@ -193,9 +195,9 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
             ? "Try changing your search or filters."
             : $"Deleted {EntityNamePlural} will show up here.";
 
-    #endregion
-
-    #region Selection
+    // -------------------------------------------------------------------------
+    // Selection
+    // -------------------------------------------------------------------------
 
     [ObservableProperty]
     public partial bool? IsAllSelected { get; set; } = false;
@@ -204,9 +206,9 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
 
     public bool HasSelection => SelectedCount > 0;
 
-    #endregion
-
-    #region Preview panel
+    // -------------------------------------------------------------------------
+    // Preview panel
+    // -------------------------------------------------------------------------
 
     [ObservableProperty]
     public partial double PreviewPanelWidth { get; set; }
@@ -249,14 +251,18 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     public bool IsPreviewPanelVisible =>
         IsPreviewInlineVisible || IsPreviewOverlayVisible;
 
-    #endregion
-
-    #region Property-changed hooks
+    // -------------------------------------------------------------------------
+    // Lifecycle
+    // -------------------------------------------------------------------------
 
     public async Task OnNavigatedToAsync()
     {
         await LoadAsync();
     }
+
+    // -------------------------------------------------------------------------
+    // Property-changed hooks
+    // -------------------------------------------------------------------------
 
     partial void OnPageSizeChanged(int value)
     {
@@ -320,15 +326,19 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
         }
     }
 
-    #endregion
-
-    #region Commands
+    // -------------------------------------------------------------------------
+    // Commands: navigation
+    // -------------------------------------------------------------------------
 
     [RelayCommand]
     private async Task GoBackAsync()
     {
         await NavigateBackAsync();
     }
+
+    // -------------------------------------------------------------------------
+    // Commands: search / filter / sort / paging
+    // -------------------------------------------------------------------------
 
     [RelayCommand]
     private void SetDeletedRange(RelativeDateRange range)
@@ -519,10 +529,13 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
         await LoadAsync();
     }
 
-    #endregion
+    // -------------------------------------------------------------------------
+    // Loading
+    // -------------------------------------------------------------------------
 
-    #region Loading
-
+    /// <summary>
+    /// Reload the current page (keeps the current page number).
+    /// </summary>
     protected async Task LoadAsync(bool debounce = false)
     {
         int requestId = ++_loadRequestId;
@@ -615,9 +628,9 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
         await LoadAsync();
     }
 
-    #endregion
-
-    #region Helpers
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
 
     private List<TItem> GetSelectedItems()
     {
@@ -704,6 +717,4 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
         OnPropertyChanged(nameof(EmptyStateMessage));
         EmptyCommand.NotifyCanExecuteChanged();
     }
-
-    #endregion
 }
