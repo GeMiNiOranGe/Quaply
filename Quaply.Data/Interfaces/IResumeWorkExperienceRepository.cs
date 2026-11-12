@@ -9,7 +9,7 @@ public interface IResumeWorkExperienceRepository
     );
 
     IAsyncEnumerable<ResumeWorkExperience> GetManyByWorkExperienceIdsAsync(
-        IEnumerable<int> ids
+        IEnumerable<int> workExperienceIds
     );
 
     void PurgeRange(IEnumerable<ResumeWorkExperience> entities);

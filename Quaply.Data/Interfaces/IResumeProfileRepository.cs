@@ -7,7 +7,7 @@ public interface IResumeProfileRepository
     IAsyncEnumerable<ResumeProfile> GetManyByProfileIdAsync(int profileId);
 
     IAsyncEnumerable<ResumeProfile> GetManyByProfileIdsAsync(
-        IEnumerable<int> ids
+        IEnumerable<int> profileIds
     );
 
     void PurgeRange(IEnumerable<ResumeProfile> entities);

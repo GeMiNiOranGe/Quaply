@@ -21,13 +21,13 @@ internal class ProjectRepository(QuaplyDbContext context) : IProjectRepository
     }
 
     public IAsyncEnumerable<Project> GetManyByWorkExperienceIdsAsync(
-        IEnumerable<int> ids
+        IEnumerable<int> workExperienceIds
     )
     {
         return _context
             .Projects.Where(entity =>
                 entity.WorkExperienceId.HasValue
-                && ids.Contains(entity.WorkExperienceId.Value)
+                && workExperienceIds.Contains(entity.WorkExperienceId.Value)
             )
             .AsAsyncEnumerable();
     }

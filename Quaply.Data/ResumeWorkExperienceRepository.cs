@@ -22,12 +22,12 @@ internal class ResumeWorkExperienceRepository(QuaplyDbContext context)
     }
 
     public IAsyncEnumerable<ResumeWorkExperience> GetManyByWorkExperienceIdsAsync(
-        IEnumerable<int> ids
+        IEnumerable<int> workExperienceIds
     )
     {
         return _context
             .ResumeWorkExperiences.Where(entity =>
-                ids.Contains(entity.WorkExperienceId)
+                workExperienceIds.Contains(entity.WorkExperienceId)
             )
             .AsAsyncEnumerable();
     }

@@ -9,7 +9,7 @@ public interface IProjectRepository
     );
 
     IAsyncEnumerable<Project> GetManyByWorkExperienceIdsAsync(
-        IEnumerable<int> ids
+        IEnumerable<int> workExperienceIds
     );
 
     void Update(Project entity);

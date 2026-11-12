@@ -15,16 +15,18 @@ internal class ResumeProfileRepository(QuaplyDbContext context)
     )
     {
         return _context
-            .ResumeProfiles.Where(rp => rp.ProfileId == profileId)
+            .ResumeProfiles.Where(entity => entity.ProfileId == profileId)
             .AsAsyncEnumerable();
     }
 
     public IAsyncEnumerable<ResumeProfile> GetManyByProfileIdsAsync(
-        IEnumerable<int> ids
+        IEnumerable<int> profileIds
     )
     {
         return _context
-            .ResumeProfiles.Where(entity => ids.Contains(entity.ProfileId))
+            .ResumeProfiles.Where(entity =>
+                profileIds.Contains(entity.ProfileId)
+            )
             .AsAsyncEnumerable();
     }
 
