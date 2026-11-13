@@ -15,7 +15,7 @@
   xmlns:system="clr-namespace:System;assembly=mscorlib"
   xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
   xmlns:viewModels="clr-namespace:Quaply.Ui.ViewModels"
-  d:DataContext="{d:DesignInstance Type=viewModels:WorkExperienceViewModel,
+  d:DataContext="{d:DesignInstance Type=viewModels:WorkExperienceIndexViewModel,
                                    IsDesignTimeCreatable=False}"
   d:DesignHeight="450"
   d:DesignWidth="800"
@@ -272,6 +272,13 @@
                   </atoms:AdaptiveContent.Compact>
                 </atoms:AdaptiveContent>
 
+                <ui:Button
+                  Margin="8,0,0,0"
+                  Command="{Binding ResetFiltersCommand}"
+                  Icon="{ui:SymbolIcon FilterDismiss24}"
+                  Style="{StaticResource IconOnlyButtonStyle}"
+                  ToolTip="Clear filters" />
+
                 <atoms:Divider Margin="12,8" Orientation="Vertical" />
 
                 <!--  Sort field  -->
@@ -404,6 +411,22 @@
                 HorizontalAlignment="Center"
                 Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                 Text="{Binding EmptyStateMessage}" />
+
+              <ui:Button
+                Margin="0,16,0,0"
+                HorizontalAlignment="Center"
+                Appearance="Primary"
+                Command="{Binding AddCommand}"
+                Content="Add Work Experience"
+                Icon="{ui:SymbolIcon Add24}"
+                Visibility="{Binding HasAnyItems, Converter={converters:InverseBooleanToVisibilityConverter}}" />
+
+              <ui:Button
+                Margin="0,16,0,0"
+                HorizontalAlignment="Center"
+                Command="{Binding ResetFiltersCommand}"
+                Content="Clear filters"
+                Visibility="{Binding HasAnyItems, Converter={converters:BooleanToVisibilityConverter}}" />
             </StackPanel>
 
             <!--  Table  -->
@@ -796,7 +819,7 @@
                   MinWidth="72"
                   Padding="8,6"
                   Background="Transparent"
-                  ItemsSource="{x:Static viewModels:WorkExperienceViewModel.PageSizeOptions}"
+                  ItemsSource="{Binding PageSizeOptions}"
                   SelectedItem="{Binding PageSize}" />
 
                 <atoms:Divider Margin="12,8" Orientation="Vertical" />

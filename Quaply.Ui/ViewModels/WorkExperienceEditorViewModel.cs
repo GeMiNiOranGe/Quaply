@@ -239,7 +239,7 @@ public partial class WorkExperienceEditorViewModel(
                 await _service.CreateWorkExperienceAsync(workExperience);
             }
 
-            await Navigator.NavigateToAsync<WorkExperienceViewModel>();
+            await Navigator.NavigateToAsync<WorkExperienceIndexViewModel>();
         }
         finally
         {
@@ -257,7 +257,7 @@ public partial class WorkExperienceEditorViewModel(
     [RelayCommand]
     private async Task CancelAsync()
     {
-        await Navigator.NavigateToAsync<WorkExperienceViewModel>();
+        await Navigator.NavigateToAsync<WorkExperienceIndexViewModel>();
     }
 
     [RelayCommand(CanExecute = nameof(CanReset))]

@@ -35,7 +35,7 @@
         <pages:WorkExperienceEditorPage />
       </DataTemplate>
 
-      <DataTemplate DataType="{x:Type viewModels:WorkExperienceViewModel}">
+      <DataTemplate DataType="{x:Type viewModels:WorkExperienceIndexViewModel}">
         <pages:WorkExperiencePage />
       </DataTemplate>
 

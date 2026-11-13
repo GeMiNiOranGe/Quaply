@@ -37,7 +37,7 @@ public class MainViewModel : NavigableViewModel, IDisposable
     public bool IsProfileSelected => CurrentViewModel is ProfileIndexViewModel;
 
     public bool IsWorkExperienceSelected =>
-        CurrentViewModel is WorkExperienceViewModel;
+        CurrentViewModel is WorkExperienceIndexViewModel;
 
     public ICommand NavigateToProfileCommand => _navigateToProfileCommand;
 
@@ -66,12 +66,12 @@ public class MainViewModel : NavigableViewModel, IDisposable
 
     private async Task NavigateToWorkExperienceAsync()
     {
-        await _hostNavigator.NavigateToAsync<WorkExperienceViewModel>();
+        await _hostNavigator.NavigateToAsync<WorkExperienceIndexViewModel>();
     }
 
     private bool CanNavigateToWorkExperience()
     {
-        return _hostNavigator.Current is not WorkExperienceViewModel;
+        return _hostNavigator.Current is not WorkExperienceIndexViewModel;
     }
 
     private void OnNavigatorPropertyChanged(

@@ -10,7 +10,7 @@ namespace Quaply.Ui.Models;
 /// </summary>
 public partial class WorkExperienceItem(WorkExperience workExperience)
     : ObservableObject,
-        ISelectableItem
+        IIndexItem
 {
     public WorkExperience WorkExperience { get; } = workExperience;
 

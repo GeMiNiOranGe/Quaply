@@ -53,7 +53,7 @@ public class ProfileIndexViewModel(
 
     protected override Task NavigateBackAsync()
     {
-        return Navigator.NavigateToAsync<WorkExperienceViewModel>();
+        return Navigator.NavigateToAsync<WorkExperienceIndexViewModel>();
     }
 
     protected override Task OpenRecoveryAsync()
