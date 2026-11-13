@@ -23,7 +23,7 @@ public class ProfileRecoveryViewModel(
 
     protected override Task NavigateBackAsync()
     {
-        return Navigator.NavigateToAsync<ProfileViewModel>();
+        return Navigator.NavigateToAsync<ProfileIndexViewModel>();
     }
 
     protected override Task<PagedResult<Profile>> FetchPageAsync(

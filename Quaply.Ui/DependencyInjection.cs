@@ -27,7 +27,7 @@ public static class DependencyInjection
 
             services.AddTransient<MainViewModel>();
             services.AddTransient<ProfileEditorViewModel>();
-            services.AddTransient<ProfileViewModel>();
+            services.AddTransient<ProfileIndexViewModel>();
             services.AddTransient<ProfileRecoveryViewModel>();
             services.AddTransient<WorkExperienceEditorViewModel>();
             services.AddTransient<WorkExperienceViewModel>();

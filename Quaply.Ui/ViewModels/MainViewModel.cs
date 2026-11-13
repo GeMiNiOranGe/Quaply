@@ -34,7 +34,7 @@ public class MainViewModel : NavigableViewModel, IDisposable
 
     public ViewModel? CurrentViewModel => _hostNavigator.Current;
 
-    public bool IsProfileSelected => CurrentViewModel is ProfileViewModel;
+    public bool IsProfileSelected => CurrentViewModel is ProfileIndexViewModel;
 
     public bool IsWorkExperienceSelected =>
         CurrentViewModel is WorkExperienceViewModel;
@@ -56,12 +56,12 @@ public class MainViewModel : NavigableViewModel, IDisposable
 
     private async Task NavigateToProfileAsync()
     {
-        await _hostNavigator.NavigateToAsync<ProfileViewModel>();
+        await _hostNavigator.NavigateToAsync<ProfileIndexViewModel>();
     }
 
     private bool CanNavigateToProfile()
     {
-        return _hostNavigator.Current is not ProfileViewModel;
+        return _hostNavigator.Current is not ProfileIndexViewModel;
     }
 
     private async Task NavigateToWorkExperienceAsync()

@@ -200,7 +200,7 @@ public partial class ProfileEditorViewModel(
                 await _service.CreateProfileAsync(profile);
             }
 
-            await Navigator.NavigateToAsync<ProfileViewModel>();
+            await Navigator.NavigateToAsync<ProfileIndexViewModel>();
         }
         // TODO: Catch specific exceptions and show a dialog with the error
         // message.
@@ -227,7 +227,7 @@ public partial class ProfileEditorViewModel(
     [RelayCommand]
     private async Task CancelAsync()
     {
-        await Navigator.NavigateToAsync<ProfileViewModel>();
+        await Navigator.NavigateToAsync<ProfileIndexViewModel>();
     }
 
     [RelayCommand(CanExecute = nameof(CanReset))]

@@ -250,7 +250,7 @@ public partial class WorkExperienceViewModel(
     [RelayCommand]
     private async Task GoBackAsync()
     {
-        await Navigator.NavigateToAsync<ProfileViewModel>();
+        await Navigator.NavigateToAsync<ProfileIndexViewModel>();
     }
 
     [RelayCommand]

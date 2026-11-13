@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Quaply.Data.Models;
+using Quaply.Ui.Interfaces;
 
 namespace Quaply.Ui.Models;
 
@@ -8,7 +9,7 @@ namespace Quaply.Ui.Models;
 /// UI-only state (selection) plus display helpers, so the XAML stays free of
 /// formatting logic.
 /// </summary>
-public partial class ProfileItem(Profile profile) : ObservableObject
+public partial class ProfileItem(Profile profile) : ObservableObject, IIndexItem
 {
     public Profile Profile { get; } = profile;
 
