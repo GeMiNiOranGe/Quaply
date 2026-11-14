@@ -37,7 +37,7 @@ public static class DependencyInjection
             services.AddSingleton<ProfilePage>();
             services.AddSingleton<ProfileRecoveryPage>();
             services.AddSingleton<WorkExperienceEditorPage>();
-            services.AddSingleton<WorkExperiencePage>();
+            services.AddSingleton<WorkExperienceIndexPage>();
             services.AddSingleton<WorkExperienceRecoveryPage>();
             services.AddSingleton(provider => new MainWindow(
                 provider.GetRequiredService<IContentDialogService>()

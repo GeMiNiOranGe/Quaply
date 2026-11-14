@@ -1,5 +1,5 @@
-﻿<UserControl
-  x:Class="Quaply.Ui.Views.Pages.WorkExperiencePage"
+<UserControl
+  x:Class="Quaply.Ui.Views.Pages.WorkExperienceIndexPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:atoms="clr-namespace:Quaply.Ui.Views.Atoms"
@@ -25,10 +25,10 @@
     <!--
       PROXY-BINDING: Bridge to this page's ViewModel for elements OUTSIDE
       the visual tree (ContextMenu, Popup, DataGridColumn.Header/Visibility).
-      Usage: {Binding Data.XxxCommand, Source={StaticResource WorkExperiencePageProxy}}
+      Usage: {Binding Data.XxxCommand, Source={StaticResource WorkExperienceIndexPageProxy}}
       CommandParameter still uses a plain {Binding}.
     -->
-    <markup:BindingProxy x:Key="WorkExperiencePageProxy" Data="{Binding}" />
+    <markup:BindingProxy x:Key="WorkExperienceIndexPageProxy" Data="{Binding}" />
 
     <ContextMenu
       x:Key="UpdatedRangeMenu"
@@ -37,7 +37,7 @@
       Placement="Bottom">
       <ContextMenu.ItemContainerStyle>
         <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
-          <Setter Property="Command" Value="{Binding Data.SetUpdatedRangeCommand, Source={StaticResource WorkExperiencePageProxy}}" />
+          <Setter Property="Command" Value="{Binding Data.SetUpdatedRangeCommand, Source={StaticResource WorkExperienceIndexPageProxy}}" />
 
           <Setter Property="CommandParameter" Value="{Binding}" />
 
@@ -48,7 +48,7 @@
           <Setter Property="IsChecked">
             <Setter.Value>
               <MultiBinding Converter="{converters:EnumEqualityConverter}" Mode="OneWay">
-                <Binding Path="Data.SelectedUpdatedRange" Source="{StaticResource WorkExperiencePageProxy}" />
+                <Binding Path="Data.SelectedUpdatedRange" Source="{StaticResource WorkExperienceIndexPageProxy}" />
 
                 <Binding />
               </MultiBinding>
@@ -65,7 +65,7 @@
       Placement="Bottom">
       <ContextMenu.ItemContainerStyle>
         <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
-          <Setter Property="Command" Value="{Binding Data.SetSortFieldCommand, Source={StaticResource WorkExperiencePageProxy}}" />
+          <Setter Property="Command" Value="{Binding Data.SetSortFieldCommand, Source={StaticResource WorkExperienceIndexPageProxy}}" />
 
           <Setter Property="CommandParameter" Value="{Binding}" />
 
@@ -76,7 +76,7 @@
           <Setter Property="IsChecked">
             <Setter.Value>
               <MultiBinding Converter="{converters:EnumEqualityConverter}" Mode="OneWay">
-                <Binding Path="Data.SortField" Source="{StaticResource WorkExperiencePageProxy}" />
+                <Binding Path="Data.SortField" Source="{StaticResource WorkExperienceIndexPageProxy}" />
 
                 <Binding />
               </MultiBinding>
@@ -371,7 +371,7 @@
                         ToolTip="More">
                         <ui:Button.ContextMenu>
                           <ContextMenu Placement="Bottom">
-                            <MenuItem Command="{Binding Data.RefreshCommand, Source={StaticResource WorkExperiencePageProxy}}" Header="Refresh">
+                            <MenuItem Command="{Binding Data.RefreshCommand, Source={StaticResource WorkExperienceIndexPageProxy}}" Header="Refresh">
                               <MenuItem.Icon>
                                 <ui:SymbolIcon Symbol="ArrowClockwise24" />
                               </MenuItem.Icon>
@@ -494,7 +494,7 @@
                       <CheckBox
                         Margin="16,0,0,0"
                         Padding="2"
-                        Command="{Binding Data.ToggleSelectionCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                        Command="{Binding Data.ToggleSelectionCommand, Source={StaticResource WorkExperienceIndexPageProxy}}"
                         IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" />
                     </DataTemplate>
                   </DataGridTemplateColumn.CellTemplate>
@@ -634,7 +634,7 @@
                           <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                             <ui:Button
                               Margin="0,0,8,0"
-                              Command="{Binding Data.ViewDetailsCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                              Command="{Binding Data.ViewDetailsCommand, Source={StaticResource WorkExperienceIndexPageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="View Details">
@@ -643,7 +643,7 @@
 
                             <ui:Button
                               Margin="0,0,8,0"
-                              Command="{Binding Data.EditCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                              Command="{Binding Data.EditCommand, Source={StaticResource WorkExperienceIndexPageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="Edit">
@@ -658,7 +658,7 @@
                               <ui:Button.ContextMenu>
                                 <ContextMenu Placement="Bottom">
                                   <MenuItem
-                                    Command="{Binding Data.DuplicateCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                                    Command="{Binding Data.DuplicateCommand, Source={StaticResource WorkExperienceIndexPageProxy}}"
                                     CommandParameter="{Binding}"
                                     Header="Duplicate"
                                     Icon="{ui:SymbolIcon SaveCopy24}" />
@@ -666,7 +666,7 @@
                                   <Separator />
 
                                   <MenuItem
-                                    Command="{Binding Data.DeleteCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                                    Command="{Binding Data.DeleteCommand, Source={StaticResource WorkExperienceIndexPageProxy}}"
                                     CommandParameter="{Binding}"
                                     Foreground="IndianRed"
                                     Header="Delete"
@@ -691,7 +691,7 @@
                           <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                             <ui:Button
                               Margin="0,0,8,0"
-                              Command="{Binding Data.ViewDetailsCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                              Command="{Binding Data.ViewDetailsCommand, Source={StaticResource WorkExperienceIndexPageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="View Details">
@@ -700,7 +700,7 @@
 
                             <ui:Button
                               Margin="0,0,8,0"
-                              Command="{Binding Data.EditCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                              Command="{Binding Data.EditCommand, Source={StaticResource WorkExperienceIndexPageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="Edit">
@@ -708,7 +708,7 @@
                             </ui:Button>
 
                             <ui:Button
-                              Command="{Binding Data.DuplicateCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                              Command="{Binding Data.DuplicateCommand, Source={StaticResource WorkExperienceIndexPageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="Duplicate">
@@ -718,7 +718,7 @@
                             <atoms:Divider Margin="12,8" Orientation="Vertical" />
 
                             <ui:Button
-                              Command="{Binding Data.DeleteCommand, Source={StaticResource WorkExperiencePageProxy}}"
+                              Command="{Binding Data.DeleteCommand, Source={StaticResource WorkExperienceIndexPageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="Delete">
