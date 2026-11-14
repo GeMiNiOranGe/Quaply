@@ -3,11 +3,11 @@ using System.Windows.Controls;
 namespace Quaply.Ui.Views.Pages;
 
 /// <summary>
-/// Interaction logic for ProfilePage.xaml
+/// Interaction logic for ProfileIndexPage.xaml
 /// </summary>
-public partial class ProfilePage : UserControl
+public partial class ProfileIndexPage : UserControl
 {
-    public ProfilePage()
+    public ProfileIndexPage()
     {
         InitializeComponent();
     }

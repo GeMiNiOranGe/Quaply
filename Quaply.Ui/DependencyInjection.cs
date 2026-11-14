@@ -34,7 +34,7 @@ public static class DependencyInjection
             services.AddTransient<WorkExperienceRecoveryViewModel>();
 
             services.AddSingleton<ProfileEditorPage>();
-            services.AddSingleton<ProfilePage>();
+            services.AddSingleton<ProfileIndexPage>();
             services.AddSingleton<ProfileRecoveryPage>();
             services.AddSingleton<WorkExperienceEditorPage>();
             services.AddSingleton<WorkExperienceIndexPage>();

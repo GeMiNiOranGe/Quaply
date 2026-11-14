@@ -1,5 +1,5 @@
-﻿<UserControl
-  x:Class="Quaply.Ui.Views.Pages.ProfilePage"
+<UserControl
+  x:Class="Quaply.Ui.Views.Pages.ProfileIndexPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:atoms="clr-namespace:Quaply.Ui.Views.Atoms"
@@ -25,10 +25,10 @@
     <!--
       PROXY-BINDING: Bridge to this page's ViewModel for elements OUTSIDE
       the visual tree (ContextMenu, Popup, DataGridColumn.Header/Visibility).
-      Usage: {Binding Data.XxxCommand, Source={StaticResource ProfilePageProxy}}
+      Usage: {Binding Data.XxxCommand, Source={StaticResource ProfileIndexPageProxy}}
       CommandParameter still uses a plain {Binding}.
     -->
-    <markup:BindingProxy x:Key="ProfilePageProxy" Data="{Binding}" />
+    <markup:BindingProxy x:Key="ProfileIndexPageProxy" Data="{Binding}" />
 
     <!--  Preview panel text styles  -->
     <Style x:Key="PreviewSectionHeaderStyle" TargetType="TextBlock">
@@ -55,7 +55,7 @@
       Placement="Bottom">
       <ContextMenu.ItemContainerStyle>
         <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
-          <Setter Property="Command" Value="{Binding Data.SetUpdatedRangeCommand, Source={StaticResource ProfilePageProxy}}" />
+          <Setter Property="Command" Value="{Binding Data.SetUpdatedRangeCommand, Source={StaticResource ProfileIndexPageProxy}}" />
 
           <Setter Property="CommandParameter" Value="{Binding}" />
 
@@ -66,7 +66,7 @@
           <Setter Property="IsChecked">
             <Setter.Value>
               <MultiBinding Converter="{converters:EnumEqualityConverter}" Mode="OneWay">
-                <Binding Path="Data.SelectedUpdatedRange" Source="{StaticResource ProfilePageProxy}" />
+                <Binding Path="Data.SelectedUpdatedRange" Source="{StaticResource ProfileIndexPageProxy}" />
 
                 <Binding />
               </MultiBinding>
@@ -83,7 +83,7 @@
       Placement="Bottom">
       <ContextMenu.ItemContainerStyle>
         <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
-          <Setter Property="Command" Value="{Binding Data.SetSortFieldCommand, Source={StaticResource ProfilePageProxy}}" />
+          <Setter Property="Command" Value="{Binding Data.SetSortFieldCommand, Source={StaticResource ProfileIndexPageProxy}}" />
 
           <Setter Property="CommandParameter" Value="{Binding}" />
 
@@ -94,7 +94,7 @@
           <Setter Property="IsChecked">
             <Setter.Value>
               <MultiBinding Converter="{converters:EnumEqualityConverter}" Mode="OneWay">
-                <Binding Path="Data.SortField" Source="{StaticResource ProfilePageProxy}" />
+                <Binding Path="Data.SortField" Source="{StaticResource ProfileIndexPageProxy}" />
 
                 <Binding />
               </MultiBinding>
@@ -382,7 +382,7 @@
                         ToolTip="More">
                         <ui:Button.ContextMenu>
                           <ContextMenu Placement="Bottom">
-                            <MenuItem Command="{Binding Data.RefreshCommand, Source={StaticResource ProfilePageProxy}}" Header="Refresh">
+                            <MenuItem Command="{Binding Data.RefreshCommand, Source={StaticResource ProfileIndexPageProxy}}" Header="Refresh">
                               <MenuItem.Icon>
                                 <ui:SymbolIcon Symbol="ArrowClockwise24" />
                               </MenuItem.Icon>
@@ -496,7 +496,7 @@
                       <CheckBox
                         Margin="16,0,0,0"
                         Padding="2"
-                        Command="{Binding Data.ToggleSelectionCommand, Source={StaticResource ProfilePageProxy}}"
+                        Command="{Binding Data.ToggleSelectionCommand, Source={StaticResource ProfileIndexPageProxy}}"
                         IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" />
                     </DataTemplate>
                   </DataGridTemplateColumn.CellTemplate>
@@ -654,7 +654,7 @@
                           <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                             <ui:Button
                               Margin="0,0,8,0"
-                              Command="{Binding Data.ViewDetailsCommand, Source={StaticResource ProfilePageProxy}}"
+                              Command="{Binding Data.ViewDetailsCommand, Source={StaticResource ProfileIndexPageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="View Details">
@@ -663,7 +663,7 @@
 
                             <ui:Button
                               Margin="0,0,8,0"
-                              Command="{Binding Data.EditCommand, Source={StaticResource ProfilePageProxy}}"
+                              Command="{Binding Data.EditCommand, Source={StaticResource ProfileIndexPageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="Edit">
@@ -678,7 +678,7 @@
                               <ui:Button.ContextMenu>
                                 <ContextMenu Placement="Bottom">
                                   <MenuItem
-                                    Command="{Binding Data.DuplicateCommand, Source={StaticResource ProfilePageProxy}}"
+                                    Command="{Binding Data.DuplicateCommand, Source={StaticResource ProfileIndexPageProxy}}"
                                     CommandParameter="{Binding}"
                                     Header="Duplicate"
                                     Icon="{ui:SymbolIcon SaveCopy24}" />
@@ -686,7 +686,7 @@
                                   <Separator />
 
                                   <MenuItem
-                                    Command="{Binding Data.DeleteCommand, Source={StaticResource ProfilePageProxy}}"
+                                    Command="{Binding Data.DeleteCommand, Source={StaticResource ProfileIndexPageProxy}}"
                                     CommandParameter="{Binding}"
                                     Foreground="IndianRed"
                                     Header="Delete"
@@ -711,7 +711,7 @@
                           <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                             <ui:Button
                               Margin="0,0,8,0"
-                              Command="{Binding Data.ViewDetailsCommand, Source={StaticResource ProfilePageProxy}}"
+                              Command="{Binding Data.ViewDetailsCommand, Source={StaticResource ProfileIndexPageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="View Details">
@@ -720,7 +720,7 @@
 
                             <ui:Button
                               Margin="0,0,8,0"
-                              Command="{Binding Data.EditCommand, Source={StaticResource ProfilePageProxy}}"
+                              Command="{Binding Data.EditCommand, Source={StaticResource ProfileIndexPageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="Edit">
@@ -728,7 +728,7 @@
                             </ui:Button>
 
                             <ui:Button
-                              Command="{Binding Data.DuplicateCommand, Source={StaticResource ProfilePageProxy}}"
+                              Command="{Binding Data.DuplicateCommand, Source={StaticResource ProfileIndexPageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="Duplicate">
@@ -738,7 +738,7 @@
                             <atoms:Divider Margin="12,8" Orientation="Vertical" />
 
                             <ui:Button
-                              Command="{Binding Data.DeleteCommand, Source={StaticResource ProfilePageProxy}}"
+                              Command="{Binding Data.DeleteCommand, Source={StaticResource ProfileIndexPageProxy}}"
                               CommandParameter="{Binding}"
                               Style="{StaticResource IconOnlyButtonStyle}"
                               ToolTip="Delete">
