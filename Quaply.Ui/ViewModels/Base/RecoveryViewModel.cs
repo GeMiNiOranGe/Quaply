@@ -24,9 +24,12 @@ namespace Quaply.Ui.ViewModels.Base;
 public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     : NavigableViewModel,
         INavigationAware
+    where TEntity : class
     where TItem : class, IRecoveryItem
     where TSortField : struct, Enum
 {
+    private const int SearchDebounceMilliseconds = 300;
+
     private static readonly IReadOnlyList<int> DefaultPageSizeOptions =
     [
         20,
@@ -106,6 +109,22 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     /// Reset the extra filters; reload is handled by the base.
     /// </summary>
     protected virtual void ResetExtraFilters() { }
+
+    /// <summary>
+    /// Override to add extra filters to the query.
+    /// </summary>
+    protected virtual DeletedItemsQuery<TSortField> BuildQuery()
+    {
+        return new(
+            SearchText: SearchText,
+            DeletedRange: SelectedDeletedRange,
+            Sorting: new SortOption<TSortField>(
+                Field: SortField,
+                Descending: IsSortDescending
+            ),
+            Paging: new PageOption(CurrentPage, PageSize)
+        );
+    }
 
     // -------------------------------------------------------------------------
     // Paging
@@ -275,7 +294,7 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     // Lifecycle
     // -------------------------------------------------------------------------
 
-    public async Task OnNavigatedToAsync()
+    public virtual async Task OnNavigatedToAsync()
     {
         await LoadAsync();
     }
@@ -588,7 +607,7 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
 
         if (debounce)
         {
-            await Task.Delay(300);
+            await Task.Delay(SearchDebounceMilliseconds);
 
             // The user typed another character while waiting
             // -> this request is obsolete; discard it.
@@ -603,17 +622,7 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
 
         try
         {
-            DeletedItemsQuery<TSortField> query = new(
-                SearchText: SearchText,
-                DeletedRange: SelectedDeletedRange,
-                Sorting: new SortOption<TSortField>(
-                    Field: SortField,
-                    Descending: IsSortDescending
-                ),
-                Paging: new PageOption(CurrentPage, PageSize)
-            );
-
-            PagedResult<TEntity> result = await FetchPageAsync(query);
+            PagedResult<TEntity> result = await FetchPageAsync(BuildQuery());
 
             // Without filters, the filtered count equals the total deleted items.
             int totalCount = IsFiltering
@@ -669,9 +678,7 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
         _ = LoadAsync(debounce);
     }
 
-    private async Task ReloadAfterRemovalAsync(
-        IReadOnlyCollection<TItem> removed
-    )
+    private async Task ReloadAfterRemovalAsync(IReadOnlyList<TItem> removed)
     {
         ClearPreviewIfRemoved(removed);
 
@@ -716,7 +723,7 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
         return $"This will permanently delete {subject}. This action cannot be undone.";
     }
 
-    private void ClearPreviewIfRemoved(IReadOnlyCollection<TItem> removedItems)
+    private void ClearPreviewIfRemoved(IReadOnlyList<TItem> removedItems)
     {
         if (PreviewedItem is null || !removedItems.Contains(PreviewedItem))
         {
