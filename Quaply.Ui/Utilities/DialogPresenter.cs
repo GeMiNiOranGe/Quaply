@@ -71,4 +71,20 @@ public sealed class DialogPresenter(IContentDialogService contentDialogService)
 
         return result == ContentDialogResult.Primary;
     }
+
+    public Task<bool> ShowExplicitConfirmationAsync(
+        string title,
+        string message,
+        string primaryButtonText = "Confirm",
+        string closeButtonText = "Cancel"
+    )
+    {
+        return ShowConfirmationAsync(
+            title,
+            message,
+            primaryButtonText,
+            closeButtonText,
+            defaultButton: ContentDialogButton.Close
+        );
+    }
 }

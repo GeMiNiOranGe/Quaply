@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Quaply.Data.Querying.Base;
 using Quaply.Ui.Interfaces;
-using Wpf.Ui.Controls;
 
 namespace Quaply.Ui.ViewModels.Base;
 
@@ -575,12 +574,10 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     [RelayCommand(CanExecute = nameof(HasAnyItems))]
     private async Task EmptyAsync()
     {
-        bool confirmed = await _dialogPresenter.ShowConfirmationAsync(
+        bool confirmed = await _dialogPresenter.ShowExplicitConfirmationAsync(
             title: "Empty trash?",
             message: $"This will permanently delete all {TotalCount} {EntityNamePlural} in the trash, including any hidden by your search or filters. This action cannot be undone.",
-            primaryButtonText: "Empty trash",
-            closeButtonText: "Cancel",
-            defaultButton: ContentDialogButton.Close
+            primaryButtonText: "Empty trash"
         );
 
         if (!confirmed)
@@ -704,12 +701,10 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
         IReadOnlyList<TItem> items
     )
     {
-        return _dialogPresenter.ShowConfirmationAsync(
+        return _dialogPresenter.ShowExplicitConfirmationAsync(
             title: title,
             message: BuildPurgeWarning(items),
-            primaryButtonText: "Delete permanently",
-            closeButtonText: "Cancel",
-            defaultButton: ContentDialogButton.Close
+            primaryButtonText: "Delete permanently"
         );
     }
 

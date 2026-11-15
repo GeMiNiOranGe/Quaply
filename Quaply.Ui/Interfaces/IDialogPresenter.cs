@@ -22,4 +22,11 @@ public interface IDialogPresenter
         string primaryButtonText = "Confirm",
         string closeButtonText = "Cancel"
     );
+
+    Task<bool> ShowExplicitConfirmationAsync(
+        string title,
+        string message,
+        string primaryButtonText = "Confirm",
+        string closeButtonText = "Cancel"
+    );
 }
