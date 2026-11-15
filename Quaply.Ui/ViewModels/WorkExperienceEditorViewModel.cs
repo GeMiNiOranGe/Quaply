@@ -263,7 +263,7 @@ public partial class WorkExperienceEditorViewModel(
     [RelayCommand(CanExecute = nameof(CanReset))]
     private async Task ResetAsync()
     {
-        bool confirmed = await _dialogPresenter.ShowDangerConfirmationAsync(
+        bool confirmed = await _dialogPresenter.ShowSafeFirstConfirmationAsync(
             title: "Discard changes?",
             message: "Your unsaved changes will be lost. This action cannot be undone.",
             primaryButtonText: "Discard",

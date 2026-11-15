@@ -12,7 +12,11 @@ public interface IDialogPresenter
         ContentDialogButton defaultButton = ContentDialogButton.Primary
     );
 
-    Task<bool> ShowDangerConfirmationAsync(
+    /// <summary>
+    /// Safety-first confirmation: the cancel path is emphasized and receives
+    /// Enter by default, so accidental key presses do not trigger the action.
+    /// </summary>
+    Task<bool> ShowSafeFirstConfirmationAsync(
         string title,
         string message,
         string primaryButtonText = "Confirm",

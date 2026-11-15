@@ -715,7 +715,7 @@ public abstract partial class IndexViewModel<TEntity, TItem, TSortField>
         IReadOnlyList<TItem> items
     )
     {
-        return _dialogPresenter.ShowDangerConfirmationAsync(
+        return _dialogPresenter.ShowSafeFirstConfirmationAsync(
             title: title,
             message: BuildDeleteWarning(items),
             primaryButtonText: "Move to trash",

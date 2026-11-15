@@ -42,7 +42,7 @@ public sealed class DialogPresenter(IContentDialogService contentDialogService)
         return result == ContentDialogResult.Primary;
     }
 
-    public async Task<bool> ShowDangerConfirmationAsync(
+    public async Task<bool> ShowSafeFirstConfirmationAsync(
         string title,
         string message,
         string primaryButtonText = "Confirm",
