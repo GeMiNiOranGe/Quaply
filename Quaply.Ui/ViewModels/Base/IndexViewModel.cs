@@ -688,7 +688,7 @@ public abstract partial class IndexViewModel<TEntity, TItem, TSortField>
         _ = LoadAsync(debounce);
     }
 
-    private async Task ReloadAfterRemovalAsync(IEnumerable<TItem> removed)
+    private async Task ReloadAfterRemovalAsync(IReadOnlyList<TItem> removed)
     {
         ClearPreviewIfRemoved(removed);
 
@@ -715,7 +715,7 @@ public abstract partial class IndexViewModel<TEntity, TItem, TSortField>
         IReadOnlyList<TItem> items
     )
     {
-        return _dialogPresenter.ShowConfirmationAsync(
+        return _dialogPresenter.ShowDangerConfirmationAsync(
             title: title,
             message: BuildDeleteWarning(items),
             primaryButtonText: "Move to trash",
@@ -723,7 +723,7 @@ public abstract partial class IndexViewModel<TEntity, TItem, TSortField>
         );
     }
 
-    private void ClearPreviewIfRemoved(IEnumerable<TItem> removedItems)
+    private void ClearPreviewIfRemoved(IReadOnlyList<TItem> removedItems)
     {
         if (PreviewedItem is null || !removedItems.Contains(PreviewedItem))
         {
