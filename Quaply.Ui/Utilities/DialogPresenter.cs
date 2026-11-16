@@ -10,12 +10,68 @@ public sealed class DialogPresenter(IContentDialogService contentDialogService)
     private readonly IContentDialogService _contentDialogService =
         contentDialogService;
 
-    public async Task<bool> ShowConfirmationAsync(
+    public Task<bool> ShowConfirmationAsync(
         string title,
         string message,
         string primaryButtonText = "Confirm",
-        string closeButtonText = "Cancel",
-        ContentDialogButton defaultButton = ContentDialogButton.Primary
+        string closeButtonText = "Cancel"
+    )
+    {
+        return ShowConfirmationCoreAsync(
+            title,
+            message,
+            primaryButtonText,
+            closeButtonText,
+            primaryAppearance: ControlAppearance.Primary,
+            closeAppearance: ControlAppearance.Secondary,
+            defaultButton: ContentDialogButton.Primary
+        );
+    }
+
+    public Task<bool> ShowExplicitConfirmationAsync(
+        string title,
+        string message,
+        string primaryButtonText,
+        string closeButtonText = "Cancel"
+    )
+    {
+        return ShowConfirmationCoreAsync(
+            title,
+            message,
+            primaryButtonText,
+            closeButtonText,
+            primaryAppearance: ControlAppearance.Primary,
+            closeAppearance: ControlAppearance.Secondary,
+            defaultButton: ContentDialogButton.Close
+        );
+    }
+
+    public Task<bool> ShowSafeFirstConfirmationAsync(
+        string title,
+        string message,
+        string primaryButtonText = "Confirm",
+        string closeButtonText = "Cancel"
+    )
+    {
+        return ShowConfirmationCoreAsync(
+            title,
+            message,
+            primaryButtonText,
+            closeButtonText,
+            primaryAppearance: ControlAppearance.Secondary,
+            closeAppearance: ControlAppearance.Primary,
+            defaultButton: ContentDialogButton.Close
+        );
+    }
+
+    private async Task<bool> ShowConfirmationCoreAsync(
+        string title,
+        string message,
+        string primaryButtonText,
+        string closeButtonText,
+        ControlAppearance primaryAppearance,
+        ControlAppearance closeAppearance,
+        ContentDialogButton defaultButton
     )
     {
         ContentDialog dialog = new()
@@ -25,10 +81,8 @@ public sealed class DialogPresenter(IContentDialogService contentDialogService)
             PrimaryButtonText = primaryButtonText,
             CloseButtonText = closeButtonText,
 
-            // Always highlight the primary button, regardless of
-            // where the Enter key is focused.
-            PrimaryButtonAppearance = ControlAppearance.Primary,
-            CloseButtonAppearance = ControlAppearance.Secondary,
+            PrimaryButtonAppearance = primaryAppearance,
+            CloseButtonAppearance = closeAppearance,
 
             // The button that receives the Enter key.
             DefaultButton = defaultButton,
@@ -40,51 +94,5 @@ public sealed class DialogPresenter(IContentDialogService contentDialogService)
         );
 
         return result == ContentDialogResult.Primary;
-    }
-
-    public async Task<bool> ShowSafeFirstConfirmationAsync(
-        string title,
-        string message,
-        string primaryButtonText = "Confirm",
-        string closeButtonText = "Cancel"
-    )
-    {
-        ContentDialog dialog = new()
-        {
-            Title = title,
-            Content = message,
-            PrimaryButtonText = primaryButtonText,
-            CloseButtonText = closeButtonText,
-
-            // Change the accent colors for "Close" and "Primary" to a neutral color.
-            PrimaryButtonAppearance = ControlAppearance.Secondary,
-            CloseButtonAppearance = ControlAppearance.Primary,
-
-            // Default to "Close" to prevent dangerous actions.
-            DefaultButton = ContentDialogButton.Close,
-        };
-
-        ContentDialogResult result = await _contentDialogService.ShowAsync(
-            dialog,
-            CancellationToken.None
-        );
-
-        return result == ContentDialogResult.Primary;
-    }
-
-    public Task<bool> ShowExplicitConfirmationAsync(
-        string title,
-        string message,
-        string primaryButtonText = "Confirm",
-        string closeButtonText = "Cancel"
-    )
-    {
-        return ShowConfirmationAsync(
-            title,
-            message,
-            primaryButtonText,
-            closeButtonText,
-            defaultButton: ContentDialogButton.Close
-        );
     }
 }
