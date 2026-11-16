@@ -718,8 +718,7 @@ public abstract partial class IndexViewModel<TEntity, TItem, TSortField>
         return _dialogPresenter.ShowSafeFirstConfirmationAsync(
             title: title,
             message: BuildDeleteWarning(items),
-            primaryButtonText: "Move to trash",
-            closeButtonText: "Cancel"
+            primaryButtonText: "Move to trash"
         );
     }
 
