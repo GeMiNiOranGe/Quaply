@@ -72,11 +72,6 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     // -------------------------------------------------------------------------
 
     /// <summary>
-    /// Override when the page has filters beyond search + date.
-    /// </summary>
-    protected virtual bool HasExtraFilters => false;
-
-    /// <summary>
     /// Lower-case plural noun for UI text, e.g. "profiles".
     /// </summary>
     protected abstract string EntityNamePlural { get; }
@@ -103,27 +98,6 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
     protected abstract Task PurgeAllAsync();
 
     protected abstract Task NavigateBackAsync();
-
-    /// <summary>
-    /// Reset the extra filters; reload is handled by the base.
-    /// </summary>
-    protected virtual void ResetExtraFilters() { }
-
-    /// <summary>
-    /// Override to add extra filters to the query.
-    /// </summary>
-    protected virtual DeletedItemsQuery<TSortField> BuildQuery()
-    {
-        return new(
-            SearchText: SearchText,
-            DeletedRange: SelectedDeletedRange,
-            Sorting: new SortOption<TSortField>(
-                Field: SortField,
-                Descending: IsSortDescending
-            ),
-            Paging: new PageOption(CurrentPage, PageSize)
-        );
-    }
 
     // -------------------------------------------------------------------------
     // Paging
@@ -215,8 +189,7 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
 
     public bool IsFiltering =>
         !string.IsNullOrWhiteSpace(SearchText)
-        || SelectedDeletedRange != RelativeDateRange.All
-        || HasExtraFilters;
+        || SelectedDeletedRange != RelativeDateRange.All;
 
     public bool HasAnyItems => TotalCount > 0;
 
@@ -412,7 +385,6 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
         {
             SearchText = DefaultSearchText;
             SelectedDeletedRange = DefaultDeletedRange;
-            ResetExtraFilters();
         }
         finally
         {
@@ -619,7 +591,17 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
 
         try
         {
-            PagedResult<TEntity> result = await FetchPageAsync(BuildQuery());
+            DeletedItemsQuery<TSortField> query = new(
+                SearchText: SearchText,
+                DeletedRange: SelectedDeletedRange,
+                Sorting: new SortOption<TSortField>(
+                    Field: SortField,
+                    Descending: IsSortDescending
+                ),
+                Paging: new PageOption(CurrentPage, PageSize)
+            );
+
+            PagedResult<TEntity> result = await FetchPageAsync(query);
 
             // Without filters, the filtered count equals the total deleted items.
             int totalCount = IsFiltering
@@ -653,15 +635,6 @@ public abstract partial class RecoveryViewModel<TEntity, TItem, TSortField>
                 IsLoading = false;
             }
         }
-    }
-
-    /// <summary>
-    /// Derived pages call this whenever one of their extra filters changes.
-    /// </summary>
-    protected void RaiseFilterStateChanged()
-    {
-        OnPropertyChanged(nameof(IsFiltering));
-        ResetFiltersCommand.NotifyCanExecuteChanged();
     }
 
     private void ReloadFromFirstPage(bool debounce = false)
