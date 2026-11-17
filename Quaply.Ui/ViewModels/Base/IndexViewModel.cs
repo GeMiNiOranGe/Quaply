@@ -147,6 +147,17 @@ public abstract partial class IndexViewModel<TEntity, TItem, TSortField>
         );
     }
 
+    /// <summary>
+    /// Derived pages call this when one of their extra filters changes.
+    /// </summary>
+    protected void OnExtraFilterChanged()
+    {
+        RaiseFilterStateChanged();
+
+        // respected _suppressReload
+        ReloadFromFirstPage();
+    }
+
     // -------------------------------------------------------------------------
     // Paging
     // -------------------------------------------------------------------------
