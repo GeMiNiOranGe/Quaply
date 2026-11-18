@@ -1,4 +1,4 @@
-<UserControl
+﻿<UserControl
   x:Class="Quaply.Ui.Views.Pages.WorkExperienceIndexPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -31,13 +31,13 @@
     <markup:BindingProxy x:Key="WorkExperienceIndexPageProxy" Data="{Binding}" />
 
     <ContextMenu
-      x:Key="UpdatedRangeMenu"
+      x:Key="DateRangeMenu"
       x:Shared="False"
       ItemsSource="{markup:EnumBindingSource {x:Type queryingBase:RelativeDateRange}}"
       Placement="Bottom">
       <ContextMenu.ItemContainerStyle>
         <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
-          <Setter Property="Command" Value="{Binding Data.SetUpdatedRangeCommand, Source={StaticResource WorkExperienceIndexPageProxy}}" />
+          <Setter Property="Command" Value="{Binding Data.SetDateRangeCommand, Source={StaticResource WorkExperienceIndexPageProxy}}" />
 
           <Setter Property="CommandParameter" Value="{Binding}" />
 
@@ -48,7 +48,7 @@
           <Setter Property="IsChecked">
             <Setter.Value>
               <MultiBinding Converter="{converters:EnumEqualityConverter}" Mode="OneWay">
-                <Binding Path="Data.SelectedUpdatedRange" Source="{StaticResource WorkExperienceIndexPageProxy}" />
+                <Binding Path="Data.SelectedDateRange" Source="{StaticResource WorkExperienceIndexPageProxy}" />
 
                 <Binding />
               </MultiBinding>
@@ -230,7 +230,7 @@
                           Appearance="Transparent"
                           ItemsSource="{markup:EnumBindingSource {x:Type queryingBase:RelativeDateRange}}"
                           SelectedAppearance="Secondary"
-                          SelectedValue="{Binding SelectedUpdatedRange}">
+                          SelectedValue="{Binding SelectedDateRange}">
                           <molecules:SegmentedButton.ItemTemplate>
                             <DataTemplate>
                               <TextBlock Text="{Binding Converter={converters:EnumDisplayNameConverter}}" />
@@ -249,8 +249,8 @@
                         HorizontalContentAlignment="Stretch"
                         layout:ContextMenuBehavior.OpenOnClick="True"
                         Background="Transparent"
-                        Content="{Binding SelectedUpdatedRange, Converter={converters:EnumDisplayNameConverter}}"
-                        ContextMenu="{StaticResource UpdatedRangeMenu}"
+                        Content="{Binding SelectedDateRange, Converter={converters:EnumDisplayNameConverter}}"
+                        ContextMenu="{StaticResource DateRangeMenu}"
                         Icon="{ui:SymbolIcon Filter24}"
                         ToolTip="Filter by updated date" />
                     </DataTemplate>
@@ -264,8 +264,8 @@
                         HorizontalContentAlignment="Left"
                         layout:ContextMenuBehavior.OpenOnClick="True"
                         Appearance="Transparent"
-                        Content="{Binding SelectedUpdatedRange, Converter={converters:EnumDisplayNameConverter}}"
-                        ContextMenu="{StaticResource UpdatedRangeMenu}"
+                        Content="{Binding SelectedDateRange, Converter={converters:EnumDisplayNameConverter}}"
+                        ContextMenu="{StaticResource DateRangeMenu}"
                         Icon="{ui:SymbolIcon Filter24}"
                         ToolTip="Filter by updated date" />
                     </DataTemplate>
