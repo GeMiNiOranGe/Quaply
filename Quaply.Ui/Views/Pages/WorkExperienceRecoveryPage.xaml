@@ -31,13 +31,13 @@
     <markup:BindingProxy x:Key="WorkExperienceRecoveryPageProxy" Data="{Binding}" />
 
     <ContextMenu
-      x:Key="DeletedRangeMenu"
+      x:Key="DateRangeMenu"
       x:Shared="False"
       ItemsSource="{markup:EnumBindingSource {x:Type queryingBase:RelativeDateRange}}"
       Placement="Bottom">
       <ContextMenu.ItemContainerStyle>
         <Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
-          <Setter Property="Command" Value="{Binding Data.SetDeletedRangeCommand, Source={StaticResource WorkExperienceRecoveryPageProxy}}" />
+          <Setter Property="Command" Value="{Binding Data.SetDateRangeCommand, Source={StaticResource WorkExperienceRecoveryPageProxy}}" />
 
           <Setter Property="CommandParameter" Value="{Binding}" />
 
@@ -48,7 +48,7 @@
           <Setter Property="IsChecked">
             <Setter.Value>
               <MultiBinding Converter="{converters:EnumEqualityConverter}" Mode="OneWay">
-                <Binding Path="Data.SelectedDeletedRange" Source="{StaticResource WorkExperienceRecoveryPageProxy}" />
+                <Binding Path="Data.SelectedDateRange" Source="{StaticResource WorkExperienceRecoveryPageProxy}" />
 
                 <Binding />
               </MultiBinding>
@@ -198,7 +198,7 @@
                           Appearance="Transparent"
                           ItemsSource="{markup:EnumBindingSource {x:Type queryingBase:RelativeDateRange}}"
                           SelectedAppearance="Secondary"
-                          SelectedValue="{Binding SelectedDeletedRange}">
+                          SelectedValue="{Binding SelectedDateRange}">
                           <molecules:SegmentedButton.ItemTemplate>
                             <DataTemplate>
                               <TextBlock Text="{Binding Converter={converters:EnumDisplayNameConverter}}" />
@@ -217,8 +217,8 @@
                         HorizontalContentAlignment="Stretch"
                         layout:ContextMenuBehavior.OpenOnClick="True"
                         Background="Transparent"
-                        Content="{Binding SelectedDeletedRange, Converter={converters:EnumDisplayNameConverter}}"
-                        ContextMenu="{StaticResource DeletedRangeMenu}"
+                        Content="{Binding SelectedDateRange, Converter={converters:EnumDisplayNameConverter}}"
+                        ContextMenu="{StaticResource DateRangeMenu}"
                         Icon="{ui:SymbolIcon Filter24}"
                         ToolTip="Filter by deleted date" />
                     </DataTemplate>
@@ -232,8 +232,8 @@
                         HorizontalContentAlignment="Left"
                         layout:ContextMenuBehavior.OpenOnClick="True"
                         Appearance="Transparent"
-                        Content="{Binding SelectedDeletedRange, Converter={converters:EnumDisplayNameConverter}}"
-                        ContextMenu="{StaticResource DeletedRangeMenu}"
+                        Content="{Binding SelectedDateRange, Converter={converters:EnumDisplayNameConverter}}"
+                        ContextMenu="{StaticResource DateRangeMenu}"
                         Icon="{ui:SymbolIcon Filter24}"
                         ToolTip="Filter by deleted date" />
                     </DataTemplate>
