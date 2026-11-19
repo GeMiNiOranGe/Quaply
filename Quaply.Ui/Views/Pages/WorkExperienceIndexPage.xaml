@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
   x:Class="Quaply.Ui.Views.Pages.WorkExperienceIndexPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -96,17 +96,10 @@
 
     <!--  Navigation and Page Header  -->
     <StackPanel Grid.Row="0" Margin="0,0,0,24">
-      <StackPanel Margin="0,0,0,8">
-        <TextBlock
-          FontSize="22"
-          FontWeight="SemiBold"
-          Text="Work Experiences" />
-
-        <TextBlock
-          Margin="0,4,0,0"
-          Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-          Text="Select the experiences that best match the job you're applying for." />
-      </StackPanel>
+      <molecules:PageHeader
+        Title="Work Experiences"
+        Margin="0,0,0,8"
+        Subtitle="View and manage your work experiences and professional history." />
 
       <Grid>
         <Grid.ColumnDefinitions>

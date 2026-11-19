@@ -95,17 +95,10 @@
 
     <!--  Navigation and Page Header  -->
     <StackPanel Grid.Row="0" Margin="0,0,0,24">
-      <StackPanel Margin="0,0,0,8">
-        <TextBlock
-          FontSize="22"
-          FontWeight="SemiBold"
-          Text="Deleted Work Experiences" />
-
-        <TextBlock
-          Margin="0,4,0,0"
-          Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-          Text="View deleted work experiences and restore them to your Resume anytime." />
-      </StackPanel>
+      <molecules:PageHeader
+        Title="Deleted Work Experiences"
+        Margin="0,0,0,8"
+        Subtitle="View deleted work experiences and restore them to your Resume anytime." />
 
       <ui:Button
         HorizontalAlignment="Left"

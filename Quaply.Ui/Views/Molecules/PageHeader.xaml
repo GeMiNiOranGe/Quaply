@@ -1,0 +1,43 @@
+﻿<!--
+  Implementation notes (usage and contract: see PageHeader.xaml.cs)
+  - Bindings use ElementName=Root, not DataContext, so the parent's DataContext is left untouched.
+  - The subtitle TextBlock is collapsed by the DataTriggers below when Subtitle is empty or null.
+-->
+<UserControl
+  x:Class="Quaply.Ui.Views.Molecules.PageHeader"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:local="clr-namespace:Quaply.Ui.Views.Molecules"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  x:Name="pageHeader"
+  d:DesignWidth="800"
+  mc:Ignorable="d">
+  <StackPanel>
+    <TextBlock
+      FontSize="22"
+      FontWeight="SemiBold"
+      Text="{Binding Title, ElementName=pageHeader}" />
+
+    <TextBlock
+      Margin="0,4,0,0"
+      Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+      Text="{Binding Subtitle, ElementName=pageHeader}"
+      TextWrapping="Wrap">
+      <TextBlock.Style>
+        <Style TargetType="TextBlock">
+          <!--  Hide when there is no subtitle  -->
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding Subtitle, ElementName=pageHeader}" Value="">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding Subtitle, ElementName=pageHeader}" Value="{x:Null}">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </TextBlock.Style>
+    </TextBlock>
+  </StackPanel>
+</UserControl>

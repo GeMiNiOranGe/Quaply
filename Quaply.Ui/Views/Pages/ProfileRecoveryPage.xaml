@@ -113,17 +113,10 @@
 
     <!--  Navigation and Page Header  -->
     <StackPanel Grid.Row="0" Margin="0,0,0,24">
-      <StackPanel Margin="0,0,0,8">
-        <TextBlock
-          FontSize="22"
-          FontWeight="SemiBold"
-          Text="Deleted Profiles" />
-
-        <TextBlock
-          Margin="0,4,0,0"
-          Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-          Text="View deleted profiles and restore them to your Resume anytime." />
-      </StackPanel>
+      <molecules:PageHeader
+        Title="Deleted Profiles"
+        Margin="0,0,0,8"
+        Subtitle="View deleted profiles and restore them to your Resume anytime." />
 
       <ui:Button
         HorizontalAlignment="Left"
