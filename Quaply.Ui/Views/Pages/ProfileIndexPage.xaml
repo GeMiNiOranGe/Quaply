@@ -200,32 +200,27 @@
             <Grid>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
 
-              <ui:TextBox
+              <molecules:SearchBox
                 Grid.Column="0"
-                Width="{Binding ActualWidth, ElementName=listCardGrid, Converter={converters:LinearInterpolationConverter}, ConverterParameter='SourceMin=720;SourceMax=880;TargetMin=160;TargetMax=320'}"
-                Padding="8,6"
+                IsBusy="{Binding IsSearching}"
                 PlaceholderText="Search by name or email..."
-                Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
-                <ui:TextBox.Icon>
-                  <ui:SymbolIcon Symbol="Search24" />
-                </ui:TextBox.Icon>
-              </ui:TextBox>
+                ProgressRingSize="12"
+                Text="{Binding SearchText}"
+                TextBoxPadding="8,6">
+                <molecules:SearchBox.Width>
+                  <Binding
+                    Converter="{converters:LinearInterpolationConverter}"
+                    ConverterParameter="SourceMin=720;SourceMax=880;TargetMin=160;TargetMax=320"
+                    ElementName="listCardGrid"
+                    Path="ActualWidth" />
+                </molecules:SearchBox.Width>
+              </molecules:SearchBox>
 
-              <ui:ProgressRing
-                Grid.Column="1"
-                Width="20"
-                Height="20"
-                Margin="8,0"
-                VerticalAlignment="Center"
-                IsIndeterminate="True"
-                Visibility="{Binding IsSearching, Converter={converters:BooleanToVisibilityConverter}}" />
-
-              <StackPanel Grid.Column="3" Orientation="Horizontal">
+              <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <!--  Filter: scoping the current view, not an action  -->
                 <atoms:AdaptiveContent Breakpoints="0;720;1120" ReferenceWidth="{Binding ActualWidth, ElementName=listCardGrid}">
                   <atoms:AdaptiveContent.Expanded>
