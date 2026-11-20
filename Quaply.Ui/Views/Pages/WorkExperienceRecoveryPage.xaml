@@ -10,6 +10,7 @@
   xmlns:markup="clr-namespace:Quaply.Ui.MarkupHelpers"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:molecules="clr-namespace:Quaply.Ui.Views.Molecules"
+  xmlns:organisms="clr-namespace:Quaply.Ui.Views.Organisms"
   xmlns:queryingBase="clr-namespace:Quaply.Data.Querying.Base;assembly=Quaply.Data"
   xmlns:queryingWorkExperiences="clr-namespace:Quaply.Data.Querying.WorkExperiences;assembly=Quaply.Data"
   xmlns:system="clr-namespace:System;assembly=mscorlib"
@@ -94,14 +95,13 @@
     </Grid.RowDefinitions>
 
     <!--  Navigation and Page Header  -->
-    <StackPanel Grid.Row="0" Margin="0,0,0,24">
-      <molecules:PageHeader
-        Title="Deleted Work Experiences"
-        Margin="0,0,0,8"
-        Subtitle="View deleted work experiences and restore them to your Resume anytime." />
-
-      <molecules:PageNavigationBar GoBackCommand="{Binding GoBackCommand}" GoForwardCommand="{Binding GoForwardCommand}" />
-    </StackPanel>
+    <organisms:PageHeaderSection
+      Title="Deleted Work Experiences"
+      Grid.Row="0"
+      Margin="0,0,0,24"
+      GoBackCommand="{Binding GoBackCommand}"
+      GoForwardCommand="{Binding GoForwardCommand}"
+      Subtitle="View deleted work experiences and restore them to your Resume anytime." />
 
     <!--  Row 1: Card - list + optional detail panel  -->
     <Grid

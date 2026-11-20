@@ -1,0 +1,40 @@
+﻿<!--
+  Implementation notes (usage and contract: see PageHeaderSection.xaml.cs)
+  - Layout: Row 0 = PageHeader, Row 1 = PageNavigationBar | Actions slot.
+  - Bindings use ElementName, not DataContext. The Actions content relies on inheriting the page's DataContext, so never set DataContext on this control.
+-->
+<UserControl
+  x:Class="Quaply.Ui.Views.Organisms.PageHeaderSection"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:local="clr-namespace:Quaply.Ui.Views.Organisms"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:molecules="clr-namespace:Quaply.Ui.Views.Molecules"
+  x:Name="pageHeaderSection"
+  d:DesignWidth="800"
+  mc:Ignorable="d">
+  <StackPanel>
+    <molecules:PageHeader
+      Title="{Binding Title, ElementName=pageHeaderSection}"
+      Margin="0,0,0,8"
+      Subtitle="{Binding Subtitle, ElementName=pageHeaderSection}" />
+
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <molecules:PageNavigationBar
+        Grid.Column="0"
+        GoBackCommand="{Binding GoBackCommand, ElementName=pageHeaderSection}"
+        GoForwardCommand="{Binding GoForwardCommand, ElementName=pageHeaderSection}" />
+
+      <ContentPresenter
+        Grid.Column="1"
+        VerticalAlignment="Center"
+        Content="{Binding Actions, ElementName=pageHeaderSection}" />
+    </Grid>
+  </StackPanel>
+</UserControl>

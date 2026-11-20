@@ -10,6 +10,7 @@
   xmlns:markup="clr-namespace:Quaply.Ui.MarkupHelpers"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
   xmlns:molecules="clr-namespace:Quaply.Ui.Views.Molecules"
+  xmlns:organisms="clr-namespace:Quaply.Ui.Views.Organisms"
   xmlns:queryingBase="clr-namespace:Quaply.Data.Querying.Base;assembly=Quaply.Data"
   xmlns:queryingWorkExperiences="clr-namespace:Quaply.Data.Querying.WorkExperiences;assembly=Quaply.Data"
   xmlns:system="clr-namespace:System;assembly=mscorlib"
@@ -95,24 +96,15 @@
     </Grid.RowDefinitions>
 
     <!--  Navigation and Page Header  -->
-    <StackPanel Grid.Row="0" Margin="0,0,0,24">
-      <molecules:PageHeader
-        Title="Work Experiences"
-        Margin="0,0,0,8"
-        Subtitle="View and manage your work experiences and professional history." />
-
-      <Grid>
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*" />
-          <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-
-        <molecules:PageNavigationBar
-          Grid.Column="0"
-          GoBackCommand="{Binding GoBackCommand}"
-          GoForwardCommand="{Binding GoForwardCommand}" />
-
-        <StackPanel Grid.Column="1" Orientation="Horizontal">
+    <organisms:PageHeaderSection
+      Title="Work Experiences"
+      Grid.Row="0"
+      Margin="0,0,0,24"
+      GoBackCommand="{Binding GoBackCommand}"
+      GoForwardCommand="{Binding GoForwardCommand}"
+      Subtitle="View and manage your work experiences and professional history.">
+      <organisms:PageHeaderSection.Actions>
+        <StackPanel Orientation="Horizontal">
           <ui:Button
             Margin="0,0,8,0"
             Command="{Binding NavigateToRecoveryCommand}"
@@ -126,8 +118,8 @@
             Content="Add Work Experience"
             Icon="{ui:SymbolIcon Add24}" />
         </StackPanel>
-      </Grid>
-    </StackPanel>
+      </organisms:PageHeaderSection.Actions>
+    </organisms:PageHeaderSection>
 
     <!--  Row 1: Card - list + optional detail panel  -->
     <Grid
