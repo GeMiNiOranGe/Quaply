@@ -1,0 +1,83 @@
+﻿<!--
+  Implementation notes (usage and contract: see PageNavigationBar.xaml.cs)
+  - Bindings use ElementName, not DataContext, so the parent's DataContext is left untouched.
+  - Requires `IconOnlyButtonStyle` from app-level resources.
+  - A null command disables the matching button (see the DataTriggers below).
+-->
+<UserControl
+  x:Class="Quaply.Ui.Views.Molecules.PageNavigationBar"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:local="clr-namespace:Quaply.Ui.Views.Molecules"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+  x:Name="pageNavigationBar"
+  d:DesignWidth="800"
+  mc:Ignorable="d">
+  <UserControl.Resources>
+    <Style
+      x:Key="SegmentButtonStyle"
+      BasedOn="{StaticResource IconOnlyButtonStyle}"
+      TargetType="ui:Button">
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+  </UserControl.Resources>
+
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <Border
+      Grid.Column="0"
+      BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+      BorderThickness="1"
+      CornerRadius="4"
+      UseLayoutRounding="True">
+      <StackPanel Orientation="Horizontal">
+        <ui:Button
+          Command="{Binding GoBackCommand, ElementName=pageNavigationBar}"
+          CornerRadius="4,0,0,4"
+          Icon="{ui:SymbolIcon ArrowLeft24}"
+          ToolTip="Back">
+          <ui:Button.Style>
+            <Style BasedOn="{StaticResource SegmentButtonStyle}" TargetType="ui:Button">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding GoBackCommand, ElementName=pageNavigationBar}" Value="{x:Null}">
+                  <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </ui:Button.Style>
+        </ui:Button>
+
+        <Border Width="1" Background="{DynamicResource ControlElevationBorderBrush}" />
+
+        <ui:Button
+          Command="{Binding GoForwardCommand, ElementName=pageNavigationBar}"
+          CornerRadius="0,4,4,0"
+          Icon="{ui:SymbolIcon ArrowRight24}"
+          ToolTip="Forward">
+          <ui:Button.Style>
+            <Style BasedOn="{StaticResource SegmentButtonStyle}" TargetType="ui:Button">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding GoForwardCommand, ElementName=pageNavigationBar}" Value="{x:Null}">
+                  <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </ui:Button.Style>
+        </ui:Button>
+      </StackPanel>
+    </Border>
+
+    <!--  TODO: implement Breadcrumb's logic.  -->
+    <ui:BreadcrumbBar
+      Grid.Column="1"
+      Margin="16,0,0,0"
+      VerticalAlignment="Center"
+      FontSize="20" />
+  </Grid>
+</UserControl>

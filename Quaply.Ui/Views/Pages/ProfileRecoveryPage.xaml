@@ -118,12 +118,7 @@
         Margin="0,0,0,8"
         Subtitle="View deleted profiles and restore them to your Resume anytime." />
 
-      <ui:Button
-        HorizontalAlignment="Left"
-        Command="{Binding GoBackCommand}"
-        Icon="{ui:SymbolIcon ArrowLeft24}"
-        Style="{StaticResource IconOnlyButtonStyle}"
-        ToolTip="Back" />
+      <molecules:PageNavigationBar GoBackCommand="{Binding GoBackCommand}" GoForwardCommand="{Binding GoForwardCommand}" />
     </StackPanel>
 
     <!--  Row 1: Card - list + optional detail panel  -->

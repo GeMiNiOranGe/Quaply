@@ -1,4 +1,4 @@
-<UserControl
+﻿<UserControl
   x:Class="Quaply.Ui.Views.Pages.WorkExperienceIndexPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -103,28 +103,16 @@
 
       <Grid>
         <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="Auto" />
           <ColumnDefinition Width="*" />
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Orientation="Horizontal">
-          <ui:Button
-            Command="{Binding GoBackCommand}"
-            CornerRadius="4,0,0,4"
-            Icon="{ui:SymbolIcon ArrowLeft24}"
-            Style="{StaticResource IconOnlyButtonStyle}"
-            ToolTip="Back" />
+        <molecules:PageNavigationBar
+          Grid.Column="0"
+          GoBackCommand="{Binding GoBackCommand}"
+          GoForwardCommand="{Binding GoForwardCommand}" />
 
-          <!--  TODO: Implement `Command="{Binding GoForwardCommand}"`  -->
-          <ui:Button
-            CornerRadius="0,4,4,0"
-            Icon="{ui:SymbolIcon ArrowRight24}"
-            Style="{StaticResource IconOnlyButtonStyle}"
-            ToolTip="Forward" />
-        </StackPanel>
-
-        <StackPanel Grid.Column="2" Orientation="Horizontal">
+        <StackPanel Grid.Column="1" Orientation="Horizontal">
           <ui:Button
             Margin="0,0,8,0"
             Command="{Binding NavigateToRecoveryCommand}"
