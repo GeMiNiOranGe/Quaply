@@ -1,9 +1,4 @@
-﻿<!--
-  Implementation notes (usage and contract: see PageHeader.xaml.cs)
-  - Bindings use ElementName=Root, not DataContext, so the parent's DataContext is left untouched.
-  - The subtitle TextBlock is collapsed by the DataTriggers below when Subtitle is empty or null.
--->
-<UserControl
+﻿<UserControl
   x:Class="Quaply.Ui.Views.Molecules.PageHeader"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

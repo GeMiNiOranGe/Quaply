@@ -4,39 +4,39 @@ using System.Windows.Controls;
 namespace Quaply.Ui.Views.Molecules;
 
 /// <summary>
-/// Molecule that displays the title and subtitle of a page.
+/// Displays a page title with an optional subtitle.
 /// </summary>
 ///
 /// <remarks>
 /// <list type="bullet">
 ///   <item>
-///   Pure presentation: no commands, no business knowledge,
-///   and unaware of the ViewModel using it.
+///   <b>Role:</b> presentation only. The control exposes no commands and has no
+///   dependency on any ViewModel or business logic.
 ///   </item>
 ///   <item>
-///   An empty or null <see cref="Subtitle"/> hides the subtitle line.
+///   <b>Subtitle:</b> the subtitle line is collapsed when <see cref="Subtitle"/>
+///   is null or empty.
 ///   </item>
 ///   <item>
-///   Internal bindings do not touch DataContext, so a page can still write
-///   <c>Title="{Binding ...}"</c> against its own ViewModel.
+///   <b>Binding:</b> internal bindings do not modify <c>DataContext</c>, so
+///   consumers can bind <see cref="Title"/> and <see cref="Subtitle"/> directly
+///   to their own ViewModel (e.g. <c>Title="{Binding ...}"</c>).
 ///   </item>
 ///   <item>
-///   Usually placed above <see cref="PageNavigationBar"/>;
+///   <b>Composition:</b> typically placed above <see cref="PageNavigationBar"/>.
 ///   <see cref="PageHeaderSection"/> combines both.
 ///   </item>
 /// </list>
 ///
-/// <para><b><i>Example:</i></b></para>
-/// <code>
-/// &lt;molecules:PageHeader
-///     Title="Work Experiences"
-///     Subtitle="Select the experiences that best match the job." /&gt;
+/// <para><b>Example</b></para>
+/// <code language="xml">
+/// &lt;molecules:PageHeader Title="The title" Subtitle="The subtitle." /&gt;
 /// </code>
 /// </remarks>
 public partial class PageHeader : UserControl
 {
     /// <summary>
-    /// Dependency property for <see cref="Title"/>.
+    /// Identifies the <see cref="Title"/> dependency property.
     /// </summary>
     public static readonly DependencyProperty TitleProperty =
         DependencyProperty.Register(
@@ -47,7 +47,7 @@ public partial class PageHeader : UserControl
         );
 
     /// <summary>
-    /// Dependency property for <see cref="Subtitle"/>.
+    /// Identifies the <see cref="Subtitle"/> dependency property.
     /// </summary>
     public static readonly DependencyProperty SubtitleProperty =
         DependencyProperty.Register(
@@ -65,7 +65,7 @@ public partial class PageHeader : UserControl
     // --- Title ---
 
     /// <summary>
-    /// Main page title (large font, SemiBold).
+    /// Gets or sets the main page title, rendered in a large SemiBold font.
     /// </summary>
     public string Title
     {
@@ -76,7 +76,8 @@ public partial class PageHeader : UserControl
     // --- Subtitle ---
 
     /// <summary>
-    /// Short description below the title. Empty hides the line.
+    /// Gets or sets the short description shown below the title.
+    /// The line is hidden when the value is null or empty.
     /// </summary>
     public string Subtitle
     {

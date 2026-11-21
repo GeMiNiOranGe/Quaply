@@ -5,33 +5,43 @@ using System.Windows.Input;
 namespace Quaply.Ui.Views.Molecules;
 
 /// <summary>
-/// Page navigation molecule: Back, Forward and a Breadcrumb.
+/// Provides Back and Forward buttons and a breadcrumb for page-level navigation.
 /// </summary>
 ///
 /// <remarks>
 /// <list type="bullet">
 ///   <item>
-///   The control knows NO business logic and NOTHING about Navigation. It only
-///   receives <see cref="ICommand"/>s from outside via DependencyProperty.
+///   <b>Role:</b> presentation only. The control has no knowledge of the navigation
+///   service or business logic; behavior is supplied entirely through
+///   <see cref="GoBackCommand"/> and <see cref="GoForwardCommand"/>.
 ///   </item>
 ///   <item>
-///   Trash / Add / Export buttons do NOT belong here; the page places them next
-///   to this control.
+///   <b>Disabled state:</b> a <c>null</c> command disables the corresponding button.
 ///   </item>
 ///   <item>
-///   A <c>null</c> command disables the matching button.
+///   <b>Scope:</b> page actions such as Trash, Add or Export are intentionally
+///   excluded. Pages place them beside this control.
 ///   </item>
 ///   <item>
-///   Commands should live in <c>PageViewModelBase</c> (injected with navigation
-///   service); child ViewModels can override them for custom behavior
-///   (e.g. confirm on unsaved changes).
+///   <b>Command source:</b> the default commands are expected to be defined in
+///   navigation ViewModel, which receives the navigation service through
+///   dependency injection. Derived ViewModels may override them for custom
+///   behavior, such as confirming when there are unsaved changes.
 ///   </item>
 /// </list>
+///
+/// <para><b>Example</b></para>
+/// <code language="xml">
+/// &lt;molecules:PageNavigationBar
+///   GoBackCommand="{Binding GoBackCommand}"
+///   GoForwardCommand="{Binding GoForwardCommand}"
+/// /&gt;
+/// </code>
 /// </remarks>
 public partial class PageNavigationBar : UserControl
 {
     /// <summary>
-    /// Dependency property for <see cref="GoBackCommand"/>.
+    /// Identifies the <see cref="GoBackCommand"/> dependency property.
     /// </summary>
     public static readonly DependencyProperty GoBackCommandProperty =
         DependencyProperty.Register(
@@ -42,7 +52,7 @@ public partial class PageNavigationBar : UserControl
         );
 
     /// <summary>
-    /// Dependency property for <see cref="GoForwardCommand"/>.
+    /// Identifies the <see cref="GoForwardCommand"/> dependency property.
     /// </summary>
     public static readonly DependencyProperty GoForwardCommandProperty =
         DependencyProperty.Register(
@@ -57,8 +67,11 @@ public partial class PageNavigationBar : UserControl
         InitializeComponent();
     }
 
+    // --- GoBackCommand ---
+
     /// <summary>
-    /// Command for the Back button. Null disables the button.
+    /// Gets or sets the command executed by the Back button.
+    /// A null value disables the button.
     /// </summary>
     public ICommand? GoBackCommand
     {
@@ -66,8 +79,11 @@ public partial class PageNavigationBar : UserControl
         set => SetValue(GoBackCommandProperty, value);
     }
 
+    // --- GoForwardCommand ---
+
     /// <summary>
-    /// Command for the Forward button. Null disables the button.
+    /// Gets or sets the command executed by the Forward button.
+    /// A null value disables the button.
     /// </summary>
     public ICommand? GoForwardCommand
     {

@@ -5,38 +5,46 @@ using System.Windows.Input;
 namespace Quaply.Ui.Views.Organisms;
 
 /// <summary>
-/// Organism that composes <see cref="PageHeader"/> and <see cref="PageNavigationBar"/>
-/// and exposes an <see cref="Actions"/> slot for page-specific buttons.
+/// Page header block composed of <see cref="PageHeader"/>, <see cref="PageNavigationBar"/>
+/// and a slot for page-specific actions.
 /// </summary>
 ///
 /// <remarks>
 /// <list type="bullet">
 ///   <item>
-///   Only forwards properties to the molecules; it contains no logic of its own.
+///   <b>Role:</b> composition only. <see cref="Title"/>, <see cref="Subtitle"/>,
+///   <see cref="GoBackCommand"/> and <see cref="GoForwardCommand"/> are forwarded
+///   unchanged to the inner molecules; the control contains no logic of its own.
 ///   </item>
 ///   <item>
-///   Business buttons (Trash, Add, ...) are NOT defined here. The page passes them
-///   via <see cref="Actions"/>; pages without them (e.g. recovery) leave it unset.
+///   <b>Actions slot:</b> business buttons (Trash, Add, ...) are not part of this
+///   control. A page supplies them through <see cref="Actions"/>, which is rendered
+///   on the right side of the navigation row. Pages that need none (e.g. recovery)
+///   leave it unset.
 ///   </item>
 ///   <item>
-///   <see cref="Actions"/> holds a single element: wrap several buttons in a StackPanel.
+///   <b>Single element:</b> <see cref="Actions"/> accepts one element. To supply
+///   several buttons, wrap them in a container such as <c>StackPanel</c>.
 ///   </item>
 ///   <item>
-///   Do not set DataContext on this control, or bindings inside <see cref="Actions"/>
-///   will stop resolving against the page ViewModel.
+///   <b>DataContext:</b> this control does not set its own <c>DataContext</c>, so
+///   bindings declared inside <see cref="Actions"/> resolve against the page
+///   ViewModel. Consumers should not set one either, or those bindings will break.
 ///   </item>
 ///   <item>
-///   No outer margin: spacing below the header is decided by the page.
+///   <b>Layout:</b> the control defines no outer margin. Spacing below the header
+///   is the responsibility of the page.
 ///   </item>
 /// </list>
 ///
-/// <para><b><i>Example:</i></b></para>
+/// <para><b>Example</b></para>
 /// <code language="xml">
 /// &lt;organisms:PageHeaderSection
-///     Title="The title"
-///     Subtitle="The subtitle."
-///     GoBackCommand="{Binding GoBackCommand}"
-///     GoForwardCommand="{Binding GoForwardCommand}"&gt;
+///   Title="The title"
+///   Subtitle="The subtitle."
+///   GoBackCommand="{Binding GoBackCommand}"
+///   GoForwardCommand="{Binding GoForwardCommand}"
+/// &gt;
 ///   &lt;organisms:PageHeaderSection.Actions&gt;
 ///     &lt;StackPanel Orientation="Horizontal"&gt;
 ///       &lt;ui:Button Command="{Binding AddCommand}" Content="Add item" /&gt;
@@ -49,7 +57,7 @@ namespace Quaply.Ui.Views.Organisms;
 public partial class PageHeaderSection : UserControl
 {
     /// <summary>
-    /// Dependency property for <see cref="Title"/>.
+    /// Identifies the <see cref="Title"/> dependency property.
     /// </summary>
     public static readonly DependencyProperty TitleProperty =
         DependencyProperty.Register(
@@ -60,7 +68,7 @@ public partial class PageHeaderSection : UserControl
         );
 
     /// <summary>
-    /// Dependency property for <see cref="Subtitle"/>.
+    /// Identifies the <see cref="Subtitle"/> dependency property.
     /// </summary>
     public static readonly DependencyProperty SubtitleProperty =
         DependencyProperty.Register(
@@ -71,7 +79,7 @@ public partial class PageHeaderSection : UserControl
         );
 
     /// <summary>
-    /// Dependency property for <see cref="GoBackCommand"/>.
+    /// Identifies the <see cref="GoBackCommand"/> dependency property.
     /// </summary>
     public static readonly DependencyProperty GoBackCommandProperty =
         DependencyProperty.Register(
@@ -82,7 +90,7 @@ public partial class PageHeaderSection : UserControl
         );
 
     /// <summary>
-    /// Dependency property for <see cref="GoForwardCommand"/>.
+    /// Identifies the <see cref="GoForwardCommand"/> dependency property.
     /// </summary>
     public static readonly DependencyProperty GoForwardCommandProperty =
         DependencyProperty.Register(
@@ -93,7 +101,7 @@ public partial class PageHeaderSection : UserControl
         );
 
     /// <summary>
-    /// Dependency property for <see cref="Actions"/>.
+    /// Identifies the <see cref="Actions"/> dependency property.
     /// </summary>
     public static readonly DependencyProperty ActionsProperty =
         DependencyProperty.Register(
@@ -108,8 +116,10 @@ public partial class PageHeaderSection : UserControl
         InitializeComponent();
     }
 
+    // --- Title ---
+
     /// <summary>
-    /// Main page title. Forwarded to <see cref="PageHeader"/>.
+    /// Gets or sets the page title. Forwarded to <see cref="PageHeader.Title"/>.
     /// </summary>
     public string Title
     {
@@ -117,9 +127,11 @@ public partial class PageHeaderSection : UserControl
         set => SetValue(TitleProperty, value);
     }
 
+    // --- Subtitle ---
+
     /// <summary>
-    /// Short description under the title. Empty hides it.
-    /// Forwarded to <see cref="PageHeader"/>.
+    /// Gets or sets the description shown below the title. Hidden when null or empty.
+    /// Forwarded to <see cref="PageHeader.Subtitle"/>.
     /// </summary>
     public string Subtitle
     {
@@ -127,9 +139,11 @@ public partial class PageHeaderSection : UserControl
         set => SetValue(SubtitleProperty, value);
     }
 
+    // --- GoBackCommand ---
+
     /// <summary>
-    /// Command for the Back button. Null disables it.
-    /// Forwarded to <see cref="PageNavigationBar"/>.
+    /// Gets or sets the command for the Back button. Null disables the button.
+    /// Forwarded to <see cref="PageNavigationBar.GoBackCommand"/>.
     /// </summary>
     public ICommand? GoBackCommand
     {
@@ -137,9 +151,11 @@ public partial class PageHeaderSection : UserControl
         set => SetValue(GoBackCommandProperty, value);
     }
 
+    // --- GoForwardCommand ---
+
     /// <summary>
-    /// Command for the Forward button. Null disables it.
-    /// Forwarded to <see cref="PageNavigationBar"/>.
+    /// Gets or sets the command for the Forward button. Null disables the button.
+    /// Forwarded to <see cref="PageNavigationBar.GoForwardCommand"/>.
     /// </summary>
     public ICommand? GoForwardCommand
     {
@@ -147,9 +163,12 @@ public partial class PageHeaderSection : UserControl
         set => SetValue(GoForwardCommandProperty, value);
     }
 
+    // --- Actions ---
+
     /// <summary>
-    /// Page-specific content shown on the right side of the navigation row
-    /// (typically a StackPanel of buttons). Unset means the slot stays empty.
+    /// Gets or sets page-specific content displayed on the right side of the
+    /// navigation row, typically a <c>StackPanel</c> of buttons.
+    /// When unset, the slot is empty.
     /// </summary>
     public object? Actions
     {
