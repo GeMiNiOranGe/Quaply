@@ -356,46 +356,25 @@
 
           <!--  Table row hosts BOTH the DataGrid and the floating bulk-action bar  -->
           <Grid Grid.Row="1">
-            <!--  Empty state  -->
-            <StackPanel
-              HorizontalAlignment="Center"
-              VerticalAlignment="Center"
+            <molecules:EmptyState
+              Title="{Binding EmptyStateTitle}"
+              Description="{Binding EmptyStateMessage}"
+              Icon="{ui:SymbolIcon Briefcase24}"
               Visibility="{Binding HasVisibleItems, Converter={converters:InverseBooleanToVisibilityConverter}}">
-              <ui:SymbolIcon
-                HorizontalAlignment="Center"
-                FontSize="48"
-                Foreground="{DynamicResource TextFillColorDisabledBrush}"
-                Symbol="Briefcase24" />
+              <StackPanel>
+                <ui:Button
+                  Appearance="Primary"
+                  Command="{Binding AddCommand}"
+                  Content="Add Work Experience"
+                  Icon="{ui:SymbolIcon Add24}"
+                  Visibility="{Binding HasAnyItems, Converter={converters:InverseBooleanToVisibilityConverter}}" />
 
-              <TextBlock
-                Margin="0,12,0,0"
-                HorizontalAlignment="Center"
-                FontSize="16"
-                FontWeight="SemiBold"
-                Text="{Binding EmptyStateTitle}" />
-
-              <TextBlock
-                Margin="0,4,0,0"
-                HorizontalAlignment="Center"
-                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                Text="{Binding EmptyStateMessage}" />
-
-              <ui:Button
-                Margin="0,16,0,0"
-                HorizontalAlignment="Center"
-                Appearance="Primary"
-                Command="{Binding AddCommand}"
-                Content="Add Work Experience"
-                Icon="{ui:SymbolIcon Add24}"
-                Visibility="{Binding HasAnyItems, Converter={converters:InverseBooleanToVisibilityConverter}}" />
-
-              <ui:Button
-                Margin="0,16,0,0"
-                HorizontalAlignment="Center"
-                Command="{Binding ResetFiltersCommand}"
-                Content="Clear filters"
-                Visibility="{Binding HasAnyItems, Converter={converters:BooleanToVisibilityConverter}}" />
-            </StackPanel>
+                <ui:Button
+                  Command="{Binding ResetFiltersCommand}"
+                  Content="Clear filters"
+                  Visibility="{Binding HasAnyItems, Converter={converters:BooleanToVisibilityConverter}}" />
+              </StackPanel>
+            </molecules:EmptyState>
 
             <!--  Table  -->
             <atoms:AdaptiveDataGrid

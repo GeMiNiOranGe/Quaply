@@ -1,0 +1,56 @@
+﻿<UserControl
+  x:Class="Quaply.Ui.Views.Molecules.EmptyState"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:local="clr-namespace:Quaply.Ui.Views.Molecules"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  x:Name="emptyState"
+  d:DesignHeight="400"
+  d:DesignWidth="320"
+  mc:Ignorable="d">
+  <UserControl.Resources>
+    <!--
+      The action area owns its top spacing, and disappears completely
+      (spacing included) when there is nothing visible to show.
+    -->
+    <Style x:Key="ActionsPresenterStyle" TargetType="ContentPresenter">
+      <Setter Property="Margin" Value="0,16,0,0" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Style.Triggers>
+        <!--  No actions provided by the consumer  -->
+        <DataTrigger Binding="{Binding Actions, ElementName=emptyState}" Value="{x:Null}">
+          <Setter Property="Visibility" Value="Collapsed" />
+        </DataTrigger>
+
+        <!--  Actions provided, but the consumer collapsed it (e.g. a single button)  -->
+        <DataTrigger Binding="{Binding Actions.Visibility, ElementName=emptyState}" Value="Collapsed">
+          <Setter Property="Visibility" Value="Collapsed" />
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+  </UserControl.Resources>
+
+  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+    <ContentPresenter
+      HorizontalAlignment="Center"
+      Content="{Binding Icon, ElementName=emptyState}"
+      TextElement.FontSize="48"
+      TextElement.Foreground="{DynamicResource TextFillColorDisabledBrush}" />
+
+    <TextBlock
+      Margin="0,12,0,0"
+      HorizontalAlignment="Center"
+      FontSize="16"
+      FontWeight="SemiBold"
+      Text="{Binding Title, ElementName=emptyState}" />
+
+    <TextBlock
+      Margin="0,4,0,0"
+      HorizontalAlignment="Center"
+      Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+      Text="{Binding Description, ElementName=emptyState}" />
+
+    <ContentPresenter Content="{Binding Actions, ElementName=emptyState}" Style="{StaticResource ActionsPresenterStyle}" />
+  </StackPanel>
+</UserControl>
