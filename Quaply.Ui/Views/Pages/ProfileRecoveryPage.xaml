@@ -546,62 +546,30 @@
               </atoms:AdaptiveDataGrid.Layout>
             </atoms:AdaptiveDataGrid>
 
-            <!--
-              Floating bulk-action bar - only appears once something is checked,
-              sits above the DataGrid, doesn't push layout
-            -->
-            <Border
+            <molecules:SelectionActionBar
               MaxWidth="{StaticResource PageMaxWidthForm}"
               Margin="24,8"
-              Padding="16,8,12,8"
               HorizontalAlignment="Stretch"
               VerticalAlignment="Bottom"
-              layout:ToggleBulkBarAnimation.IsVisible="{Binding HasSelection}"
-              Background="{DynamicResource ControlFillColorDefaultBrush}"
-              BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-              BorderThickness="1"
-              CornerRadius="4"
-              Effect="{StaticResource FloatingBarShadow}">
-              <Grid>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="*" />
-                  <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+              ClearCommand="{Binding ClearSelectionCommand}"
+              IsOpen="{Binding HasSelection}"
+              SelectedCount="{Binding SelectedCount}">
+              <StackPanel Orientation="Horizontal">
+                <ui:Button
+                  Margin="0,0,8,0"
+                  Command="{Binding RestoreSelectedCommand}"
+                  Content="Restore"
+                  Icon="{ui:SymbolIcon ArrowUndo16}"
+                  Style="{StaticResource TextButtonStyle}" />
 
-                <TextBlock
-                  Margin="4,0,16,0"
-                  VerticalAlignment="Center"
-                  FontWeight="SemiBold"
-                  Text="{Binding SelectedCount, StringFormat='{}{0} selected'}" />
-
-                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                  <ui:Button
-                    Margin="0,0,8,0"
-                    Padding="16,8"
-                    Appearance="Transparent"
-                    Command="{Binding RestoreSelectedCommand}"
-                    Content="Restore"
-                    Icon="{ui:SymbolIcon ArrowUndo24}" />
-
-                  <ui:Button
-                    Padding="16,8"
-                    Appearance="Transparent"
-                    Command="{Binding PurgeSelectedCommand}"
-                    Content="Delete Permanently"
-                    Foreground="IndianRed"
-                    Icon="{ui:SymbolIcon Delete24}" />
-
-                  <atoms:Divider Margin="12,8" Orientation="Vertical" />
-
-                  <ui:Button
-                    Command="{Binding ClearSelectionCommand}"
-                    Style="{StaticResource IconOnlyButtonStyle}"
-                    ToolTip="Clear selection">
-                    <ui:SymbolIcon Symbol="Dismiss24" />
-                  </ui:Button>
-                </StackPanel>
-              </Grid>
-            </Border>
+                <ui:Button
+                  Command="{Binding PurgeSelectedCommand}"
+                  Content="Delete Permanently"
+                  Foreground="IndianRed"
+                  Icon="{ui:SymbolIcon Delete16}"
+                  Style="{StaticResource TextButtonStyle}" />
+              </StackPanel>
+            </molecules:SelectionActionBar>
           </Grid>
 
           <!--  Footer  -->

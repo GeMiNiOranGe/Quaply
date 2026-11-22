@@ -6,7 +6,18 @@
     x:Key="IconOnlyButtonStyle"
     BasedOn="{StaticResource {x:Type ui:Button}}"
     TargetType="ui:Button">
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="MinWidth" Value="32" />
     <Setter Property="Padding" Value="8" />
+    <Setter Property="Appearance" Value="Transparent" />
+  </Style>
+
+  <Style
+    x:Key="TextButtonStyle"
+    BasedOn="{StaticResource {x:Type ui:Button}}"
+    TargetType="ui:Button">
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Padding" Value="12,6" />
     <Setter Property="Appearance" Value="Transparent" />
   </Style>
 </ResourceDictionary>
