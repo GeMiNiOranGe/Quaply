@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
   x:Class="Quaply.Ui.Views.Pages.ProfileIndexPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -735,15 +735,10 @@
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
 
-              <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                <TextBlock Text="{Binding ResultSummary}" />
-
-                <TextBlock
-                  Margin="8,0,0,0"
-                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                  Text="{Binding TotalCount, StringFormat='({0} total)'}"
-                  Visibility="{Binding IsFiltering, Converter={converters:BooleanToVisibilityConverter}}" />
-              </StackPanel>
+              <molecules:AnnotatedText
+                IsSecondaryTextVisible="{Binding IsFiltering}"
+                SecondaryText="{Binding TotalCount, StringFormat='({0} total)'}"
+                Text="{Binding ResultSummary}" />
 
               <StackPanel
                 Grid.Column="1"
