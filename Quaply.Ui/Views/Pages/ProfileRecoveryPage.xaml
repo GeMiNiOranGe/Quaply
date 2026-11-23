@@ -600,29 +600,12 @@
 
                 <atoms:Divider Margin="12,8" Orientation="Vertical" />
 
-                <TextBlock
-                  MinWidth="72"
-                  Margin="0,0,16,0"
-                  VerticalAlignment="Center"
-                  FontWeight="SemiBold"
+                <molecules:Pager
+                  NextCommand="{Binding GoToNextPageCommand}"
+                  NextToolTip="Next page"
+                  PreviousCommand="{Binding GoToPreviousPageCommand}"
+                  PreviousToolTip="Previous page"
                   Text="{Binding PageIndicator}" />
-
-                <ui:Button
-                  Margin="0,0,8,0"
-                  Padding="8"
-                  Appearance="Transparent"
-                  Command="{Binding GoToPreviousPageCommand}"
-                  ToolTip="Previous page">
-                  <ui:SymbolIcon Symbol="ChevronLeft24" />
-                </ui:Button>
-
-                <ui:Button
-                  Padding="8"
-                  Appearance="Transparent"
-                  Command="{Binding GoToNextPageCommand}"
-                  ToolTip="Next page">
-                  <ui:SymbolIcon Symbol="ChevronRight24" />
-                </ui:Button>
               </StackPanel>
             </Grid>
           </Border>

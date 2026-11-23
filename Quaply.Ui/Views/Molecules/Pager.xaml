@@ -1,0 +1,32 @@
+﻿<UserControl
+  x:Class="Quaply.Ui.Views.Molecules.Pager"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:local="clr-namespace:Quaply.Ui.Views.Molecules"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+  x:Name="pager"
+  mc:Ignorable="d">
+  <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+    <TextBlock
+      MinWidth="72"
+      Margin="0,0,16,0"
+      VerticalAlignment="Center"
+      FontWeight="SemiBold"
+      Text="{Binding Text, ElementName=pager}" />
+
+    <ui:Button
+      Margin="0,0,8,0"
+      Command="{Binding PreviousCommand, ElementName=pager}"
+      Icon="{ui:SymbolIcon ChevronLeft16}"
+      Style="{StaticResource IconOnlyButtonStyle}"
+      ToolTip="{Binding PreviousToolTip, ElementName=pager}" />
+
+    <ui:Button
+      Command="{Binding NextCommand, ElementName=pager}"
+      Icon="{ui:SymbolIcon ChevronRight16}"
+      Style="{StaticResource IconOnlyButtonStyle}"
+      ToolTip="{Binding NextToolTip, ElementName=pager}" />
+  </StackPanel>
+</UserControl>
