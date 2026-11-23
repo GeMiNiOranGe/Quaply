@@ -593,17 +593,9 @@
                 Grid.Column="1"
                 VerticalAlignment="Center"
                 Orientation="Horizontal">
-                <TextBlock
-                  Margin="0,0,8,0"
-                  VerticalAlignment="Center"
-                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                  Text="Show" />
-
-                <ComboBox
-                  MinWidth="72"
-                  Padding="8,6"
-                  Background="Transparent"
+                <molecules:LabeledComboBox
                   ItemsSource="{Binding PageSizeOptions}"
+                  Label="Show"
                   SelectedItem="{Binding PageSize}" />
 
                 <atoms:Divider Margin="12,8" Orientation="Vertical" />
