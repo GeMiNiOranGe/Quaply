@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
   x:Class="Quaply.Ui.Views.Organisms.PaginationFooter"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -26,6 +26,7 @@
       VerticalAlignment="Center"
       Orientation="Horizontal">
       <molecules:LabeledComboBox
+        ComboBoxMinWidth="72"
         ItemsSource="{Binding PageSizeOptions, ElementName=paginationFooter}"
         Label="{Binding PageSizeLabel, ElementName=paginationFooter}"
         SelectedItem="{Binding PageSize, ElementName=paginationFooter, Mode=TwoWay}" />

@@ -272,27 +272,18 @@
                 <atoms:AdaptiveContent Breakpoints="0;720;1200" ReferenceWidth="{Binding ActualWidth, ElementName=listCardGrid}">
                   <atoms:AdaptiveContent.Expanded>
                     <DataTemplate>
-                      <StackPanel Orientation="Horizontal">
-                        <TextBlock
-                          Margin="0,0,8,0"
-                          VerticalAlignment="Center"
-                          Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                          Text="Sort by" />
-
-                        <ComboBox
-                          MinWidth="144"
-                          Margin="0,0,8,0"
-                          Padding="8,6"
-                          Background="Transparent"
-                          ItemsSource="{markup:EnumBindingSource {x:Type queryingProfiles:ProfileSortField}}"
-                          SelectedItem="{Binding SortField}">
-                          <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                              <TextBlock Text="{Binding Converter={converters:EnumDisplayNameConverter}}" />
-                            </DataTemplate>
-                          </ComboBox.ItemTemplate>
-                        </ComboBox>
-                      </StackPanel>
+                      <molecules:LabeledComboBox
+                        Margin="0,0,8,0"
+                        ComboBoxMinWidth="144"
+                        ItemsSource="{markup:EnumBindingSource {x:Type queryingProfiles:ProfileSortField}}"
+                        Label="Sort by"
+                        SelectedItem="{Binding SortField}">
+                        <molecules:LabeledComboBox.ItemTemplate>
+                          <DataTemplate>
+                            <TextBlock Text="{Binding Converter={converters:EnumDisplayNameConverter}}" />
+                          </DataTemplate>
+                        </molecules:LabeledComboBox.ItemTemplate>
+                      </molecules:LabeledComboBox>
                     </DataTemplate>
                   </atoms:AdaptiveContent.Expanded>
 

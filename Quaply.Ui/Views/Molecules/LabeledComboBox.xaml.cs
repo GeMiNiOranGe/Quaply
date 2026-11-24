@@ -48,6 +48,28 @@ public partial class LabeledComboBox : UserControl
         );
 
     /// <summary>
+    /// Identifies the <see cref="ComboBoxMinWidth"/> dependency property.
+    /// </summary>
+    public static readonly DependencyProperty ComboBoxMinWidthProperty =
+        DependencyProperty.Register(
+            nameof(ComboBoxMinWidth),
+            typeof(double),
+            typeof(LabeledComboBox),
+            new PropertyMetadata(0d)
+        );
+
+    /// <summary>
+    /// Identifies the <see cref="ItemTemplate"/> dependency property.
+    /// </summary>
+    public static readonly DependencyProperty ItemTemplateProperty =
+        DependencyProperty.Register(
+            nameof(ItemTemplate),
+            typeof(DataTemplate),
+            typeof(LabeledComboBox),
+            new PropertyMetadata(null)
+        );
+
+    /// <summary>
     /// Identifies the <see cref="ItemsSource"/> dependency property.
     /// </summary>
     public static readonly DependencyProperty ItemsSourceProperty =
@@ -85,6 +107,26 @@ public partial class LabeledComboBox : UserControl
     {
         get => (string)GetValue(LabelProperty);
         set => SetValue(LabelProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the minimum width of the combo box. The default is 72.
+    /// </summary>
+    public double ComboBoxMinWidth
+    {
+        get => (double)GetValue(ComboBoxMinWidthProperty);
+        set => SetValue(ComboBoxMinWidthProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the template used to display each item in the combo box.
+    /// The default is <see langword="null"/>, which uses the default item
+    /// presentation.
+    /// </summary>
+    public DataTemplate? ItemTemplate
+    {
+        get => (DataTemplate?)GetValue(ItemTemplateProperty);
+        set => SetValue(ItemTemplateProperty, value);
     }
 
     /// <summary>
