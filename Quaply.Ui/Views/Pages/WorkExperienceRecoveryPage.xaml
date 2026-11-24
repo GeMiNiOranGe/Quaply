@@ -560,36 +560,19 @@
             Padding="24,8"
             BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
             BorderThickness="0,1,0,0">
-            <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="Auto" />
-              </Grid.ColumnDefinitions>
-
-              <molecules:AnnotatedText
-                IsSecondaryTextVisible="{Binding IsFiltering}"
-                SecondaryText="{Binding TotalCount, StringFormat='({0} in trash)'}"
-                Text="{Binding ResultSummary}" />
-
-              <StackPanel
-                Grid.Column="1"
-                VerticalAlignment="Center"
-                Orientation="Horizontal">
-                <molecules:LabeledComboBox
-                  ItemsSource="{Binding PageSizeOptions}"
-                  Label="Show"
-                  SelectedItem="{Binding PageSize}" />
-
-                <atoms:Divider Margin="12,8" Orientation="Vertical" />
-
-                <molecules:Pager
-                  NextCommand="{Binding GoToNextPageCommand}"
-                  NextToolTip="Next page"
-                  PreviousCommand="{Binding GoToPreviousPageCommand}"
-                  PreviousToolTip="Previous page"
-                  Text="{Binding PageIndicator}" />
-              </StackPanel>
-            </Grid>
+            <organisms:PaginationFooter
+              Grid.Row="2"
+              IsSecondaryTextVisible="{Binding IsFiltering}"
+              NextPageCommand="{Binding GoToNextPageCommand}"
+              NextPageToolTip="Next page"
+              PageIndicatorText="{Binding PageIndicator}"
+              PageSize="{Binding PageSize}"
+              PageSizeLabel="Show"
+              PageSizeOptions="{Binding PageSizeOptions}"
+              PreviousPageCommand="{Binding GoToPreviousPageCommand}"
+              PreviousPageToolTip="Previous page"
+              SecondaryText="{Binding TotalCount, StringFormat='({0} in trash)'}"
+              Text="{Binding ResultSummary}" />
           </Border>
         </Grid>
       </ui:Card>
