@@ -9,20 +9,13 @@ namespace Quaply.Ui.Views.Molecules;
 ///
 /// <remarks>
 /// <para>
-/// The control is responsible only for presenting the supplied text.
-/// The consumer provides the primary text, the secondary text and whether the
-/// secondary text is visible.
-/// </para>
-///
-/// <para>
 /// The secondary text is hidden by default. Setting <see cref="SecondaryText"/>
 /// does not make it visible automatically; visibility is controlled independently
 /// through <see cref="IsSecondaryTextVisible"/>.
 /// </para>
-///
 /// <para>
-/// The control does not set its own <c>DataContext</c>, so bindings on its
-/// properties resolve against the consumer.
+/// The visual structure lives in the default <see cref="ControlTemplate"/>
+/// (Themes/Generic.xaml) and can be replaced by the consumer.
 /// </para>
 ///
 /// <para><b>Example</b></para>
@@ -34,8 +27,16 @@ namespace Quaply.Ui.Views.Molecules;
 /// /&gt;
 /// </code>
 /// </remarks>
-public partial class AnnotatedText : UserControl
+public class AnnotatedText : Control
 {
+    static AnnotatedText()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(
+            typeof(AnnotatedText),
+            new FrameworkPropertyMetadata(typeof(AnnotatedText))
+        );
+    }
+
     /// <summary>
     /// Identifies the <see cref="Text"/> dependency property.
     /// </summary>
@@ -69,11 +70,6 @@ public partial class AnnotatedText : UserControl
             new PropertyMetadata(false)
         );
 
-    public AnnotatedText()
-    {
-        InitializeComponent();
-    }
-
     /// <summary>
     /// Gets or sets the primary text displayed by the control. The default is
     /// <see cref="string.Empty"/>.
@@ -96,7 +92,7 @@ public partial class AnnotatedText : UserControl
     }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the secondary text is visible.
+    /// Gets or sets whether the secondary text is visible.
     /// The default is <see langword="false"/>.
     /// </summary>
     public bool IsSecondaryTextVisible
