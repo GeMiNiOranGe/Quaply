@@ -4,6 +4,7 @@
     <ResourceDictionary Source="pack://application:,,,/Quaply.Ui;component/Views/Molecules/Primitives/ValidatedField.xaml" />
     <ResourceDictionary Source="pack://application:,,,/Quaply.Ui;component/Views/Molecules/AnnotatedText.xaml" />
     <ResourceDictionary Source="pack://application:,,,/Quaply.Ui;component/Views/Molecules/EmptyState.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/Quaply.Ui;component/Views/Molecules/LabeledComboBox.xaml" />
     <ResourceDictionary Source="pack://application:,,,/Quaply.Ui;component/Views/Molecules/SegmentedButton.xaml" />
   </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

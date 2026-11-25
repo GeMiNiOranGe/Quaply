@@ -14,15 +14,13 @@ namespace Quaply.Ui.Views.Molecules;
 /// The consumer provides the label, the items to choose from and the currently
 /// selected item.
 /// </para>
-///
 /// <para>
 /// <see cref="SelectedItem"/> binds two-way by default, so the selection made by
 /// the user flows back to the consumer without specifying <c>Mode=TwoWay</c>.
 /// </para>
-///
 /// <para>
-/// The control does not set its own <c>DataContext</c>, so bindings on its
-/// properties resolve against the consumer.
+/// The visual structure lives in the default <see cref="ControlTemplate"/>
+/// (Themes/Generic.xaml) and can be replaced by the consumer.
 /// </para>
 ///
 /// <para><b>Example</b></para>
@@ -34,8 +32,16 @@ namespace Quaply.Ui.Views.Molecules;
 /// /&gt;
 /// </code>
 /// </remarks>
-public partial class LabeledComboBox : UserControl
+public class LabeledComboBox : Control
 {
+    static LabeledComboBox()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(
+            typeof(LabeledComboBox),
+            new FrameworkPropertyMetadata(typeof(LabeledComboBox))
+        );
+    }
+
     /// <summary>
     /// Identifies the <see cref="Label"/> dependency property.
     /// </summary>
@@ -94,11 +100,6 @@ public partial class LabeledComboBox : UserControl
             )
         );
 
-    public LabeledComboBox()
-    {
-        InitializeComponent();
-    }
-
     /// <summary>
     /// Gets or sets the label displayed beside the combo box. The default is
     /// <see cref="string.Empty"/>.
@@ -110,7 +111,7 @@ public partial class LabeledComboBox : UserControl
     }
 
     /// <summary>
-    /// Gets or sets the minimum width of the combo box. The default is 72.
+    /// Gets or sets the minimum width of the combo box. The default is 0.
     /// </summary>
     public double ComboBoxMinWidth
     {
