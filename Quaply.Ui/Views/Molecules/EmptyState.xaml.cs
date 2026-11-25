@@ -13,6 +13,7 @@ namespace Quaply.Ui.Views.Molecules;
 /// The consumer decides when the control is visible (bind <see cref="UIElement.Visibility"/>)
 /// and which actions appear (put them in <see cref="Actions"/> and control their visibility).
 /// The control does not set its own DataContext, so bindings resolve against the consumer.
+/// The visual structure lives in the default template (Themes/Generic.xaml).
 ///
 /// <para><b>Example</b></para>
 /// <code language="xml">
@@ -40,8 +41,16 @@ namespace Quaply.Ui.Views.Molecules;
 /// </code>
 /// </remarks>
 [ContentProperty(nameof(Actions))]
-public partial class EmptyState : UserControl
+public class EmptyState : Control
 {
+    static EmptyState()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(
+            typeof(EmptyState),
+            new FrameworkPropertyMetadata(typeof(EmptyState))
+        );
+    }
+
     /// <summary>
     /// Identifies the <see cref="Icon"/> dependency property.
     /// </summary>
@@ -86,17 +95,9 @@ public partial class EmptyState : UserControl
             new PropertyMetadata(null)
         );
 
-    public EmptyState()
-    {
-        // Per-instance default: a UIElement in PropertyMetadata would be shared.
-        SetCurrentValue(IconProperty, new SymbolIcon(SymbolRegular.Document24));
-
-        InitializeComponent();
-    }
-
     /// <summary>
-    /// Gets or sets the icon displayed above the title.
-    /// The default is a <see cref="SymbolIcon"/> with <see cref="SymbolRegular.Document24"/>.
+    /// Gets or sets the icon displayed above the title. The default is <see langword="null"/>,
+    /// in which case the icon area is collapsed.
     /// </summary>
     /// <remarks>
     /// Usage in XAML: <c>Icon="{ui:SymbolIcon Briefcase24}"</c>.
@@ -109,8 +110,7 @@ public partial class EmptyState : UserControl
     }
 
     /// <summary>
-    /// Gets or sets the headline text, shown in semi-bold below the icon.
-    /// The default is an empty string.
+    /// Gets or sets the headline text. The default is an empty string.
     /// </summary>
     public string Title
     {

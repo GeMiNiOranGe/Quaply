@@ -1,4 +1,4 @@
-<UserControl
+﻿<UserControl
   x:Class="Quaply.Ui.Views.Pages.WorkExperienceIndexPage"
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -350,7 +350,7 @@
             <molecules:EmptyState
               Title="{Binding EmptyStateTitle}"
               Description="{Binding EmptyStateMessage}"
-              Icon="{ui:SymbolIcon Briefcase24}"
+              Icon="{ui:SymbolIcon Briefcase48}"
               Visibility="{Binding HasVisibleItems, Converter={converters:InverseBooleanToVisibilityConverter}}">
               <StackPanel>
                 <ui:Button

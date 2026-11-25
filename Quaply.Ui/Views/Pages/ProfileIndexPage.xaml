@@ -369,7 +369,7 @@
             <molecules:EmptyState
               Title="{Binding EmptyStateTitle}"
               Description="{Binding EmptyStateMessage}"
-              Icon="{ui:SymbolIcon Person24}"
+              Icon="{ui:SymbolIcon Person48}"
               Visibility="{Binding HasVisibleItems, Converter={converters:InverseBooleanToVisibilityConverter}}">
               <StackPanel>
                 <ui:Button

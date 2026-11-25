@@ -1,56 +1,61 @@
-﻿<UserControl
-  x:Class="Quaply.Ui.Views.Molecules.EmptyState"
+﻿<ResourceDictionary
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:local="clr-namespace:Quaply.Ui.Views.Molecules"
-  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  x:Name="emptyState"
-  d:DesignHeight="400"
-  d:DesignWidth="320"
-  mc:Ignorable="d">
-  <UserControl.Resources>
-    <!--
-      The action area owns its top spacing, and disappears completely
-      (spacing included) when there is nothing visible to show.
-    -->
-    <Style x:Key="ActionsPresenterStyle" TargetType="ContentPresenter">
-      <Setter Property="Margin" Value="0,16,0,0" />
-      <Setter Property="HorizontalAlignment" Value="Center" />
-      <Style.Triggers>
-        <!--  No actions provided by the consumer  -->
-        <DataTrigger Binding="{Binding Actions, ElementName=emptyState}" Value="{x:Null}">
-          <Setter Property="Visibility" Value="Collapsed" />
-        </DataTrigger>
+  xmlns:molecules="clr-namespace:Quaply.Ui.Views.Molecules">
+  <Style TargetType="{x:Type molecules:EmptyState}">
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="IsTabStop" Value="False" />
 
-        <!--  Actions provided, but the consumer collapsed it (e.g. a single button)  -->
-        <DataTrigger Binding="{Binding Actions.Visibility, ElementName=emptyState}" Value="Collapsed">
-          <Setter Property="Visibility" Value="Collapsed" />
-        </DataTrigger>
-      </Style.Triggers>
-    </Style>
-  </UserControl.Resources>
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type molecules:EmptyState}">
+          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
 
-  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-    <ContentPresenter
-      HorizontalAlignment="Center"
-      Content="{Binding Icon, ElementName=emptyState}"
-      TextElement.FontSize="48"
-      TextElement.Foreground="{DynamicResource TextFillColorDisabledBrush}" />
+            <ContentPresenter
+              x:Name="iconPresenter"
+              Margin="0,0,0,12"
+              HorizontalAlignment="Center"
+              Content="{TemplateBinding Icon}"
+              TextElement.FontSize="48"
+              TextElement.Foreground="{DynamicResource TextFillColorDisabledBrush}" />
 
-    <TextBlock
-      Margin="0,12,0,0"
-      HorizontalAlignment="Center"
-      FontSize="16"
-      FontWeight="SemiBold"
-      Text="{Binding Title, ElementName=emptyState}" />
+            <TextBlock
+              HorizontalAlignment="Center"
+              FontSize="16"
+              FontWeight="SemiBold"
+              Text="{TemplateBinding Title}" />
 
-    <TextBlock
-      Margin="0,4,0,0"
-      HorizontalAlignment="Center"
-      Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-      Text="{Binding Description, ElementName=emptyState}" />
+            <TextBlock
+              Margin="0,4,0,0"
+              HorizontalAlignment="Center"
+              Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+              Text="{TemplateBinding Description}" />
 
-    <ContentPresenter Content="{Binding Actions, ElementName=emptyState}" Style="{StaticResource ActionsPresenterStyle}" />
-  </StackPanel>
-</UserControl>
+            <ContentPresenter
+              x:Name="actionsPresenter"
+              Margin="0,16,0,0"
+              HorizontalAlignment="Center"
+              Content="{TemplateBinding Actions}" />
+          </StackPanel>
+
+          <ControlTemplate.Triggers>
+            <!--  No icon provided: remove the icon area and its spacing  -->
+            <Trigger Property="Icon" Value="{x:Null}">
+              <Setter TargetName="iconPresenter" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+
+            <!--  No actions provided: remove the action area and its spacing  -->
+            <Trigger Property="Actions" Value="{x:Null}">
+              <Setter TargetName="actionsPresenter" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+
+            <!--  Actions provided, but the consumer collapsed it (e.g. a single button)  -->
+            <DataTrigger Binding="{Binding Actions.Visibility, RelativeSource={RelativeSource Self}}" Value="Collapsed">
+              <Setter TargetName="actionsPresenter" Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>
