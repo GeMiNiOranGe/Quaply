@@ -5,25 +5,19 @@ using System.Windows.Input;
 namespace Quaply.Ui.Views.Molecules;
 
 /// <summary>
-/// A presentational molecule that displays a text with previous and next buttons.
+/// A presentational molecule that displays a text between previous and next
+/// buttons.
 /// </summary>
 ///
 /// <remarks>
 /// <para>
-/// The control is responsible only for presenting the supplied text and the two
-/// navigation buttons. The consumer provides the text, the commands executed by
-/// each button and the tooltips shown on them.
+/// The control does not track the current position or the number of pages.
+/// Whether each button is enabled is decided by the <c>CanExecute</c> logic of
+/// <see cref="PreviousCommand"/> and <see cref="NextCommand"/>.
 /// </para>
-///
 /// <para>
-/// The control does not track the current position or the number of pages. Whether
-/// a button is enabled is decided entirely by the <c>CanExecute</c> logic of the
-/// supplied <see cref="PreviousCommand"/> and <see cref="NextCommand"/>.
-/// </para>
-///
-/// <para>
-/// The control does not set its own <c>DataContext</c>, so bindings on its
-/// properties resolve against the consumer.
+/// The visual structure lives in the default <see cref="ControlTemplate"/>
+/// (Themes/Generic.xaml) and can be replaced by the consumer.
 /// </para>
 ///
 /// <para><b>Example</b></para>
@@ -31,14 +25,22 @@ namespace Quaply.Ui.Views.Molecules;
 /// &lt;molecules:Pager
 ///   Text="{Binding PageText}"
 ///   PreviousCommand="{Binding GoToPreviousCommand}"
+///   PreviousToolTip="{Binding PreviousText}"
 ///   NextCommand="{Binding GoToNextCommand}"
-///   PreviousToolTip="Previous page"
-///   NextToolTip="Next page"
+///   NextToolTip="{Binding NextText}"
 /// /&gt;
 /// </code>
 /// </remarks>
-public partial class Pager : UserControl
+public class Pager : Control
 {
+    static Pager()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(
+            typeof(Pager),
+            new FrameworkPropertyMetadata(typeof(Pager))
+        );
+    }
+
     /// <summary>
     /// Identifies the <see cref="Text"/> dependency property.
     /// </summary>
@@ -94,14 +96,9 @@ public partial class Pager : UserControl
             new PropertyMetadata(string.Empty)
         );
 
-    public Pager()
-    {
-        InitializeComponent();
-    }
-
     /// <summary>
-    /// Gets or sets the text displayed between the navigation buttons, for example
-    /// the current position. The default is <see cref="string.Empty"/>.
+    /// Gets or sets the text displayed between the buttons. The default is
+    /// <see cref="string.Empty"/>.
     /// </summary>
     public string Text
     {
@@ -110,8 +107,8 @@ public partial class Pager : UserControl
     }
 
     /// <summary>
-    /// Gets or sets the command executed when the previous button is clicked.
-    /// The default is <see langword="null"/>.
+    /// Gets or sets the command executed by the previous button. The default is
+    /// <see langword="null"/>.
     /// </summary>
     public ICommand? PreviousCommand
     {
@@ -120,7 +117,8 @@ public partial class Pager : UserControl
     }
 
     /// <summary>
-    /// Gets or sets the tooltip shown on the previous button. The default is null.
+    /// Gets or sets the tooltip of the previous button. The default is
+    /// <see cref="string.Empty"/>.
     /// </summary>
     public string PreviousToolTip
     {
@@ -129,8 +127,8 @@ public partial class Pager : UserControl
     }
 
     /// <summary>
-    /// Gets or sets the command executed when the next button is clicked.
-    /// The default is <see langword="null"/>.
+    /// Gets or sets the command executed by the next button. The default is
+    /// <see langword="null"/>.
     /// </summary>
     public ICommand? NextCommand
     {
@@ -139,7 +137,8 @@ public partial class Pager : UserControl
     }
 
     /// <summary>
-    /// Gets or sets the tooltip shown on the next button. The default is null.
+    /// Gets or sets the tooltip of the next button. The default is
+    /// <see cref="string.Empty"/>.
     /// </summary>
     public string NextToolTip
     {

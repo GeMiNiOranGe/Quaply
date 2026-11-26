@@ -7,6 +7,7 @@
     <ResourceDictionary Source="pack://application:,,,/Quaply.Ui;component/Views/Molecules/LabeledComboBox.xaml" />
     <ResourceDictionary Source="pack://application:,,,/Quaply.Ui;component/Views/Molecules/PageHeader.xaml" />
     <ResourceDictionary Source="pack://application:,,,/Quaply.Ui;component/Views/Molecules/PageNavigationBar.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/Quaply.Ui;component/Views/Molecules/Pager.xaml" />
     <ResourceDictionary Source="pack://application:,,,/Quaply.Ui;component/Views/Molecules/SegmentedButton.xaml" />
   </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
