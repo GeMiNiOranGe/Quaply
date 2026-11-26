@@ -24,7 +24,9 @@
       <molecules:PageNavigationBar
         Grid.Column="0"
         GoBackCommand="{Binding GoBackCommand, ElementName=pageHeaderSection}"
-        GoForwardCommand="{Binding GoForwardCommand, ElementName=pageHeaderSection}" />
+        GoBackToolTip="Back"
+        GoForwardCommand="{Binding GoForwardCommand, ElementName=pageHeaderSection}"
+        GoForwardToolTip="Forward" />
 
       <ContentPresenter
         Grid.Column="1"

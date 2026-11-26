@@ -5,41 +5,44 @@ using System.Windows.Input;
 namespace Quaply.Ui.Views.Molecules;
 
 /// <summary>
-/// Provides Back and Forward buttons and a breadcrumb for page-level navigation.
+/// A presentational molecule that displays back and forward buttons next to a
+/// breadcrumb.
 /// </summary>
 ///
 /// <remarks>
-/// <list type="bullet">
-///   <item>
-///   <b>Role:</b> presentation only. The control has no knowledge of the navigation
-///   service or business logic; behavior is supplied entirely through
-///   <see cref="GoBackCommand"/> and <see cref="GoForwardCommand"/>.
-///   </item>
-///   <item>
-///   <b>Disabled state:</b> a <c>null</c> command disables the corresponding button.
-///   </item>
-///   <item>
-///   <b>Scope:</b> page actions such as Trash, Add or Export are intentionally
-///   excluded. Pages place them beside this control.
-///   </item>
-///   <item>
-///   <b>Command source:</b> the default commands are expected to be defined in
-///   navigation ViewModel, which receives the navigation service through
-///   dependency injection. Derived ViewModels may override them for custom
-///   behavior, such as confirming when there are unsaved changes.
-///   </item>
-/// </list>
+/// <para>
+/// The control contains no navigation logic. What each button does, and
+/// whether it can run, is decided by the supplied commands'
+/// <c>CanExecute</c>.
+/// </para>
+/// <para>
+/// Each button is disabled while its command is <see langword="null"/>.
+/// </para>
+/// <para>
+/// The visual structure lives in the default <see cref="ControlTemplate"/>
+/// (Themes/Generic.xaml) and can be replaced by the consumer.
+/// </para>
 ///
 /// <para><b>Example</b></para>
-/// <code language="xml">
+/// <code>
 /// &lt;molecules:PageNavigationBar
-///   GoBackCommand="{Binding GoBackCommand}"
-///   GoForwardCommand="{Binding GoForwardCommand}"
+///   GoBackCommand="{Binding GoToPreviousCommand}"
+///   GoBackToolTip="{Binding PreviousText}"
+///   GoForwardCommand="{Binding GoToNextCommand}"
+///   GoForwardToolTip="{Binding NextText}"
 /// /&gt;
 /// </code>
 /// </remarks>
-public partial class PageNavigationBar : UserControl
+public class PageNavigationBar : Control
 {
+    static PageNavigationBar()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(
+            typeof(PageNavigationBar),
+            new FrameworkPropertyMetadata(typeof(PageNavigationBar))
+        );
+    }
+
     /// <summary>
     /// Identifies the <see cref="GoBackCommand"/> dependency property.
     /// </summary>
@@ -47,6 +50,17 @@ public partial class PageNavigationBar : UserControl
         DependencyProperty.Register(
             nameof(GoBackCommand),
             typeof(ICommand),
+            typeof(PageNavigationBar),
+            new PropertyMetadata(null)
+        );
+
+    /// <summary>
+    /// Identifies the <see cref="GoBackToolTip"/> dependency property.
+    /// </summary>
+    public static readonly DependencyProperty GoBackToolTipProperty =
+        DependencyProperty.Register(
+            nameof(GoBackToolTip),
+            typeof(object),
             typeof(PageNavigationBar),
             new PropertyMetadata(null)
         );
@@ -62,16 +76,22 @@ public partial class PageNavigationBar : UserControl
             new PropertyMetadata(null)
         );
 
-    public PageNavigationBar()
-    {
-        InitializeComponent();
-    }
+    /// <summary>
+    /// Identifies the <see cref="GoForwardToolTip"/> dependency property.
+    /// </summary>
+    public static readonly DependencyProperty GoForwardToolTipProperty =
+        DependencyProperty.Register(
+            nameof(GoForwardToolTip),
+            typeof(object),
+            typeof(PageNavigationBar),
+            new PropertyMetadata(null)
+        );
 
     // --- GoBackCommand ---
 
     /// <summary>
-    /// Gets or sets the command executed by the Back button.
-    /// A null value disables the button.
+    /// Gets or sets the command executed by the back button. The default is
+    /// <see langword="null"/>, which disables the button.
     /// </summary>
     public ICommand? GoBackCommand
     {
@@ -79,15 +99,39 @@ public partial class PageNavigationBar : UserControl
         set => SetValue(GoBackCommandProperty, value);
     }
 
+    // --- GoBackToolTip ---
+
+    /// <summary>
+    /// Gets or sets the tooltip of the back button. The default is
+    /// <see langword="null"/>, which shows no tooltip.
+    /// </summary>
+    public object? GoBackToolTip
+    {
+        get => GetValue(GoBackToolTipProperty);
+        set => SetValue(GoBackToolTipProperty, value);
+    }
+
     // --- GoForwardCommand ---
 
     /// <summary>
-    /// Gets or sets the command executed by the Forward button.
-    /// A null value disables the button.
+    /// Gets or sets the command executed by the forward button. The default is
+    /// <see langword="null"/>, which disables the button.
     /// </summary>
     public ICommand? GoForwardCommand
     {
         get => (ICommand?)GetValue(GoForwardCommandProperty);
         set => SetValue(GoForwardCommandProperty, value);
+    }
+
+    // --- GoForwardToolTip ---
+
+    /// <summary>
+    /// Gets or sets the tooltip of the forward button. The default is
+    /// <see langword="null"/>, which shows no tooltip.
+    /// </summary>
+    public object? GoForwardToolTip
+    {
+        get => GetValue(GoForwardToolTipProperty);
+        set => SetValue(GoForwardToolTipProperty, value);
     }
 }
