@@ -4,37 +4,37 @@ using System.Windows.Controls;
 namespace Quaply.Ui.Views.Molecules;
 
 /// <summary>
-/// Displays a page title with an optional subtitle.
+/// A presentational molecule that displays a title with an optional subtitle.
 /// </summary>
 ///
 /// <remarks>
-/// <list type="bullet">
-///   <item>
-///   <b>Role:</b> presentation only. The control exposes no commands and has no
-///   dependency on any ViewModel or business logic.
-///   </item>
-///   <item>
-///   <b>Subtitle:</b> the subtitle line is collapsed when <see cref="Subtitle"/>
-///   is null or empty.
-///   </item>
-///   <item>
-///   <b>Binding:</b> internal bindings do not modify <c>DataContext</c>, so
-///   consumers can bind <see cref="Title"/> and <see cref="Subtitle"/> directly
-///   to their own ViewModel (e.g. <c>Title="{Binding ...}"</c>).
-///   </item>
-///   <item>
-///   <b>Composition:</b> typically placed above <see cref="PageNavigationBar"/>.
-///   <see cref="PageHeaderSection"/> combines both.
-///   </item>
-/// </list>
+/// <para>
+/// The subtitle line is collapsed when <see cref="Subtitle"/> is
+/// <see langword="null"/> or empty, independently of the title.
+/// </para>
+/// <para>
+/// The visual structure lives in the default <see cref="ControlTemplate"/>
+/// (Themes/Generic.xaml) and can be replaced by the consumer.
+/// </para>
 ///
 /// <para><b>Example</b></para>
-/// <code language="xml">
-/// &lt;molecules:PageHeader Title="The title" Subtitle="The subtitle." /&gt;
+/// <code>
+/// &lt;molecules:PageHeader
+///   Title="{Binding HeaderText}"
+///   Subtitle="{Binding SummaryText}"
+/// /&gt;
 /// </code>
 /// </remarks>
-public partial class PageHeader : UserControl
+public class PageHeader : Control
 {
+    static PageHeader()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(
+            typeof(PageHeader),
+            new FrameworkPropertyMetadata(typeof(PageHeader))
+        );
+    }
+
     /// <summary>
     /// Identifies the <see cref="Title"/> dependency property.
     /// </summary>
@@ -57,15 +57,10 @@ public partial class PageHeader : UserControl
             new PropertyMetadata(string.Empty)
         );
 
-    public PageHeader()
-    {
-        InitializeComponent();
-    }
-
     // --- Title ---
 
     /// <summary>
-    /// Gets or sets the main page title, rendered in a large SemiBold font.
+    /// Gets or sets the main title. The default is <see cref="string.Empty"/>.
     /// </summary>
     public string Title
     {
@@ -76,8 +71,8 @@ public partial class PageHeader : UserControl
     // --- Subtitle ---
 
     /// <summary>
-    /// Gets or sets the short description shown below the title.
-    /// The line is hidden when the value is null or empty.
+    /// Gets or sets the secondary text shown below the title. The default is
+    /// <see cref="string.Empty"/>, which hides the subtitle line.
     /// </summary>
     public string Subtitle
     {
